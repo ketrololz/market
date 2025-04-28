@@ -25,5 +25,5 @@ export default typescriptEslint.config(
       'vue/multi-word-component-names': 'off',
     },
   },
-  eslintConfigPrettier
+  eslintConfigPrettier,
 );
