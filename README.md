@@ -22,6 +22,8 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
 
 - **Frontend**: Built with [TypeScript](https://www.typescriptlang.org/), [Vue](https://vuejs.org/), and [PrimeVue](https://primevue.org/), the application delivers a responsive and visually appealing user interface. Vue Router ensures smooth navigation across pages, while [Tailwind CSS](https://tailwindcss.com/) provides utility-first styling for rapid and consistent UI development.
 
+- **State Management**: Managed with [Pinia](https://pinia.vuejs.org/), the intuitive and modular store for Vue, offering a lightweight and type-safe way to manage application state.
+
 - **Data Management**: Powered by [TanStack Query](https://tanstack.com/), enabling efficient and scalable data fetching, caching, and synchronization across the application.
 
 - **Bundling & Dev Server**: Uses [Vite](https://vite.dev/) for fast build times, instant hot module replacement, and an optimized developer experience.
@@ -30,7 +32,7 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
 
 - **CI/CD**: Automated with [GitHub Actions](https://github.com/features/actions) and deployed via [Netlify](https://www.netlify.com/), ensuring reliable continuous integration and hassle-free delivery with each code update.
 
-- **Code Quality & Formatting**: Maintained using [Husky](https://typicode.github.io/husky/)for Git hooks,[ESLint](https://eslint.org/) for code linting, and [Prettier](https://prettier.io/) for consistent formatting across the codebase.
+- **Code Quality & Formatting**: Maintained using [Husky](https://typicode.github.io/husky/)for Git hooks,[ESLint](https://eslint.org/) for code linting, and [Prettier](https://prettier.io/) for consistent formatting across the codebase and [Commitlint](https://commitlint.js.org/) to enforce conventional commit messages for a clean and structured Git history.
 
 - **Testing**: Ensures application reliability with [Vitest](https://vitest.dev/) for unit and integration tests, providing a robust and fast testing environment tailored for modern frontend frameworks.
 
@@ -42,13 +44,18 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
   git clone https://github.com/ketrololz/market.git
 ```
 
-2. Install NPM packages
-
+2. install PNPM package manager (if not installed)
 ```sh
-  npm install -g pnpm@latest-10
+  npm install -g pnpm@latest-10  
 ```
 
-3. Start project
+3. Install packages
+
+```sh
+  pnpm install
+```
+
+4. Start project
 
 ```sh
   pnpm dev
