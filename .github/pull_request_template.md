@@ -1,18 +1,6 @@
-#### Task
-*provide a link to the task*
-
 #### Description
 
 *what has been done*
-
-🤔 **Select type:**
-- [ ] 💿 New module
-- [ ] 💡 Feature
-- [ ] ✏️ Code refactor
-- [ ] 🐛 Bugfix
-- [ ] 📋 Documentation update
-- [ ] ⚙️ Configuration
-- [ ] ❓ Other: { *write here* }
 
 #### Media (optional)
 
@@ -21,3 +9,5 @@
 - [ ] 💭 I have commented my code in areas that are hard to understand
 - [ ] ⚠️ My changes do not result in any new warnings or errors
 - [ ] 🎯 I have been testing my own code
+
+#### What gif best describes this PR or how it makes you feel? [GIFs for GitHub](https://chromewebstore.google.com/detail/gifs-for-github/dkgjnpbipbdaoaadbdhpiokaemhlphep)
