@@ -2,7 +2,7 @@
 
 ## Content
 
-Welcome to [Senet](https://deploy-preview-4--rpgheroes.netlify.app), a modern eCommerce platform dedicated to board game enthusiasts
+Welcome to [Senet](https://rpgheroes.netlify.app), a modern eCommerce platform dedicated to board game enthusiasts
 
 - [Overview and Purpose](#overview-and-purpose)
 - [Technical Stack](#technical-stack)
