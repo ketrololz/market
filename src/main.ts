@@ -12,14 +12,17 @@ const app = createApp(App);
 
 app
 .use(PrimeVue, {
+
   theme: {
     preset: MAIN_THEME,
     options: {
       darkModeSelector: false
   }
   },
+
 })
 .use(VueQueryPlugin)
 .use(pinia)
 .use(router)
 .mount('#app');
+
