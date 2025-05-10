@@ -7,7 +7,7 @@ import InlineSvg from 'vue-inline-svg';
 
 const items = ref([
   {
-    label: 'Main',
+    label: 'Home',
     route: '/',
     icon: 'pi pi-home',
   },
@@ -17,7 +17,17 @@ const userItems = ref([
   {
     label: 'Login',
     route: '/',
-    icon: 'pi pi-home',
+    icon: 'pi pi-sign-in',
+  },
+  {
+    label: 'Sign up',
+    route: '/',
+    icon: 'pi pi-user-plus',
+  },
+  {
+    label: 'Logout',
+    route: '/',
+    icon: 'pi pi-sign-out',
   },
 ]);
 
