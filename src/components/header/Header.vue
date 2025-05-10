@@ -4,32 +4,9 @@ import { Menu } from 'primevue';
 import { Button } from 'primevue';
 import { ref } from 'vue';
 import InlineSvg from 'vue-inline-svg';
+import type { HeaderProps } from './types/header-props';
 
-const items = ref([
-  {
-    label: 'Home',
-    route: '/',
-    icon: 'pi pi-home',
-  },
-]);
-
-const userItems = ref([
-  {
-    label: 'Login',
-    route: '/',
-    icon: 'pi pi-sign-in',
-  },
-  {
-    label: 'Sign up',
-    route: '/',
-    icon: 'pi pi-user-plus',
-  },
-  {
-    label: 'Logout',
-    route: '/',
-    icon: 'pi pi-sign-out',
-  },
-]);
+defineProps<HeaderProps>();
 
 const menu = ref();
 const toggle = (event: Event) => {
@@ -38,7 +15,7 @@ const toggle = (event: Event) => {
 </script>
 
 <template>
-  <Menubar :model="items">
+  <Menubar :model="navList">
     <template #start>
       <InlineSvg src="logo-main.svg" height="26" aria-label="logo"> </InlineSvg>
     </template>
@@ -64,7 +41,12 @@ const toggle = (event: Event) => {
         variant="outlined"
         @click="toggle"
       />
-      <Menu id="overlay_menu" ref="menu" :model="userItems" :popup="true" />
+      <Menu
+        id="overlay_menu"
+        ref="menu"
+        :model="userLoginOptions"
+        :popup="true"
+      />
     </template>
   </Menubar>
 </template>
