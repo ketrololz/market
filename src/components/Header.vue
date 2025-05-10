@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Menubar } from 'primevue';
 import { ref } from 'vue';
+import InlineSvg from 'vue-inline-svg';
 
 const items = ref([
   {
@@ -14,10 +15,12 @@ const items = ref([
 <template>
   <Menubar :model="items">
     <template #start>
-      <svg width="35" height="40" viewBox="0 0 35 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-8">
-            <path d="..." fill="var(--p-primary-color)" />
-            <path d="..." fill="var(--p-text-color)" />
-        </svg>
+      <InlineSvg
+        src="logo-main.svg"
+        height="26"
+        aria-label="logo"
+      >
+      </InlineSvg>
     </template>
     <template #item="{ item, props, hasSubmenu }">
       <RouterLink v-if="item.route" :to="item.route" v-bind="props.action">
