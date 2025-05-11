@@ -1,29 +1,54 @@
 <script setup lang="ts">
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
+import InputIcon from 'primevue/inputicon';
+import IconField from 'primevue/iconfield';
+import type { InputFieldProps } from './types/types';
 
-const props = defineProps<{
-  modelValue: string;
-  placeholder: string;
-  errorMessage?: string | { message: string };
-}>();
+const props = defineProps<InputFieldProps>();
 </script>
 
 <template>
-  <div class="flex flex-col gap-1">
-    <label :for="props.placeholder" class="sr-only">{{
-      props.placeholder
+  <div class="flex flex-col">
+    <label v-if="props.label" :for="id" class="text-sm ml-3">{{
+      props.label
     }}</label>
+    <label v-else :for="id" class="sr-only">{{
+      props.placeholder || ''
+    }}</label>
+    <IconField v-if="props.icon">
+      <InputIcon :class="`pi ${props.icon}`" />
+      <InputText
+        size="small"
+        :model-value="props.modelValue ? String(props.modelValue) : null"
+        :placeholder="props.placeholder"
+        fluid
+      />
+    </IconField>
+
     <InputText
-      :model-value="props.modelValue"
+      v-else
+      size="small"
+      :model-value="
+        props.modelValue instanceof Date
+          ? props.modelValue.toISOString()
+          : props.modelValue
+      "
       :placeholder="props.placeholder"
       fluid
     />
-    <Message v-if="props.errorMessage" severity="error">{{
-      typeof props.errorMessage === 'string'
-        ? props.errorMessage
-        : props.errorMessage?.message
-    }}</Message>
+
+    <Message
+      v-if="props.errorMessage"
+      size="small"
+      severity="error"
+      variant="simple"
+      >{{
+        typeof props.errorMessage === 'string'
+          ? props.errorMessage
+          : props.errorMessage?.message
+      }}</Message
+    >
   </div>
 </template>
 

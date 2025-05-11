@@ -25,13 +25,18 @@ export const passwordSchema = yup
 export const nameSchema = yup
   .string()
   .trim()
-  .min(2, 'Minimum 1 character')
+  .min(1, 'Minimum 1 character')
   .matches(/^[A-Za-zА-Яа-яёЁ0-9]+$/, 'Only letters and numbers are allowed');
 
 const minRequiredAge = 13;
 
 export const dateSchema = yup
   .date()
+  .typeError('Invalid date')
+  .min(
+    new Date(new Date().setFullYear(new Date().getFullYear() - 100)),
+    'Date of birth must be within the last 100 years',
+  )
   .max(
     new Date(new Date().setFullYear(new Date().getFullYear() - minRequiredAge)),
     `A User must be at least ${minRequiredAge} years old`,
@@ -51,5 +56,13 @@ export const addressSchema = yup.object({
       /^\d{5}$|^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$/,
       'Postal code must match the country format',
     ),
-  country: yup.string().required('Country is required'),
+  country: yup
+    .object({
+      name: yup.string().required(),
+      code: yup
+        .string()
+        .oneOf(['AU', 'BR', 'CN', 'EG', 'FR', 'DE', 'IN', 'JP', 'ES', 'US'])
+        .required(),
+    })
+    .required(),
 });
