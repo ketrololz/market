@@ -13,9 +13,7 @@ const props = defineProps<InputFieldProps>();
     <label v-if="props.label" :for="id" class="text-sm ml-3">{{
       props.label
     }}</label>
-    <label v-else :for="id" class="sr-only">{{
-      props.placeholder || ''
-    }}</label>
+    <label v-else :for="id" class="sr-only">{{ props.id }}</label>
     <IconField v-if="props.icon">
       <InputIcon :class="`pi ${props.icon}`" />
       <InputText

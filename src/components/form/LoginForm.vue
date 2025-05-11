@@ -3,13 +3,9 @@ import { Form, FormField } from '@primevue/forms';
 import { loginSchema } from './../../schemas/loginSchema';
 import Button from 'primevue/button';
 import { yupResolver } from '@primevue/forms/resolvers/yup';
-import BaseInput from './../../components/form/BaseInput.vue';
+import BaseInput from './BaseTextInput.vue';
 import BasePassword from './../../components/form/BasePassword.vue';
 import type { FormSubmitEvent } from '@primevue/forms';
-import type { FormInstance } from '@primevue/forms';
-import { ref } from 'vue';
-
-const form = ref<FormInstance>();
 
 const initialValues = {
   email: '',
@@ -32,7 +28,6 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
       >
     </div>
     <Form
-      v-model:form="form"
       :initial-values
       :resolver="yupResolver(loginSchema)"
       class="flex flex-col gap-4 w-full sm:w-60"

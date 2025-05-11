@@ -59,10 +59,7 @@ export const addressSchema = yup.object({
   country: yup
     .object({
       name: yup.string().required(),
-      code: yup
-        .string()
-        .oneOf(['AU', 'BR', 'CN', 'EG', 'FR', 'DE', 'IN', 'JP', 'ES', 'US'])
-        .required(),
+      code: yup.string().oneOf(['DE', 'RU', 'US']).required(),
     })
     .required(),
 });
