@@ -1,7 +1,7 @@
-import * as yup from 'yup'
-import { emailField, passwordField } from './common-fields'
+import * as yup from 'yup';
+import { emailSchema, passwordSchema } from './validators';
 
 export const loginSchema = yup.object({
-  email: emailField,
-  password: passwordField
-})
+  email: emailSchema,
+  password: passwordSchema,
+});

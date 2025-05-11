@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import Password from 'primevue/password';
+import Message from 'primevue/message';
 const props = defineProps<{
   modelValue: string;
   placeholder: string;
-  errorMessage?: string;
+  errorMessage?: string | { message: string };
 }>();
-const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
@@ -13,16 +14,17 @@ const emit = defineEmits(['update:modelValue']);
       :model-value="props.modelValue"
       :placeholder="props.placeholder"
       :feedback="false"
+      fluid
       toggle-mask
-      class="w-full"
-      @update:model-value="emit('update:modelValue', $event)"
     />
     <Message v-if="props.errorMessage" severity="error">{{
-      props.errorMessage
+      typeof props.errorMessage === 'string'
+        ? props.errorMessage
+        : props.errorMessage?.message
     }}</Message>
   </div>
 </template>
 
 <script lang="ts">
-export default {}
+export default {};
 </script>
