@@ -11,6 +11,10 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@primeuix/forms/*": ["node_modules/@primeuix/forms/*"]
+    },
 
     /* Linting */
     "strict": true,
@@ -19,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "src/**/*.{ts,tsx,vue}"]
 }
