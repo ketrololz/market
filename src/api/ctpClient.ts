@@ -4,7 +4,6 @@ import {
   type AuthMiddlewareOptions,
   type HttpMiddlewareOptions,
 } from '@commercetools/ts-client';
-import { localStorageTokenCache } from './localStorageTokenCache';
 
 export const projectKey = import.meta.env.VITE_CTP_PROJECT_KEY;
 export const clientId = import.meta.env.VITE_CTP_CLIENT_ID;
@@ -22,7 +21,6 @@ const authMiddlewareOptions: AuthMiddlewareOptions = {
   },
   scopes,
   httpClient: fetch,
-  tokenCache: localStorageTokenCache,
 };
 
 const httpMiddlewareOptions: HttpMiddlewareOptions = {
