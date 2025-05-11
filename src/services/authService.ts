@@ -1,11 +1,4 @@
 import {
-  ClientBuilder,
-  type AuthMiddlewareOptions,
-  type PasswordAuthMiddlewareOptions,
-  type RefreshAuthMiddlewareOptions,
-} from '@commercetools/ts-client';
-import {
-  createApiBuilderFromCtpClient,
   type Customer,
   type MyCustomerDraft,
   type CustomerSignInResult,
@@ -19,14 +12,8 @@ import {
   setStoredAnonymousId,
   clearStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import {
-  projectKey,
-  clientId,
-  clientSecret,
-  apiUrl,
-  authUrl,
-  scopes,
-} from '@/api/ctpClient';
+import { clientId, clientSecret, authUrl } from '@/api/ctpClient';
+import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type RegistrationData } from '@/stores/authStore';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -46,21 +33,8 @@ class AuthService {
         `AuthService: Attempting to refresh anonymous session for ID: ${anonymousIdToUse}`,
       );
       try {
-        const refreshAnonOptions: RefreshAuthMiddlewareOptions = {
-          host: authUrl,
-          projectKey,
-          credentials: { clientId, clientSecret },
-          refreshToken: currentAnonymousTokens.refreshToken,
-          tokenCache: anonymousTokenCache,
-          httpClient: fetch,
-        };
-        const refreshAnonymousClient = new ClientBuilder()
-          .withRefreshTokenFlow(refreshAnonOptions)
-          .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
-          .build();
-        const anonymousApiRoot = createApiBuilderFromCtpClient(
-          refreshAnonymousClient,
-        ).withProjectKey({ projectKey });
+        const anonymousApiRoot =
+          CtpClientFactory.createAnonymousFlowApiRoot(anonymousIdToUse);
         console.log(
           `AuthService: Anonymous session refreshed for ID: ${anonymousIdToUse}`,
         );
@@ -90,25 +64,9 @@ class AuthService {
       `AuthService: Creating new anonymous session with ID: ${this.currentAnonymousId}`,
     );
     try {
-      const anonymousAuthOptions: AuthMiddlewareOptions = {
-        host: authUrl,
-        projectKey,
-        credentials: {
-          clientId,
-          clientSecret,
-          anonymousId: this.currentAnonymousId,
-        },
-        scopes,
-        tokenCache: anonymousTokenCache,
-        httpClient: fetch,
-      };
-      const anonymousClient = new ClientBuilder()
-        .withAnonymousSessionFlow(anonymousAuthOptions)
-        .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
-        .build();
-      const anonymousApiRoot = createApiBuilderFromCtpClient(
-        anonymousClient,
-      ).withProjectKey({ projectKey });
+      const anonymousApiRoot = CtpClientFactory.createAnonymousFlowApiRoot(
+        this.currentAnonymousId,
+      );
       console.log(
         'AuthService: New anonymous session created and token cached.',
       );
@@ -172,26 +130,10 @@ class AuthService {
         'AuthService: Performing Password Flow to get user tokens...',
       );
       userTokenCache.clear();
-
-      const passwordAuthOptions: PasswordAuthMiddlewareOptions = {
-        host: authUrl,
-        projectKey,
-        credentials: {
-          clientId,
-          clientSecret,
-          user: { username: email, password },
-        },
-        scopes,
-        tokenCache: userTokenCache,
-        httpClient: fetch,
-      };
-      const userAuthClient = new ClientBuilder()
-        .withPasswordFlow(passwordAuthOptions)
-        .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
-        .build();
-      const userApiRoot = createApiBuilderFromCtpClient(
-        userAuthClient,
-      ).withProjectKey({ projectKey });
+      const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot({
+        email,
+        password,
+      });
 
       await userApiRoot.me().get().execute();
       console.log(
@@ -249,6 +191,7 @@ class AuthService {
     const tokenToRevoke = currentTokens.refreshToken || currentTokens.token;
 
     tokenCache.clear();
+    this.clearAnonymousSessionData();
 
     if (tokenToRevoke) {
       try {
@@ -279,22 +222,10 @@ class AuthService {
     }
 
     try {
-      const refreshAuthOptions: RefreshAuthMiddlewareOptions = {
-        host: authUrl,
-        projectKey,
-        credentials: { clientId, clientSecret },
-        refreshToken: initialTokenState.refreshToken,
-        tokenCache: userTokenCache,
-        httpClient: fetch,
-      };
-      const refreshClient = new ClientBuilder()
-        .withRefreshTokenFlow(refreshAuthOptions)
-        .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
-        .build();
-      const refreshApiRoot = createApiBuilderFromCtpClient(
-        refreshClient,
-      ).withProjectKey({ projectKey });
-
+      const refreshApiRoot = CtpClientFactory.createRefreshTokenFlowApiRoot(
+        initialTokenState.refreshToken,
+        userTokenCache,
+      );
       const meResponse = await refreshApiRoot.me().get().execute();
       console.log('AuthService: Session restored/refreshed successfully.');
       return meResponse.body as Customer;

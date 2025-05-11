@@ -1,9 +1,10 @@
-import { createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
-import {
-  ClientBuilder,
-  type AuthMiddlewareOptions,
-  type HttpMiddlewareOptions,
-} from '@commercetools/ts-client';
+// import { createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
+// import {
+//   ClientBuilder,
+//   type AuthMiddlewareOptions,
+//   type HttpMiddlewareOptions,
+// } from '@commercetools/ts-client';
+import { CtpClientFactory } from './ctpClientBuilderFactory';
 
 export const projectKey = import.meta.env.VITE_CTP_PROJECT_KEY;
 export const clientId = import.meta.env.VITE_CTP_CLIENT_ID;
@@ -12,33 +13,47 @@ export const apiUrl = import.meta.env.VITE_CTP_API_URL;
 export const authUrl = import.meta.env.VITE_CTP_AUTH_URL;
 export const scopes = import.meta.env.VITE_CTP_SCOPES?.split(' ') || [];
 
-const authMiddlewareOptions: AuthMiddlewareOptions = {
-  host: authUrl,
-  projectKey,
-  credentials: {
-    clientId,
-    clientSecret,
-  },
-  scopes,
-  httpClient: fetch,
-};
+if (
+  !projectKey ||
+  !clientId ||
+  !clientSecret ||
+  !apiUrl ||
+  !authUrl ||
+  !scopes.length
+) {
+  console.error(
+    'ОШИБКА: Не найдены все необходимые переменные окружения CommerceTools в .env!',
+  );
+}
 
-const httpMiddlewareOptions: HttpMiddlewareOptions = {
-  host: apiUrl,
-  httpClient: fetch,
-};
+// const authMiddlewareOptions: AuthMiddlewareOptions = {
+//   host: authUrl,
+//   projectKey,
+//   credentials: {
+//     clientId,
+//     clientSecret,
+//   },
+//   scopes,
+//   httpClient: fetch,
+// };
 
-export const ctpClient = new ClientBuilder()
-  .withClientCredentialsFlow(authMiddlewareOptions)
-  .withHttpMiddleware(httpMiddlewareOptions)
-  .withLoggerMiddleware()
-  .build();
+// const httpMiddlewareOptions: HttpMiddlewareOptions = {
+//   host: apiUrl,
+//   httpClient: fetch,
+// };
 
-const apiRootBuilder = createApiBuilderFromCtpClient(ctpClient);
+// export const ctpClient = new ClientBuilder()
+//   .withClientCredentialsFlow(authMiddlewareOptions)
+//   .withHttpMiddleware(httpMiddlewareOptions)
+//   .withLoggerMiddleware()
+//   .build();
 
-export const apiRoot = apiRootBuilder.withProjectKey({
-  projectKey,
-});
+// const apiRootBuilder = createApiBuilderFromCtpClient(ctpClient);
+
+// export const apiRoot = apiRootBuilder.withProjectKey({
+//   projectKey,
+// });
+export const appApiRoot = CtpClientFactory.createAppApiRoot();
 
 console.log(
   `ctpClient.ts: Initialized apiRoot for project ${projectKey} using Client Credentials Flow.`,
