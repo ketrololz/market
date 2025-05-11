@@ -1,4 +1,6 @@
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
+import RegistrationPage from '../pages/RegistrationPage.vue';
+import LoginPage from '../pages/LoginPage.vue';
 
 // import example
 // import VueComponent from '../components/vuecomponent.vue'
@@ -7,7 +9,7 @@ export const ROUTES: RouteRecordRaw[] = [
   // Uncomment after adding a component
 
   // { path: '/', component: Main },
-  // { path: '/login', component: Login },
-  // { path: '/registration', component: Registration },
+  { path: '/login', component: LoginPage },
+  { path: '/registration', component: RegistrationPage },
   // { path: '/404', component: NotFound },
-]
+];
