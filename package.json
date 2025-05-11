@@ -50,5 +50,4 @@
     "**/*": "prettier --write --ignore-unknown",
     "*.{js,ts,vue}": "eslint --fix"
   }
-
 }

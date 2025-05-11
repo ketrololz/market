@@ -10,6 +10,9 @@ const props = defineProps<{
 
 <template>
   <div class="flex flex-col gap-1">
+    <label :for="props.placeholder" class="sr-only">{{
+      props.placeholder
+    }}</label>
     <Password
       :model-value="props.modelValue"
       :placeholder="props.placeholder"
