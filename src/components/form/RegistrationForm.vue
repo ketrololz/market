@@ -143,7 +143,6 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
               :error-message="slotProps.error"
               :options="countries"
               filter
-              placeholder="Select a Country"
               class="w-full"
             />
           </FormField>

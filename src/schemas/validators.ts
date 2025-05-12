@@ -56,7 +56,7 @@ export const addressSchema = yup.object({
     .string()
     .required('Postal code is required')
     .matches(
-      /^\d{5}$|^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$/,
+      /^(?:\d{5}(?:-\d{4})?|\d{6})$/,
       'Postal code must match the country format',
     ),
   country: yup
