@@ -13,7 +13,13 @@ import {
   setStoredAnonymousId,
   clearStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import { clientId, clientSecret, authUrl } from '@/api/ctpClient';
+import {
+  clientId,
+  clientSecret,
+  authUrl,
+  projectKey,
+  scopes,
+} from '@/api/ctpClient';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type RegistrationData } from '@/stores/authStore';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,6 +27,8 @@ import { parseCtpError } from './authErrors';
 
 class AuthService {
   private currentAnonymousId: string | null = getStoredAnonymousId();
+  private currentUserAccessToken: string | null = null;
+  private currentUserRefreshToken: string | null = null;
 
   private async getOrCreateAnonymousApiRoot(): Promise<{
     apiRoot: ByProjectKeyRequestBuilder;
@@ -94,7 +102,6 @@ class AuthService {
 
   async login(email: string, password: string): Promise<Customer> {
     console.log('AuthService: Attempting login with /me/login strategy...');
-    let customerDataFromMeLogin: Customer | undefined;
 
     const anonymousSession = await this.getOrCreateAnonymousApiRoot();
     if (!anonymousSession) {
@@ -102,6 +109,10 @@ class AuthService {
         'Не удалось получить/создать анонимную сессию для логина.',
       );
     }
+
+    userTokenCache.clear();
+    this.currentUserAccessToken = null;
+    this.currentUserRefreshToken = null;
 
     try {
       const signInBody: MyCustomerSignin = {
@@ -120,7 +131,6 @@ class AuthService {
         .post({ body: signInBody })
         .execute();
       const signInResult = meLoginResponse.body as CustomerSignInResult;
-      customerDataFromMeLogin = signInResult.customer;
       console.log(
         'AuthService: /me/login successful, customer data obtained. Cart (if any):',
         signInResult.cart,
@@ -132,17 +142,52 @@ class AuthService {
         'AuthService: Performing Password Flow to get user tokens...',
       );
       userTokenCache.clear();
-      const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot({
-        email,
-        password,
-      });
-
-      await userApiRoot.me().get().execute();
-      console.log(
-        'AuthService: User tokens obtained and cached via Password Flow.',
+      const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot(
+        {
+          email,
+          password,
+        },
+        false,
       );
 
-      return customerDataFromMeLogin;
+      await userApiRoot.me().get().execute();
+
+      console.log(
+        'AuthService: Explicitly fetching user tokens (not saving to localStorage)...',
+      );
+      const tokenResponse = await fetch(
+        `${authUrl}/oauth/${projectKey}/customers/token`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: 'Basic ' + btoa(`${clientId}:${clientSecret}`),
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'password',
+            username: email,
+            password: password,
+            scope: scopes.join(' '),
+          }),
+        },
+      );
+
+      if (!tokenResponse.ok) {
+        const errorBody = await tokenResponse.json();
+        throw new Error(
+          `Ошибка получения токенов: ${errorBody.error_description || tokenResponse.statusText}`,
+        );
+      }
+      const tokenData = await tokenResponse.json();
+      this.currentUserAccessToken = tokenData.access_token;
+      this.currentUserRefreshToken = tokenData.refresh_token;
+      console.log('AuthService: User tokens obtained and stored in memory.');
+
+      if (anonymousSession?.anonymousId) {
+        this.clearAnonymousSessionData();
+      }
+
+      return signInResult.customer;
     } catch (error) {
       console.error('AuthService Login Error:', error);
       userTokenCache.clear();

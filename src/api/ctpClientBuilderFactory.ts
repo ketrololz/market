@@ -39,10 +39,10 @@ export class CtpClientFactory {
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
   }
 
-  static createPasswordFlowApiRoot(userCredentials: {
-    email: string;
-    password: string;
-  }): ByProjectKeyRequestBuilder {
+  static createPasswordFlowApiRoot(
+    userCredentials: { email: string; password: string },
+    useCache: boolean = true,
+  ): ByProjectKeyRequestBuilder {
     const passwordAuthOptions: PasswordAuthMiddlewareOptions = {
       host: authUrl,
       projectKey,
@@ -55,9 +55,11 @@ export class CtpClientFactory {
         },
       },
       scopes,
-      tokenCache: userTokenCache,
       httpClient: fetch,
     };
+    if (useCache) {
+      passwordAuthOptions.tokenCache = userTokenCache;
+    }
     const client = new ClientBuilder()
       .withPasswordFlow(passwordAuthOptions)
       .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
@@ -85,16 +87,22 @@ export class CtpClientFactory {
 
   static createRefreshTokenFlowApiRoot(
     refreshToken: string,
-    cache: ClearableTokenCache,
+    cacheToUse: ClearableTokenCache,
+    useCacheOptionForUser: boolean = true,
   ): ByProjectKeyRequestBuilder {
     const refreshAuthOptions: RefreshAuthMiddlewareOptions = {
       host: authUrl,
       projectKey,
       credentials: { clientId, clientSecret },
       refreshToken,
-      tokenCache: cache,
       httpClient: fetch,
     };
+    if (cacheToUse === userTokenCache && useCacheOptionForUser) {
+      refreshAuthOptions.tokenCache = userTokenCache;
+    } else if (cacheToUse === anonymousTokenCache) {
+      refreshAuthOptions.tokenCache = anonymousTokenCache;
+    }
+
     const client = new ClientBuilder()
       .withRefreshTokenFlow(refreshAuthOptions)
       .withHttpMiddleware({ host: apiUrl, httpClient: fetch })

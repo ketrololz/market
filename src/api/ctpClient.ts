@@ -1,9 +1,3 @@
-// import { createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
-// import {
-//   ClientBuilder,
-//   type AuthMiddlewareOptions,
-//   type HttpMiddlewareOptions,
-// } from '@commercetools/ts-client';
 import { CtpClientFactory } from './ctpClientBuilderFactory';
 
 export const projectKey = import.meta.env.VITE_CTP_PROJECT_KEY;
@@ -26,33 +20,6 @@ if (
   );
 }
 
-// const authMiddlewareOptions: AuthMiddlewareOptions = {
-//   host: authUrl,
-//   projectKey,
-//   credentials: {
-//     clientId,
-//     clientSecret,
-//   },
-//   scopes,
-//   httpClient: fetch,
-// };
-
-// const httpMiddlewareOptions: HttpMiddlewareOptions = {
-//   host: apiUrl,
-//   httpClient: fetch,
-// };
-
-// export const ctpClient = new ClientBuilder()
-//   .withClientCredentialsFlow(authMiddlewareOptions)
-//   .withHttpMiddleware(httpMiddlewareOptions)
-//   .withLoggerMiddleware()
-//   .build();
-
-// const apiRootBuilder = createApiBuilderFromCtpClient(ctpClient);
-
-// export const apiRoot = apiRootBuilder.withProjectKey({
-//   projectKey,
-// });
 export const appApiRoot = CtpClientFactory.createAppApiRoot();
 
 console.log(
