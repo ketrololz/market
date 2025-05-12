@@ -39,10 +39,10 @@ const loginEmail = ref('');
 const loginPassword = ref('');
 
 // --- Вычисляемые свойства из стора ---
-const isLoading = computed(() => authStore.isLoadingStatus);
-const errorMessage = computed(() => authStore.getAuthErrorMessage);
-const loggedInUser = computed(() => authStore.getCurrentUser);
-const isLoggedIn = computed(() => authStore.getIsLoggedIn);
+const isLoading = computed(() => authStore.isLoading);
+const errorMessage = computed(() => authStore.authErrorMessage);
+const loggedInUser = computed(() => authStore.userProfile);
+const isLoggedIn = computed(() => authStore.isUserLoggedIn);
 
 // --- Обработчики ---
 async function handleRegister() {
@@ -121,8 +121,8 @@ async function handleLogin() {
     appLogger.log('Login process initiated successfully from component.');
     loginEmail.value = '';
     loginPassword.value = '';
-  } else if (authStore.getAuthErrorObject) {
-    appLogger.log('Login failed with code:', authStore.getAuthErrorObject.code);
+  } else if (authStore.authErrorDetails) {
+    appLogger.log('Login failed with code:', authStore.authErrorDetails.code);
   }
 }
 
@@ -132,7 +132,7 @@ async function handleLogout() {
 }
 
 onMounted(() => {
-  authStore.checkAuth();
+  authStore.restoreUserSession();
 });
 </script>
 

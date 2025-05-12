@@ -1,14 +1,15 @@
 import { defineStore } from 'pinia';
-
 import type { Customer, BaseAddress } from '@commercetools/platform-sdk';
 import AuthService from '@/services/authService';
 import { ref, computed } from 'vue';
 import { AuthError } from '@/services/authErrors';
 import appLogger from '@/utils/logger';
+import { showErrorToast, showSuccessToast } from '@/utils/toaster';
 
-interface AuthStoreError {
+interface AuthStoreErrorDetails {
   message: string;
   code?: string;
+  details?: unknown;
 }
 
 export interface AddressFormData
@@ -31,104 +32,105 @@ export interface RegistrationData {
 
 export const useAuthStore = defineStore('auth', () => {
   // --- State ---
-  const isLoggedIn = ref(false);
   const user = ref<Customer | null>(null);
-  const loading = ref(false);
-  const error = ref<AuthStoreError | null>(null);
+  const isLoading = ref(false);
+  const currentError = ref<AuthStoreErrorDetails | null>(null);
 
   // --- Getters ---
-  const getIsLoggedIn = computed(() => isLoggedIn.value);
-  const getCurrentUser = computed(() => user.value);
-  const getAuthErrorMessage = computed(() => error.value?.message || null);
-  const getAuthErrorObject = computed(() => error.value);
-  const isLoadingStatus = computed(() => loading.value);
+  const isUserLoggedIn = computed(() => !!user.value);
+  const userProfile = computed(() => user.value);
+  const authErrorDetails = computed(() => currentError.value);
+  const authErrorMessage = computed(() => currentError.value?.message || null);
 
   // --- Actions ---
-  function setLoadingState(newLoading: boolean) {
-    loading.value = newLoading;
-  }
+  const setLoading = (loadingState: boolean): void => {
+    isLoading.value = loadingState;
+  };
 
-  function setErrorState(err: AuthError | Error | string | null) {
+  const setError = (err: AuthError | Error | string | null): void => {
     if (!err) {
-      error.value = null;
+      currentError.value = null;
       return;
     }
+    let errorPayload: AuthStoreErrorDetails;
     if (err instanceof AuthError) {
-      error.value = {
+      errorPayload = {
         message: err.message,
         code: err.ctpErrorCode || err.name,
+        details: err.details,
       };
       appLogger.error(
         `AuthStore Error: ${err.name} (Code: ${err.ctpErrorCode}) - ${err.message}`,
         err.details || '',
       );
     } else if (err instanceof Error) {
-      error.value = { message: err.message, code: 'GenericError' };
+      errorPayload = { message: err.message, code: 'GenericError' };
       appLogger.error(`AuthStore Generic Error: ${err.message}`);
     } else if (typeof err === 'string') {
-      error.value = { message: err, code: 'StringError' };
+      errorPayload = { message: err, code: 'StringError' };
       appLogger.error(`AuthStore String Error: ${err}`);
     } else {
-      error.value = {
-        message: 'Unknown error',
+      errorPayload = {
+        message: 'An unknown error occurred in the store.',
         code: 'UnknownErrorInStore',
       };
       appLogger.error('AuthStore Unknown Error Structure:', err);
     }
-  }
+    currentError.value = errorPayload;
+    showErrorToast(errorPayload.message);
+  };
 
-  function clearErrorState() {
-    error.value = null;
-  }
+  const clearError = (): void => {
+    currentError.value = null;
+  };
 
-  function setLoggedInState(userData: Customer) {
+  const setUserSession = (userData: Customer): void => {
     user.value = userData;
-    isLoggedIn.value = true;
-    error.value = null;
-    appLogger.log('AuthStore (setup): User logged in', userData);
-  }
+    currentError.value = null;
+    appLogger.log('AuthStore: User session established.', userData);
+  };
 
-  function clearAuthState() {
-    isLoggedIn.value = false;
+  const clearUserSession = (): void => {
     user.value = null;
-    error.value = null;
-    appLogger.log('AuthStore (setup): Auth state cleared');
-  }
+    currentError.value = null;
+    appLogger.log('AuthStore: User session cleared.');
+  };
 
   async function login(credentials: {
     email: string;
     password: string;
   }): Promise<boolean> {
-    setLoadingState(true);
-    clearErrorState();
+    setLoading(true);
+    clearError();
     try {
       const loggedInUserData = await AuthService.login(
         credentials.email,
         credentials.password,
       );
-      setLoggedInState(loggedInUserData);
+      setUserSession(loggedInUserData);
+      showSuccessToast('Login successful! Welcome back.');
       return true;
     } catch (error) {
       if (error instanceof AuthError) {
-        setErrorState(error);
+        setError(error);
       } else if (error instanceof Error) {
-        setErrorState(new AuthError(error.message));
+        setError(new AuthError(error.message));
       } else {
-        setErrorState(new AuthError('Unexpected error during login.'));
+        setError(new AuthError('Unexpected error during login.'));
       }
       return false;
     } finally {
-      setLoadingState(false);
+      setLoading(false);
     }
   }
 
   async function register(data: RegistrationData): Promise<boolean> {
-    setLoadingState(true);
-    clearErrorState();
+    setLoading(true);
+    clearError();
     try {
       const registrationResult = await AuthService.register(data);
       if (!registrationResult || !registrationResult.customer) {
-        setErrorState(
+        setError(
           new AuthError(
             'Registration succeeded, but failed to retrieve user data for auto-login.',
           ),
@@ -142,74 +144,75 @@ export const useAuthStore = defineStore('auth', () => {
         data.email,
         data.password,
       );
-      setLoggedInState(loggedInUserData);
+      setUserSession(loggedInUserData);
+      showSuccessToast('Registration successful! You are now logged in.');
+      appLogger.log('AuthStore: Login successful.');
       return true;
     } catch (error) {
       if (error instanceof AuthError) {
-        setErrorState(error);
+        setError(error);
       } else if (error instanceof Error) {
-        setErrorState(new AuthError(error.message));
+        setError(new AuthError(error.message));
       } else {
-        setErrorState(new AuthError('Unexpected error during registration.'));
+        setError(new AuthError('Unexpected error during registration.'));
       }
       return false;
     } finally {
-      setLoadingState(false);
+      setLoading(false);
     }
   }
 
-  async function logout() {
-    setLoadingState(true);
-    clearErrorState();
+  async function logout(): Promise<void> {
+    setLoading(true);
+    clearError();
     try {
       await AuthService.logout();
-      clearAuthState();
+      clearUserSession();
     } catch (error) {
       appLogger.error('Error during logout process in store:', error);
-      clearAuthState();
+      clearUserSession();
       if (error instanceof AuthError) {
-        setErrorState(error);
+        setError(error);
       } else if (error instanceof Error) {
-        setErrorState(new AuthError(error.message));
+        setError(new AuthError(error.message));
       } else {
-        setErrorState(new AuthError('Error during logout process.'));
+        setError(new AuthError('Error during logout process.'));
       }
     } finally {
-      setLoadingState(false);
+      setLoading(false);
     }
   }
 
-  async function tryRestoreSessionOnLoad() {
-    appLogger.log('AuthStore (setup): Checking auth state on load...');
-    clearErrorState();
+  async function restoreUserSession() {
+    appLogger.log('AuthStore: Attempting to restore session on load...');
+    clearError();
     try {
       const userData = await AuthService.restoreSession();
       if (userData) {
-        setLoggedInState(userData);
+        setUserSession(userData);
       } else {
-        clearAuthState();
+        clearUserSession();
       }
     } catch (error) {
-      appLogger.error('Check auth failed in store:', error);
-      clearAuthState();
+      appLogger.error('AuthStore: Failed to restore session.', error);
+      clearUserSession();
     }
   }
 
   return {
-    isLoggedIn,
     user,
-    loading,
-    error,
+    isLoading,
+    currentError,
 
-    getIsLoggedIn,
-    getCurrentUser,
-    getAuthErrorMessage,
-    getAuthErrorObject,
-    isLoadingStatus,
+    isUserLoggedIn,
+    userProfile,
+    authErrorDetails,
+    authErrorMessage,
 
     login,
     register,
     logout,
-    checkAuth: tryRestoreSessionOnLoad,
+    restoreUserSession,
+    clearError,
   };
 });
