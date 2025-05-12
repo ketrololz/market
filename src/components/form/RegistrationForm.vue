@@ -6,6 +6,8 @@ import { yupResolver } from '@primevue/forms/resolvers/yup';
 import BaseInput from './../../components/form/BaseTextInput.vue';
 import BasePassword from './../../components/form/BasePassword.vue';
 import BaseInputDate from './../../components/form/BaseInputDate.vue';
+import Panel from 'primevue/panel';
+import Divider from 'primevue/divider';
 import Select from 'primevue/select';
 import type { FormSubmitEvent } from '@primevue/forms';
 
@@ -39,49 +41,19 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
 </script>
 
 <template>
-  <div class="card">
+  <Panel
+    header=" Create New Customer Account"
+    pt:header:class="justify-self-center text-xl"
+    pt:root:class="pb-10"
+  >
     <div class="flex flex-col items-center w-full px-8">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl font-medium mb-4">Create New Customer Account</h1>
-      </div>
+      <div class="text-center mb-8"></div>
       <Form
         :initial-values
         :resolver="yupResolver(registrationSchema)"
-        class="flex flex-col gap-2 w-full sm:w-60"
+        class="flex flex-col gap-2 w-full"
         @submit="onFormSubmit"
       >
-        <h2 class="text-gray-700 font-medium text-center">
-          Personal Information
-        </h2>
-        <div class="flex gap-2">
-          <FormField v-slot="slotProps" name="firstName">
-            <BaseInput
-              id="firstName"
-              label="First Name"
-              :model-value="slotProps.value"
-              :error-message="slotProps.error"
-            />
-          </FormField>
-          <FormField v-slot="slotProps" name="lastName">
-            <BaseInput
-              id="lastName"
-              label="Last Name"
-              :model-value="slotProps.value"
-              :error-message="slotProps.error"
-            />
-          </FormField>
-        </div>
-        <FormField v-slot="slotProps" name="dateOfBirth">
-          <BaseInputDate
-            :model-value="slotProps.value"
-            :error-message="slotProps.error"
-            placeholder="DD/MM/YYYY"
-            show-icon
-            label="Date of Birth"
-            icon-class="pi pi-calendar"
-          />
-        </FormField>
-
         <h2 class="text-gray-700 font-medium text-center">Login Information</h2>
         <FormField v-slot="slotProps" name="email">
           <BaseInput
@@ -101,9 +73,43 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           />
         </FormField>
 
-        <h2 class="text-gray-700 font-medium text-center">Address</h2>
+        <Divider />
+
+        <h2 class="text-gray-700 font-medium text-center">
+          Personal Information
+        </h2>
         <div class="flex gap-2">
-          <FormField v-slot="slotProps" name="address.street">
+          <FormField v-slot="slotProps" name="firstName" class="w-1/2">
+            <BaseInput
+              id="firstName"
+              label="First Name"
+              :model-value="slotProps.value"
+              :error-message="slotProps.error"
+            />
+          </FormField>
+          <FormField v-slot="slotProps" name="lastName" class="w-1/2">
+            <BaseInput
+              id="lastName"
+              label="Last Name"
+              :model-value="slotProps.value"
+              :error-message="slotProps.error"
+            />
+          </FormField>
+        </div>
+        <FormField v-slot="slotProps" name="dateOfBirth">
+          <BaseInputDate
+            :model-value="slotProps.value"
+            :error-message="slotProps.error"
+            placeholder="DD/MM/YYYY"
+            show-icon
+            label="Date of Birth"
+            icon-class="pi pi-calendar"
+          />
+        </FormField>
+
+        <h2 class="text-gray-700 font-medium text-center mt-5">Address</h2>
+        <div class="flex gap-2">
+          <FormField v-slot="slotProps" name="address.street" class="w-1/2">
             <BaseInput
               id="street1"
               label="Street"
@@ -111,7 +117,7 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
               :error-message="slotProps.error"
             />
           </FormField>
-          <FormField v-slot="slotProps" name="address.city">
+          <FormField v-slot="slotProps" name="address.city" class="w-1/2">
             <BaseInput
               id="city1"
               label="City"
@@ -121,19 +127,19 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           </FormField>
         </div>
         <div class="flex gap-2">
-          <FormField v-slot="slotProps" name="address.postalCode">
+          <FormField v-slot="slotProps" name="address.postalCode" class="w-1/2">
+            <label for="postal-code1" class="text-sm">Postal Code</label>
             <BaseInput
               id="postal-code1"
               v-model="slotProps.value"
               :error-message="slotProps.error"
               :options="countries"
               filter
-              label="Postal Code"
               placeholder="Select a Country"
               class="w-full"
             />
           </FormField>
-          <FormField v-slot="slotProps" name="address.country">
+          <FormField v-slot="slotProps" name="address.country" class="w-1/2">
             <label for="country" class="text-sm">Country</label>
             <Select
               v-model="slotProps.value"
@@ -161,5 +167,5 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
         <Button size="small" label="Sign up" type="submit" class="w-full" />
       </Form>
     </div>
-  </div>
+  </Panel>
 </template>
