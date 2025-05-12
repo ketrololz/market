@@ -4,6 +4,7 @@ import type { Customer, BaseAddress } from '@commercetools/platform-sdk';
 import AuthService from '@/services/authService';
 import { ref, computed } from 'vue';
 import { AuthError } from '@/services/authErrors';
+import appLogger from '@/utils/logger';
 
 interface AuthStoreError {
   message: string;
@@ -57,22 +58,22 @@ export const useAuthStore = defineStore('auth', () => {
         message: err.message,
         code: err.ctpErrorCode || err.name,
       };
-      console.error(
+      appLogger.error(
         `AuthStore Error: ${err.name} (Code: ${err.ctpErrorCode}) - ${err.message}`,
         err.details || '',
       );
     } else if (err instanceof Error) {
       error.value = { message: err.message, code: 'GenericError' };
-      console.error(`AuthStore Generic Error: ${err.message}`);
+      appLogger.error(`AuthStore Generic Error: ${err.message}`);
     } else if (typeof err === 'string') {
       error.value = { message: err, code: 'StringError' };
-      console.error(`AuthStore String Error: ${err}`);
+      appLogger.error(`AuthStore String Error: ${err}`);
     } else {
       error.value = {
-        message: 'Неизвестная ошибка',
+        message: 'Unknown error',
         code: 'UnknownErrorInStore',
       };
-      console.error('AuthStore Unknown Error Structure:', err);
+      appLogger.error('AuthStore Unknown Error Structure:', err);
     }
   }
 
@@ -84,14 +85,14 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = userData;
     isLoggedIn.value = true;
     error.value = null;
-    console.log('AuthStore (setup): User logged in', userData);
+    appLogger.log('AuthStore (setup): User logged in', userData);
   }
 
   function clearAuthState() {
     isLoggedIn.value = false;
     user.value = null;
     error.value = null;
-    console.log('AuthStore (setup): Auth state cleared');
+    appLogger.log('AuthStore (setup): Auth state cleared');
   }
 
   async function login(credentials: {
@@ -113,7 +114,7 @@ export const useAuthStore = defineStore('auth', () => {
       } else if (error instanceof Error) {
         setErrorState(new AuthError(error.message));
       } else {
-        setErrorState(new AuthError('Неожиданная ошибка при входе.'));
+        setErrorState(new AuthError('Unexpected error during login.'));
       }
       return false;
     } finally {
@@ -125,7 +126,22 @@ export const useAuthStore = defineStore('auth', () => {
     setLoadingState(true);
     clearErrorState();
     try {
-      const loggedInUserData = await AuthService.registerAndLogin(data);
+      const registrationResult = await AuthService.register(data);
+      if (!registrationResult || !registrationResult.customer) {
+        setErrorState(
+          new AuthError(
+            'Registration succeeded, but failed to retrieve user data for auto-login.',
+          ),
+        );
+        return false;
+      }
+      appLogger.log(
+        'AuthStore: Registration successful. Proceeding to auto-login...',
+      );
+      const loggedInUserData = await AuthService.login(
+        data.email,
+        data.password,
+      );
       setLoggedInState(loggedInUserData);
       return true;
     } catch (error) {
@@ -134,7 +150,7 @@ export const useAuthStore = defineStore('auth', () => {
       } else if (error instanceof Error) {
         setErrorState(new AuthError(error.message));
       } else {
-        setErrorState(new AuthError('Неожиданная ошибка при регистрации.'));
+        setErrorState(new AuthError('Unexpected error during registration.'));
       }
       return false;
     } finally {
@@ -149,32 +165,32 @@ export const useAuthStore = defineStore('auth', () => {
       await AuthService.logout();
       clearAuthState();
     } catch (error) {
-      console.error('Error during logout process in store:', error);
+      appLogger.error('Error during logout process in store:', error);
       clearAuthState();
       if (error instanceof AuthError) {
         setErrorState(error);
       } else if (error instanceof Error) {
         setErrorState(new AuthError(error.message));
       } else {
-        setErrorState(new AuthError('Ошибка при выходе из системы.'));
+        setErrorState(new AuthError('Error during logout process.'));
       }
     } finally {
       setLoadingState(false);
     }
   }
 
-  async function checkAuth() {
-    console.log('AuthStore (setup): Checking auth state on load...');
+  async function tryRestoreSessionOnLoad() {
+    appLogger.log('AuthStore (setup): Checking auth state on load...');
     clearErrorState();
     try {
-      const userData = await AuthService.checkAuthAndRefresh();
+      const userData = await AuthService.restoreSession();
       if (userData) {
         setLoggedInState(userData);
       } else {
         clearAuthState();
       }
     } catch (error) {
-      console.error('Check auth failed in store:', error);
+      appLogger.error('Check auth failed in store:', error);
       clearAuthState();
     }
   }
@@ -194,6 +210,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    checkAuth,
+    checkAuth: tryRestoreSessionOnLoad,
   };
 });

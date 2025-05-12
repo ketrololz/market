@@ -2,12 +2,13 @@
 /// <reference types="vite/types/importMeta.d.ts" />
 
 interface ImportMetaEnv {
-  readonly VITE_CT_PROJECT_KEY: string;
-  readonly VITE_CT_CLIENT_ID: string;
-  readonly VITE_CT_CLIENT_SECRET: string;
-  readonly VITE_CT_API_URL: string;
-  readonly VITE_CT_AUTH_URL: string;
-  readonly VITE_CT_SCOPES: string;
+  readonly VITE_CTP_PROJECT_KEY: string;
+  readonly VITE_CTP_CLIENT_ID: string;
+  readonly VITE_CTP_CLIENT_SECRET: string;
+  readonly VITE_CTP_API_URL: string;
+  readonly VITE_CTP_AUTH_URL: string;
+  readonly VITE_CTP_SCOPES: string;
+  readonly VITE_APP_LOGGING_ENABLED: string;
 }
 
 interface ImportMeta {

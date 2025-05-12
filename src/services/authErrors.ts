@@ -19,26 +19,46 @@ export class AuthError extends Error {
 }
 
 export class InvalidCredentialsError extends AuthError {
-  constructor(message = 'Неверный email или пароль.') {
-    super(message, 400, 'InvalidCredentials');
+  constructor(apiMessage?: string) {
+    super(
+      apiMessage || 'Invalid email or password.',
+      400,
+      'InvalidCredentials',
+      { originalApiMessage: apiMessage },
+    );
   }
 }
 
 export class EmailInUseError extends AuthError {
-  constructor(message = 'Этот email уже используется.') {
-    super(message, 400, 'DuplicateField');
+  constructor(apiMessage?: string) {
+    super(
+      apiMessage || 'This email address is already in use.',
+      400,
+      'DuplicateField',
+      { originalApiMessage: apiMessage },
+    );
   }
 }
 
 export class NetworkError extends AuthError {
-  constructor(message = 'Ошибка сети. Пожалуйста, проверьте ваше соединение.') {
-    super(message, undefined, 'NetworkError');
+  constructor(apiMessage?: string) {
+    super(
+      apiMessage || 'Network error. Please check your connection.',
+      undefined,
+      'NetworkError',
+      { originalApiMessage: apiMessage },
+    );
   }
 }
 
 export class UnknownAuthError extends AuthError {
-  constructor(message = 'Произошла неизвестная ошибка аутентификации.') {
-    super(message, undefined, 'UnknownAuthError');
+  constructor(apiMessage?: string) {
+    super(
+      apiMessage || 'An unexpected authentication error occurred.',
+      undefined,
+      'UnknownAuthError',
+      { originalApiMessage: apiMessage },
+    );
   }
 }
 
@@ -77,30 +97,47 @@ function isCtpSdkError(error: unknown): error is CtpSdkError {
 export function parseCtpError(sdkError: unknown): AuthError {
   if (isCtpSdkError(sdkError)) {
     const body = sdkError.body!;
-    const message =
-      body.message || sdkError.message || 'Ошибка от CommerceTools API.';
-    const ctpErrorCode = body.errors?.[0]?.code || body.error || 'CtpApiError';
+    const detailedMessage =
+      body.errors?.[0]?.message ||
+      body.message ||
+      sdkError.message ||
+      'An error occurred with the CommerceTools API.';
+    const oauthErrorDescription = body.error_description;
 
-    if (
-      body.error === 'invalid_grant' ||
-      (body.errors?.[0]?.code === 'InvalidOperation' &&
-        body.message?.toLowerCase().includes('password does not match'))
-    ) {
+    if (body.error === 'invalid_grant') {
       return new InvalidCredentialsError(
-        body.error_description || 'Неверный email или пароль.',
+        oauthErrorDescription ||
+          'Invalid email or password provided to authentication server.',
       );
     }
-    if (
-      body.errors?.[0]?.code === 'DuplicateField' &&
-      body.errors?.[0]?.field === 'email'
-    ) {
-      return new EmailInUseError();
+
+    if (body.errors && body.errors.length > 0) {
+      const firstError = body.errors[0];
+      if (
+        firstError.code === 'DuplicateField' &&
+        firstError.field === 'email'
+      ) {
+        return new EmailInUseError(firstError.message);
+      }
+      if (
+        firstError.code === 'InvalidOperation' &&
+        firstError.message?.toLowerCase().includes('password does not match')
+      ) {
+        return new InvalidCredentialsError(firstError.message);
+      }
+      return new AuthError(
+        detailedMessage,
+        sdkError.statusCode,
+        firstError.code,
+        body.errors,
+      );
     }
+
     return new AuthError(
-      message,
+      detailedMessage,
       sdkError.statusCode,
-      ctpErrorCode,
-      body.errors,
+      body.error || 'CtpApiError',
+      body,
     );
   }
 
@@ -109,11 +146,13 @@ export function parseCtpError(sdkError: unknown): AuthError {
       sdkError.message.toLowerCase().includes('failed to fetch') ||
       sdkError.message.toLowerCase().includes('networkerror')
     ) {
-      return new NetworkError();
+      return new NetworkError(sdkError.message);
     }
     return new UnknownAuthError(sdkError.message);
   }
 
   console.error('Unknown error structure passed to parseCtpError:', sdkError);
-  return new UnknownAuthError('Произошла непредвиденная ошибка.');
+  return new UnknownAuthError(
+    'An unexpected error occurred (unknown structure).',
+  );
 }

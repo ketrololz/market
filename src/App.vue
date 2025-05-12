@@ -5,6 +5,7 @@ import {
   type RegistrationData,
   type AddressFormData,
 } from './stores/authStore';
+import appLogger from './utils/logger';
 
 const authStore = useAuthStore();
 
@@ -84,7 +85,7 @@ async function handleRegister() {
 
   const success = await authStore.register(registrationPayload);
   if (success) {
-    console.log(
+    appLogger.log(
       'Registration (and auto-login) process initiated successfully from component.',
     );
     registerFirstName.value = '';
@@ -107,7 +108,7 @@ async function handleRegister() {
     billingCountry.value = 'DE';
     billingIsDefault.value = false;
   } else {
-    console.log('Registration failed, error should be displayed.');
+    appLogger.log('Registration failed, error should be displayed.');
   }
 }
 
@@ -117,17 +118,17 @@ async function handleLogin() {
     password: loginPassword.value,
   });
   if (success) {
-    console.log('Login process initiated successfully from component.');
+    appLogger.log('Login process initiated successfully from component.');
     loginEmail.value = '';
     loginPassword.value = '';
   } else if (authStore.getAuthErrorObject) {
-    console.log('Login failed with code:', authStore.getAuthErrorObject.code);
+    appLogger.log('Login failed with code:', authStore.getAuthErrorObject.code);
   }
 }
 
 async function handleLogout() {
   await authStore.logout();
-  console.log('Logout process initiated from component.');
+  appLogger.log('Logout process initiated from component.');
 }
 
 onMounted(() => {

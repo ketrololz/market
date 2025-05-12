@@ -1,3 +1,4 @@
+import appLogger from '@/utils/logger';
 import {
   type Customer,
   type MyCustomerDraft,
@@ -34,24 +35,24 @@ class AuthService {
     apiRoot: ByProjectKeyRequestBuilder;
     anonymousId: string;
   } | null> {
-    console.log('AuthService: Ensuring anonymous session...');
+    appLogger.log('AuthService: Ensuring anonymous session...');
     let anonymousIdToUse = this.currentAnonymousId || getStoredAnonymousId();
 
     const currentAnonymousTokens = anonymousTokenCache.get();
     if (anonymousIdToUse && currentAnonymousTokens.refreshToken) {
-      console.log(
+      appLogger.log(
         `AuthService: Attempting to refresh anonymous session for ID: ${anonymousIdToUse}`,
       );
       try {
         const anonymousApiRoot =
           CtpClientFactory.createAnonymousFlowApiRoot(anonymousIdToUse);
-        console.log(
+        appLogger.log(
           `AuthService: Anonymous session refreshed for ID: ${anonymousIdToUse}`,
         );
         this.currentAnonymousId = anonymousIdToUse;
         return { apiRoot: anonymousApiRoot, anonymousId: anonymousIdToUse };
       } catch (refreshError) {
-        console.warn(
+        appLogger.warn(
           'AuthService: Failed to refresh anonymous token, will create a new one.',
           refreshError,
         );
@@ -63,21 +64,21 @@ class AuthService {
 
     if (!anonymousIdToUse) {
       anonymousIdToUse = uuidv4();
-      console.log(
+      appLogger.log(
         `AuthService: Generating new anonymous ID: ${anonymousIdToUse}`,
       );
     }
     this.currentAnonymousId = anonymousIdToUse;
     setStoredAnonymousId(this.currentAnonymousId);
 
-    console.log(
+    appLogger.log(
       `AuthService: Creating new anonymous session with ID: ${this.currentAnonymousId}`,
     );
     try {
       const anonymousApiRoot = CtpClientFactory.createAnonymousFlowApiRoot(
         this.currentAnonymousId,
       );
-      console.log(
+      appLogger.log(
         'AuthService: New anonymous session created and token cached.',
       );
       return {
@@ -85,7 +86,10 @@ class AuthService {
         anonymousId: this.currentAnonymousId,
       };
     } catch (error) {
-      console.error('AuthService: Failed to create anonymous session:', error);
+      appLogger.error(
+        'AuthService: Failed to create anonymous session:',
+        error,
+      );
       clearStoredAnonymousId();
       this.currentAnonymousId = null;
       anonymousTokenCache.clear();
@@ -97,17 +101,15 @@ class AuthService {
     anonymousTokenCache.clear();
     clearStoredAnonymousId();
     this.currentAnonymousId = null;
-    console.log('AuthService: Anonymous session data cleared.');
+    appLogger.log('AuthService: Anonymous session data cleared.');
   }
 
-  async login(email: string, password: string): Promise<Customer> {
-    console.log('AuthService: Attempting login with /me/login strategy...');
+  public async login(email: string, password: string): Promise<Customer> {
+    appLogger.log('AuthService: Attempting login with /me/login strategy...');
 
     const anonymousSession = await this.getOrCreateAnonymousApiRoot();
     if (!anonymousSession) {
-      throw new Error(
-        'Не удалось получить/создать анонимную сессию для логина.',
-      );
+      throw new Error('Failed to get/create anonymous session for login.');
     }
 
     userTokenCache.clear();
@@ -121,7 +123,7 @@ class AuthService {
         activeCartSignInMode: 'MergeWithExistingCustomerCart',
         updateProductData: true,
       };
-      console.log(
+      appLogger.log(
         'AuthService: Calling /me/login with anonymous token and body:',
         signInBody,
       );
@@ -131,14 +133,14 @@ class AuthService {
         .post({ body: signInBody })
         .execute();
       const signInResult = meLoginResponse.body as CustomerSignInResult;
-      console.log(
+      appLogger.log(
         'AuthService: /me/login successful, customer data obtained. Cart (if any):',
         signInResult.cart,
       );
 
       this.clearAnonymousSessionData();
 
-      console.log(
+      appLogger.log(
         'AuthService: Performing Password Flow to get user tokens...',
       );
       userTokenCache.clear();
@@ -152,7 +154,7 @@ class AuthService {
 
       await userApiRoot.me().get().execute();
 
-      console.log(
+      appLogger.log(
         'AuthService: Explicitly fetching user tokens (not saving to localStorage)...',
       );
       const tokenResponse = await fetch(
@@ -181,7 +183,9 @@ class AuthService {
       const tokenData = await tokenResponse.json();
       this.currentUserAccessToken = tokenData.access_token;
       this.currentUserRefreshToken = tokenData.refresh_token;
-      console.log('AuthService: User tokens obtained and stored in memory.');
+      appLogger.log(
+        `AuthService: User tokens obtained and stored in memory: access_token=${this.currentUserAccessToken}, refresh_token=${this.currentUserRefreshToken}`,
+      );
 
       if (anonymousSession?.anonymousId) {
         this.clearAnonymousSessionData();
@@ -189,18 +193,18 @@ class AuthService {
 
       return signInResult.customer;
     } catch (error) {
-      console.error('AuthService Login Error:', error);
+      appLogger.error('AuthService Login Error:', error);
       userTokenCache.clear();
       throw parseCtpError(error);
     }
   }
 
-  async registerAndLogin(data: RegistrationData): Promise<Customer> {
-    console.log('AuthService: Attempting registration...');
+  public async register(data: RegistrationData): Promise<CustomerSignInResult> {
+    appLogger.log('AuthService: Attempting registration...');
     const anonymousSession = await this.getOrCreateAnonymousApiRoot();
     if (!anonymousSession) {
       throw new Error(
-        'Не удалось инициализировать анонимную сессию для регистрации.',
+        'Failed to initialize anonymous session for registration.',
       );
     }
 
@@ -247,26 +251,26 @@ class AuthService {
         }),
       };
 
-      await anonymousSession.apiRoot
+      const response = await anonymousSession.apiRoot
         .me()
         .signup()
         .post({ body: myCustomerDraft })
         .execute();
-      console.log(
+      appLogger.log(
         'AuthService: Registration part successful. Attempting auto-login...',
       );
 
       this.clearAnonymousSessionData();
 
-      return await this.login(data.email, data.password);
+      return response.body;
     } catch (error) {
-      console.error('AuthService Register Error:', error);
+      appLogger.error('AuthService Register Error:', error);
       throw parseCtpError(error);
     }
   }
 
-  async logout(): Promise<void> {
-    console.log('AuthService: Logging out...');
+  public async logout(): Promise<void> {
+    appLogger.log('AuthService: Logging out...');
     const tokenCache = userTokenCache;
     const currentTokens = tokenCache.get();
     const tokenToRevoke = currentTokens.refreshToken || currentTokens.token;
@@ -286,9 +290,9 @@ class AuthService {
           },
           body: `token=${encodeURIComponent(tokenToRevoke)}`,
         });
-        console.log('AuthService: Token revocation attempted.');
+        appLogger.log('AuthService: Token revocation attempted.');
       } catch (error) {
-        console.error(
+        appLogger.error(
           'AuthService: Token revocation failed:',
           error instanceof Error ? error.message : String(error),
         );
@@ -296,12 +300,12 @@ class AuthService {
     }
   }
 
-  async checkAuthAndRefresh(): Promise<Customer | null> {
-    console.log('AuthService: Checking auth and refreshing token...');
+  public async restoreSession(): Promise<Customer | null> {
+    appLogger.log('AuthService: Checking auth and refreshing token...');
     const initialTokenState = userTokenCache.get();
 
     if (!initialTokenState.refreshToken) {
-      console.log('AuthService: No refresh token found.');
+      appLogger.log('AuthService: No refresh token found.');
       return null;
     }
 
@@ -311,10 +315,10 @@ class AuthService {
         userTokenCache,
       );
       const meResponse = await refreshApiRoot.me().get().execute();
-      console.log('AuthService: Session restored/refreshed successfully.');
+      appLogger.log('AuthService: Session restored/refreshed successfully.');
       return meResponse.body as Customer;
     } catch (error: unknown) {
-      console.error('AuthService: Failed to refresh session:', error);
+      appLogger.error('AuthService: Failed to refresh session:', error);
       userTokenCache.clear();
       return null;
     }

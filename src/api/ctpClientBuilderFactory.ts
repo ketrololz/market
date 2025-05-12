@@ -1,6 +1,7 @@
 import {
   ClientBuilder,
   type AuthMiddlewareOptions,
+  type ExistingTokenMiddlewareOptions,
   type PasswordAuthMiddlewareOptions,
   type RefreshAuthMiddlewareOptions,
 } from '@commercetools/ts-client';
@@ -105,6 +106,19 @@ export class CtpClientFactory {
 
     const client = new ClientBuilder()
       .withRefreshTokenFlow(refreshAuthOptions)
+      .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
+      .build();
+    return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
+  }
+
+  static createExistingTokenFlowApiRoot(
+    accessToken: string,
+  ): ByProjectKeyRequestBuilder {
+    const existingTokenOptions: ExistingTokenMiddlewareOptions = {
+      force: true,
+    };
+    const client = new ClientBuilder()
+      .withExistingTokenFlow(`Bearer ${accessToken}`, existingTokenOptions)
       .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
       .build();
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });

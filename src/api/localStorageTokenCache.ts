@@ -1,3 +1,4 @@
+import appLogger from '@/utils/logger';
 import type { TokenCache, TokenStore } from '@commercetools/ts-client';
 
 export const USER_TOKEN_CACHE_KEY = 'ctp_user_token_cache';
@@ -17,7 +18,7 @@ function createCacheInstance(storageKey: string): ClearableTokenCache {
             refreshToken: tokenData.refreshToken || undefined,
           };
         } catch (error) {
-          console.error(
+          appLogger.error(
             `Error parsing token cache from localStorage (key: ${storageKey}):`,
             error,
           );
@@ -32,7 +33,7 @@ function createCacheInstance(storageKey: string): ClearableTokenCache {
       try {
         localStorage.setItem(storageKey, JSON.stringify(cache));
       } catch (error) {
-        console.error(
+        appLogger.error(
           `Error setting token cache in localStorage (key: ${storageKey}):`,
           error,
         );
@@ -41,7 +42,7 @@ function createCacheInstance(storageKey: string): ClearableTokenCache {
 
     clear(): void {
       localStorage.removeItem(storageKey);
-      console.log(
+      appLogger.log(
         `Token cache cleared from localStorage (key: ${storageKey}).`,
       );
     },
@@ -64,7 +65,7 @@ export function setStoredAnonymousId(id: string): void {
 
 export function clearStoredAnonymousId(): void {
   localStorage.removeItem(ANONYMOUS_ID_KEY);
-  console.log('Anonymous ID cleared from localStorage.');
+  appLogger.log('Anonymous ID cleared from localStorage.');
 }
 
 export interface ClearableTokenCache extends TokenCache {

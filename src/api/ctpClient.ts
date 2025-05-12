@@ -1,3 +1,4 @@
+import appLogger from '@/utils/logger';
 import { CtpClientFactory } from './ctpClientBuilderFactory';
 
 export const projectKey = import.meta.env.VITE_CTP_PROJECT_KEY;
@@ -15,13 +16,13 @@ if (
   !authUrl ||
   !scopes.length
 ) {
-  console.error(
-    'ОШИБКА: Не найдены все необходимые переменные окружения CommerceTools в .env!',
+  appLogger.error(
+    'Not all required CommerceTools environment variables found in .env!',
   );
 }
 
 export const appApiRoot = CtpClientFactory.createAppApiRoot();
 
-console.log(
+appLogger.log(
   `ctpClient.ts: Initialized apiRoot for project ${projectKey} using Client Credentials Flow.`,
 );
