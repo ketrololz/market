@@ -22,6 +22,12 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
 
 - **Frontend**: Built with [TypeScript](https://www.typescriptlang.org/), [Vue](https://vuejs.org/), and [PrimeVue](https://primevue.org/), the application delivers a responsive and visually appealing user interface. Vue Router ensures smooth navigation across pages, while [Tailwind CSS](https://tailwindcss.com/) provides utility-first styling for rapid and consistent UI development.
 
+- **Forms & Validation**:
+  Uses [@primevue/forms](https://www.primefaces.org/primevue/forms) for reactive form handling with built-in support for validation, and [Yup](https://github.com/jquense/yup) for schema-based form validation. This ensures a consistent and scalable approach to managing form state and validation rules across the app.
+
+  - **Icons**:
+    All UI icons are provided by [PrimeIcons](https://www.primefaces.org/primevue/icons), ensuring visual consistency and easy customization of components.
+
 - **State Management**: Managed with [Pinia](https://pinia.vuejs.org/), the intuitive and modular store for Vue, offering a lightweight and type-safe way to manage application state.
 
 - **Data Management**: Powered by [TanStack Query](https://tanstack.com/), enabling efficient and scalable data fetching, caching, and synchronization across the application.
@@ -45,8 +51,9 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
 ```
 
 2. install PNPM package manager (if not installed)
+
 ```sh
-  npm install -g pnpm@latest-10  
+  npm install -g pnpm@latest-10
 ```
 
 3. Install packages
@@ -77,5 +84,3 @@ At Senet, we believe in the power of play to connect people. Our goal is to make
 - Bogdan Nurgatin - team lead (GitHub: [ketrololz](https://github.com/ketrololz))
 - Daniil Sudorgin - frontend developer (GitHub: [zilusion](https://github.com/zilusion))
 - Anna Yaroshenko - frontend developer (GitHub: [YaroshenkoAnna](https://github.com/yaroshenkoanna))
-
-
