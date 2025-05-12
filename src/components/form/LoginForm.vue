@@ -22,11 +22,16 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
 
 <template>
   <Panel
-    header=" Create New Customer Account"
+    header="Access Your Account"
     pt:header:class="justify-self-center text-xl pb-0!"
-    pt:root:class="pb-5"
+    pt:root:class="pb-5 text-center"
     ><span class="text-gray-500 font-medium text-xs"
-      >If you have an account, sign in with your email address.</span
+      >Don't have a Senet account yet?
+      <a
+        href="/registration"
+        class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
+        >Sign up!</a
+      ></span
     >
     <div class="flex flex-col items-center w-full px-8">
       <div class="text-center mb-8"></div>

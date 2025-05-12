@@ -43,9 +43,17 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
 <template>
   <Panel
     header=" Create New Customer Account"
-    pt:header:class="justify-self-center text-xl"
-    pt:root:class="pb-10"
-  >
+    pt:header:class="justify-self-center text-xl pb-0!"
+    pt:root:class="pb-10 text-center"
+    ><span class="text-gray-500 font-medium text-xs"
+      >If you have an account,
+      <a
+        href="/login"
+        class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
+        >sign in</a
+      >
+      with your email address.</span
+    >
     <div class="flex flex-col items-center w-full px-8">
       <div class="text-center mb-8"></div>
       <Form
