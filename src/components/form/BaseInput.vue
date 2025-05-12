@@ -20,7 +20,3 @@ const emit = defineEmits(['update:modelValue']);
     }}</Message>
   </div>
 </template>
-
-<script lang="ts">
-export default {};
-</script>

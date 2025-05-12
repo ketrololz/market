@@ -143,16 +143,16 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
               placeholder="Select a Country"
               class="w-full"
             >
-              <template #value="slotProps">
-                <div v-if="slotProps.value">
-                  <div>{{ slotProps.value.name }}</div>
+              <template #value="valueSlotProps">
+                <div v-if="valueSlotProps.value">
+                  <div>{{ valueSlotProps.value.name }}</div>
                 </div>
                 <span v-else>
-                  {{ slotProps.placeholder }}
+                  {{ valueSlotProps.placeholder }}
                 </span>
               </template>
-              <template #option="slotProps">
-                <div>{{ slotProps.option.name }}</div>
+              <template #option="optionSlotProps">
+                <div>{{ optionSlotProps.option.name }}</div>
               </template>
             </Select>
           </FormField>
@@ -163,7 +163,3 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
     </div>
   </div>
 </template>
-
-<script lang="ts">
-export default {};
-</script>

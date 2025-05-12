@@ -55,7 +55,3 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
     </Form>
   </div>
 </template>
-
-<script lang="ts">
-export default {};
-</script>
