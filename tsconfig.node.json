@@ -8,13 +8,10 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "@primeuix/forms/*": ["node_modules/@primeuix/forms/*"]
-    },
 
     /* Linting */
     "strict": true,

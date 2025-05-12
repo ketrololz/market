@@ -164,7 +164,12 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           </FormField>
         </div>
 
-        <Button size="small" label="Sign up" type="submit" class="w-full" />
+        <Button
+          size="small"
+          label="Sign up"
+          type="submit"
+          class="w-full mt-8"
+        />
       </Form>
     </div>
   </Panel>
