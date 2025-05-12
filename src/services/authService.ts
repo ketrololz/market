@@ -4,6 +4,7 @@ import {
   type CustomerSignInResult,
   ByProjectKeyRequestBuilder,
   type MyCustomerSignin,
+  type BaseAddress,
 } from '@commercetools/platform-sdk';
 import {
   userTokenCache,
@@ -16,6 +17,7 @@ import { clientId, clientSecret, authUrl } from '@/api/ctpClient';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type RegistrationData } from '@/stores/authStore';
 import { v4 as uuidv4 } from 'uuid';
+import { parseCtpError } from './authErrors';
 
 class AuthService {
   private currentAnonymousId: string | null = getStoredAnonymousId();
@@ -79,7 +81,7 @@ class AuthService {
       clearStoredAnonymousId();
       this.currentAnonymousId = null;
       anonymousTokenCache.clear();
-      throw error;
+      throw parseCtpError(error);
     }
   }
 
@@ -141,10 +143,10 @@ class AuthService {
       );
 
       return customerDataFromMeLogin;
-    } catch (error: unknown) {
-      console.error('AuthService Register Error:', error);
-      const errorMessage = 'Произошла ошибка при регистрации.';
-      throw new Error(errorMessage);
+    } catch (error) {
+      console.error('AuthService Login Error:', error);
+      userTokenCache.clear();
+      throw parseCtpError(error);
     }
   }
 
@@ -158,11 +160,46 @@ class AuthService {
     }
 
     try {
+      const addresses: BaseAddress[] = [];
+
+      const shippingAddr: BaseAddress = { ...data.shippingAddress };
+      addresses.push(shippingAddr);
+
+      let billingAddr: BaseAddress = shippingAddr;
+      if (!data.useShippingAsBilling && data.billingAddress) {
+        billingAddr = { ...data.billingAddress };
+        addresses.push(billingAddr);
+      }
+
+      let defaultShippingAddressIndex: number | undefined = undefined;
+      let defaultBillingAddressIndex: number | undefined = undefined;
+
+      if (data.shippingAddress.isDefaultShipping) {
+        defaultShippingAddressIndex = addresses.indexOf(shippingAddr);
+      }
+
+      if (data.useShippingAsBilling && data.shippingAddress.isDefaultBilling) {
+        defaultBillingAddressIndex = addresses.indexOf(shippingAddr);
+      } else if (
+        !data.useShippingAsBilling &&
+        data.billingAddress?.isDefaultBilling
+      ) {
+        defaultBillingAddressIndex = addresses.indexOf(billingAddr);
+      }
+
       const myCustomerDraft: MyCustomerDraft = {
         email: data.email,
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
+        addresses: addresses,
+        ...(defaultShippingAddressIndex !== undefined && {
+          defaultShippingAddress: defaultShippingAddressIndex,
+        }),
+        ...(defaultBillingAddressIndex !== undefined && {
+          defaultBillingAddress: defaultBillingAddressIndex,
+        }),
       };
 
       await anonymousSession.apiRoot
@@ -177,10 +214,9 @@ class AuthService {
       this.clearAnonymousSessionData();
 
       return await this.login(data.email, data.password);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('AuthService Register Error:', error);
-      const errorMessage = 'Произошла ошибка при регистрации.';
-      throw new Error(errorMessage);
+      throw parseCtpError(error);
     }
   }
 
@@ -206,8 +242,11 @@ class AuthService {
           body: `token=${encodeURIComponent(tokenToRevoke)}`,
         });
         console.log('AuthService: Token revocation attempted.');
-      } catch (err) {
-        console.error('AuthService: Token revocation failed:', err);
+      } catch (error) {
+        console.error(
+          'AuthService: Token revocation failed:',
+          error instanceof Error ? error.message : String(error),
+        );
       }
     }
   }

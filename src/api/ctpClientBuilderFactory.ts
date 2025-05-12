@@ -23,10 +23,6 @@ import {
 } from '@/api/ctpClient';
 
 export class CtpClientFactory {
-  /**
-   * Создает клиент и apiRoot для Client Credentials Flow (токен приложения).
-   * Используется, например, для изначальной регистрации или общих запросов.
-   */
   static createAppApiRoot(): ByProjectKeyRequestBuilder {
     const appAuthOptions: AuthMiddlewareOptions = {
       host: authUrl,
@@ -43,9 +39,6 @@ export class CtpClientFactory {
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
   }
 
-  /**
-   * Создает клиент и apiRoot для Password Flow (логин пользователя).
-   */
   static createPasswordFlowApiRoot(userCredentials: {
     email: string;
     password: string;
@@ -72,9 +65,6 @@ export class CtpClientFactory {
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
   }
 
-  /**
-   * Создает клиент и apiRoot для Anonymous Session Flow.
-   */
   static createAnonymousFlowApiRoot(
     anonymousId: string,
   ): ByProjectKeyRequestBuilder {
@@ -93,9 +83,6 @@ export class CtpClientFactory {
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
   }
 
-  /**
-   * Создает клиент и apiRoot для Refresh Token Flow (для пользователя или анонима).
-   */
   static createRefreshTokenFlowApiRoot(
     refreshToken: string,
     cache: ClearableTokenCache,

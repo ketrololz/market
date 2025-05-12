@@ -16,10 +16,7 @@ export default defineConfig({
   },
   plugins: [vue(), tailwindcss()],
   test: {
-    browser: {
-      enabled: true,
-      provider: 'playwright',
-      instances: [{ browser: 'chromium' }],
-    },
+    globals: true,
+    environment: 'jsdom',
   },
 });

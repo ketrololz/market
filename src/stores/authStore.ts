@@ -1,18 +1,31 @@
 import { defineStore } from 'pinia';
 
-import type { Customer } from '@commercetools/platform-sdk';
+import type { Customer, BaseAddress } from '@commercetools/platform-sdk';
 import AuthService from '@/services/authService';
 import { ref, computed } from 'vue';
+import { AuthError } from '@/services/authErrors';
+
+interface AuthStoreError {
+  message: string;
+  code?: string;
+}
+
+export interface AddressFormData
+  extends Omit<BaseAddress, 'id' | 'key' | 'country'> {
+  country: string;
+  isDefaultShipping?: boolean;
+  isDefaultBilling?: boolean;
+}
 
 export interface RegistrationData {
   email: string;
   password: string;
   firstName?: string;
   lastName?: string;
-  // dateOfBirth?: string;
-  // addresses?: import('@commercetools/platform-sdk').BaseAddress[];
-  // defaultShippingAddress?: number;
-  // defaultBillingAddress?: number;
+  dateOfBirth?: string;
+  shippingAddress: AddressFormData;
+  useShippingAsBilling: boolean;
+  billingAddress?: AddressFormData;
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -20,12 +33,13 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = ref(false);
   const user = ref<Customer | null>(null);
   const loading = ref(false);
-  const error = ref<string | null>(null);
+  const error = ref<AuthStoreError | null>(null);
 
   // --- Getters ---
   const getIsLoggedIn = computed(() => isLoggedIn.value);
   const getCurrentUser = computed(() => user.value);
-  const getAuthError = computed(() => error.value);
+  const getAuthErrorMessage = computed(() => error.value?.message || null);
+  const getAuthErrorObject = computed(() => error.value);
   const isLoadingStatus = computed(() => loading.value);
 
   // --- Actions ---
@@ -33,9 +47,33 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = newLoading;
   }
 
-  function setErrorState(newError: string | null) {
-    error.value = newError;
-    if (newError) console.error('AuthStore Error (setup):', newError);
+  function setErrorState(err: AuthError | Error | string | null) {
+    if (!err) {
+      error.value = null;
+      return;
+    }
+    if (err instanceof AuthError) {
+      error.value = {
+        message: err.message,
+        code: err.ctpErrorCode || err.name,
+      };
+      console.error(
+        `AuthStore Error: ${err.name} (Code: ${err.ctpErrorCode}) - ${err.message}`,
+        err.details || '',
+      );
+    } else if (err instanceof Error) {
+      error.value = { message: err.message, code: 'GenericError' };
+      console.error(`AuthStore Generic Error: ${err.message}`);
+    } else if (typeof err === 'string') {
+      error.value = { message: err, code: 'StringError' };
+      console.error(`AuthStore String Error: ${err}`);
+    } else {
+      error.value = {
+        message: 'Неизвестная ошибка',
+        code: 'UnknownErrorInStore',
+      };
+      console.error('AuthStore Unknown Error Structure:', err);
+    }
   }
 
   function clearErrorState() {
@@ -69,11 +107,14 @@ export const useAuthStore = defineStore('auth', () => {
       );
       setLoggedInState(loggedInUserData);
       return true;
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        setErrorState(e.message);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        setErrorState(error);
+      } else if (error instanceof Error) {
+        setErrorState(new AuthError(error.message));
+      } else {
+        setErrorState(new AuthError('Неожиданная ошибка при входе.'));
       }
-      clearAuthState();
       return false;
     } finally {
       setLoadingState(false);
@@ -87,9 +128,13 @@ export const useAuthStore = defineStore('auth', () => {
       const loggedInUserData = await AuthService.registerAndLogin(data);
       setLoggedInState(loggedInUserData);
       return true;
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        setErrorState(e.message);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        setErrorState(error);
+      } else if (error instanceof Error) {
+        setErrorState(new AuthError(error.message));
+      } else {
+        setErrorState(new AuthError('Неожиданная ошибка при регистрации.'));
       }
       return false;
     } finally {
@@ -99,13 +144,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     setLoadingState(true);
+    clearErrorState();
     try {
       await AuthService.logout();
       clearAuthState();
-    } catch (e: unknown) {
+    } catch (error) {
+      console.error('Error during logout process in store:', error);
       clearAuthState();
-      if (e instanceof Error) {
-        setErrorState(e.message);
+      if (error instanceof AuthError) {
+        setErrorState(error);
+      } else if (error instanceof Error) {
+        setErrorState(new AuthError(error.message));
+      } else {
+        setErrorState(new AuthError('Ошибка при выходе из системы.'));
       }
     } finally {
       setLoadingState(false);
@@ -122,10 +173,8 @@ export const useAuthStore = defineStore('auth', () => {
       } else {
         clearAuthState();
       }
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        console.error('Check auth failed (setup store):', e);
-      }
+    } catch (error) {
+      console.error('Check auth failed in store:', error);
       clearAuthState();
     }
   }
@@ -138,7 +187,8 @@ export const useAuthStore = defineStore('auth', () => {
 
     getIsLoggedIn,
     getCurrentUser,
-    getAuthError,
+    getAuthErrorMessage,
+    getAuthErrorObject,
     isLoadingStatus,
 
     login,
