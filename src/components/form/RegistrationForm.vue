@@ -2,6 +2,7 @@
 import { Form, FormField } from '@primevue/forms';
 import { registrationSchema } from './../../schemas/registrationSchema';
 import Button from 'primevue/button';
+import Checkbox from 'primevue/checkbox';
 import { yupResolver } from '@primevue/forms/resolvers/yup';
 import BaseInput from './../../components/form/BaseTextInput.vue';
 import BasePassword from './../../components/form/BasePassword.vue';
@@ -10,6 +11,11 @@ import Panel from 'primevue/panel';
 import Divider from 'primevue/divider';
 import Select from 'primevue/select';
 import type { FormSubmitEvent } from '@primevue/forms';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import TabPanels from 'primevue/tabpanels';
+import Tab from 'primevue/tab';
+import TabPanel from 'primevue/tabpanel';
 
 import { ref } from 'vue';
 
@@ -117,60 +123,104 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           />
         </FormField>
 
-        <h2 class="text-gray-700 font-medium text-center mt-5">Address</h2>
-        <div class="flex gap-2">
-          <FormField v-slot="slotProps" name="address.street" class="w-1/2">
-            <label for="street1" class="text-xs">Street</label>
-            <BaseInput
-              input-id="street1"
-              :model-value="slotProps.value"
-              :error-message="slotProps.error"
-            />
-          </FormField>
-
-          <FormField v-slot="slotProps" name="address.city" class="w-1/2">
-            <label for="city1" class="text-xs">City</label>
-            <BaseInput
-              input-id="city1"
-              :model-value="slotProps.value"
-              :error-message="slotProps.error"
-            />
-          </FormField>
-        </div>
-        <div class="flex gap-2">
-          <FormField v-slot="slotProps" name="address.postalCode" class="w-1/2">
-            <label for="postal-code1" class="text-xs">Postal Code</label>
-            <BaseInput
-              v-model="slotProps.value"
-              input-id="postal-code1"
-              :error-message="slotProps.error"
-              filter
-              class="w-full"
-            />
-          </FormField>
-          <FormField v-slot="slotProps" name="address.country" class="w-1/2">
-            <label class="text-xs">Country</label>
-            <Select
-              v-model="slotProps.value"
-              :options="countries"
-              size="small"
-              placeholder="Select a Country"
-              class="w-full"
+        <Tabs value="shipping" class="w-full">
+          <TabList>
+            <Tab value="shipping" class="text-sm pb-1!">Shipping Address</Tab>
+            <Tab v-if="1" value="billing" class="text-sm pb-1!"
+              >Billing Address</Tab
             >
-              <template #value="valueSlotProps">
-                <div v-if="valueSlotProps.value">
-                  <div>{{ valueSlotProps.value.name }}</div>
-                </div>
-                <span v-else>
-                  {{ valueSlotProps.placeholder }}
-                </span>
-              </template>
-              <template #option="optionSlotProps">
-                <div>{{ optionSlotProps.option.name }}</div>
-              </template>
-            </Select>
-          </FormField>
-        </div>
+          </TabList>
+          <TabPanels class="px-0!">
+            <TabPanel value="shipping" class="flex flex-col gap-2">
+              <div class="flex gap-2">
+                <FormField
+                  v-slot="slotProps"
+                  name="address.street"
+                  class="w-1/2"
+                >
+                  <label for="street1" class="text-xs">Street</label>
+                  <BaseInput
+                    input-id="street1"
+                    :model-value="slotProps.value"
+                    :error-message="slotProps.error"
+                  />
+                </FormField>
+
+                <FormField v-slot="slotProps" name="address.city" class="w-1/2">
+                  <label for="city1" class="text-xs">City</label>
+                  <BaseInput
+                    input-id="city1"
+                    :model-value="slotProps.value"
+                    :error-message="slotProps.error"
+                  />
+                </FormField>
+              </div>
+              <div class="flex gap-2">
+                <FormField
+                  v-slot="slotProps"
+                  name="address.postalCode"
+                  class="w-1/2"
+                >
+                  <label for="postal-code1" class="text-xs">Postal Code</label>
+                  <BaseInput
+                    v-model="slotProps.value"
+                    input-id="postal-code1"
+                    :error-message="slotProps.error"
+                    filter
+                    class="w-full"
+                  />
+                </FormField>
+                <FormField
+                  v-slot="slotProps"
+                  name="address.country"
+                  class="w-1/2"
+                >
+                  <label class="text-xs">Country</label>
+                  <Select
+                    v-model="slotProps.value"
+                    :options="countries"
+                    size="small"
+                    placeholder="Select a Country"
+                    class="w-full"
+                  >
+                    <template #value="valueSlotProps">
+                      <div v-if="valueSlotProps.value">
+                        <div>{{ valueSlotProps.value.name }}</div>
+                      </div>
+                      <span v-else>
+                        {{ valueSlotProps.placeholder }}
+                      </span>
+                    </template>
+                    <template #option="optionSlotProps">
+                      <div>{{ optionSlotProps.option.name }}</div>
+                    </template>
+                  </Select>
+                </FormField>
+              </div>
+              <div class="flex items-center gap-2">
+                <Checkbox
+                  input-id="same-as-billing"
+                  value="true"
+                  size="small"
+                />
+                <label for="same-as-billing" class="text-xs">
+                  Shipping address is the same as billing address
+                </label>
+              </div>
+              <div class="flex items-center gap-2">
+                <Checkbox
+                  input-id="default-address"
+                  value="true"
+                  size="small"
+                />
+                <label for="default-address" class="text-xs">
+                  Set as default shipping address
+                </label>
+              </div></TabPanel
+            >
+            <TabPanel value="billing"> </TabPanel>
+          </TabPanels>
+        </Tabs>
 
         <Button
           size="small"
