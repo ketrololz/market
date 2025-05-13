@@ -1,1 +1,15 @@
 @import 'tailwindcss';
+@import 'primeicons/primeicons.css';
+
+.p-message-text {
+  font-size: 12px !important;
+}
+
+@media screen and (max-width: 960px) {
+  .p-menubar-end {
+    margin-left: 0 !important;
+  }
+  .p-menubar-button {
+    margin-left: auto !important;
+  }
+}

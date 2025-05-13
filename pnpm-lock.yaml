@@ -16,6 +16,9 @@ importers:
       '@primeuix/themes':
         specifier: ^1.0.3
         version: 1.0.3
+      '@primevue/forms':
+        specifier: ^4.3.4
+        version: 4.3.4(vue@3.5.13(typescript@5.7.3))
       '@tailwindcss/vite':
         specifier: ^4.1.4
         version: 4.1.4(vite@6.3.3(@types/node@22.15.3)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.1))
@@ -25,6 +28,9 @@ importers:
       pinia:
         specifier: ^3.0.2
         version: 3.0.2(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))
+      primeicons:
+        specifier: ^7.0.0
+        version: 7.0.0
       primevue:
         specifier: ^4.3.3
         version: 4.3.3(vue@3.5.13(typescript@5.7.3))
@@ -34,12 +40,18 @@ importers:
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.7.3)
+      vue-inline-svg:
+        specifier: ^4.0.1
+        version: 4.0.1(vue@3.5.13(typescript@5.7.3))
       vue-router:
         specifier: '4'
         version: 4.5.1(vue@3.5.13(typescript@5.7.3))
       vue-toastification:
         specifier: 2.0.0-rc.5
         version: 2.0.0-rc.5(vue@3.5.13(typescript@5.7.3))
+      yup:
+        specifier: ^1.6.1
+        version: 1.6.1
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.8.0
@@ -739,10 +751,24 @@ packages:
       }
     engines: { node: '>=14' }
 
+  '@primeuix/forms@0.0.4':
+    resolution:
+      {
+        integrity: sha512-WKrxZPM9fPAEsM0xcTrOOJn86MbfOEzPwSwpO94Y7RtguWw+1nrvqYNzCcmVqO6zBi0BVMihoWxMKFIRzTOuZg==,
+      }
+    engines: { node: '>=12.11.0' }
+
   '@primeuix/styled@0.5.1':
     resolution:
       {
         integrity: sha512-5Ftw/KSauDPClQ8F2qCyCUF7cIUEY4yLNikf0rKV7Vsb8zGYNK0dahQe7CChaR6M2Kn+NA2DSBSk76ZXqj6Uog==,
+      }
+    engines: { node: '>=12.11.0' }
+
+  '@primeuix/styled@0.6.1':
+    resolution:
+      {
+        integrity: sha512-wmZfJBKR/9Mty2fI1xAXF0MJ8SBqgtT2W2My3/364Omt4PN7DAvMWwgxWmnnKi0O5meIzSmGcnoQIx3tGfVsTw==,
       }
     engines: { node: '>=12.11.0' }
 
@@ -757,6 +783,13 @@ packages:
       {
         integrity: sha512-f/1qadrv5TFMHfvtVv4Y9zjrkeDP2BO/cuzbHBO9DYxKL6YBIPT9BjKec2K4Kg8PcfGm6CAvxAvICadJSWejRw==,
       }
+
+  '@primeuix/utils@0.4.1':
+    resolution:
+      {
+        integrity: sha512-5+1NLfyna+gLRPeFTo+xlR0tfPVLuVdidbeahAMLkQga5Rw0LxyUBCyD2/Zv2JkV69o2T+hpEDyddl3VdnYoBw==,
+      }
+    engines: { node: '>=12.11.0' }
 
   '@primeuix/utils@0.5.3':
     resolution:
@@ -773,6 +806,22 @@ packages:
     engines: { node: '>=12.11.0' }
     peerDependencies:
       vue: ^3.5.0
+
+  '@primevue/core@4.3.4':
+    resolution:
+      {
+        integrity: sha512-SIwQ8CqL/tiDYRW2ShiwO3LeFV5gWfymwzwbI7kn2p8BFPCklqGbJfIqSdvAQgUTFR2fEsI7EKtPBksTX8MlEg==,
+      }
+    engines: { node: '>=12.11.0' }
+    peerDependencies:
+      vue: ^3.5.0
+
+  '@primevue/forms@4.3.4':
+    resolution:
+      {
+        integrity: sha512-calQ85ibrF2K4BDGp3ujyMs3KhQ9KBrmph1AkKS4fn9iVPX6xkRHsgqSLZjQJ4Bk8eXsWyU+wQr8RL6hHdkeww==,
+      }
+    engines: { node: '>=12.11.0' }
 
   '@primevue/icons@4.3.3':
     resolution:
@@ -3072,12 +3121,24 @@ packages:
     engines: { node: '>=14' }
     hasBin: true
 
+  primeicons@7.0.0:
+    resolution:
+      {
+        integrity: sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==,
+      }
+
   primevue@4.3.3:
     resolution:
       {
         integrity: sha512-nooYVoEz5CdP3EhUkD6c3qTdRmpLHZh75fBynkUkl46K8y5rksHTjdSISiDijwTA5STQIOkyqLb+RM+HQ6nC1Q==,
       }
     engines: { node: '>=12.11.0' }
+
+  property-expr@2.0.6:
+    resolution:
+      {
+        integrity: sha512-SVtmxhRE/CGkn3eZY1T6pC8Nln6Fr/lu1mKSgRud0eC73whjGfoAogbn78LkD8aFL0zz3bAFerKSnOl7NlErBA==,
+      }
 
   punycode@2.3.1:
     resolution:
@@ -3370,6 +3431,12 @@ packages:
         integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==,
       }
 
+  tiny-case@1.0.3:
+    resolution:
+      {
+        integrity: sha512-Eet/eeMhkO6TX8mnUteS9zgPbUMQa4I6Kkp5ORiBD5476/m+PIRiumP5tmh5ioJpH7k51Kehawy2UDfsnxxY8Q==,
+      }
+
   tinybench@2.9.0:
     resolution:
       {
@@ -3430,6 +3497,12 @@ packages:
       }
     engines: { node: '>=8.0' }
 
+  toposort@2.0.2:
+    resolution:
+      {
+        integrity: sha512-0a5EOkAUp8D4moMi2W8ZF8jcga7BgZd91O/yabJCFY8az+XSzeGyTKs0Aoo897iV1Nj6guFq8orWDS96z91oGg==,
+      }
+
   tough-cookie@5.1.2:
     resolution:
       {
@@ -3459,6 +3532,13 @@ packages:
         integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==,
       }
     engines: { node: '>= 0.8.0' }
+
+  type-fest@2.19.0:
+    resolution:
+      {
+        integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==,
+      }
+    engines: { node: '>=12.20' }
 
   typescript-eslint@8.31.1:
     resolution:
@@ -3620,6 +3700,14 @@ packages:
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
+
+  vue-inline-svg@4.0.1:
+    resolution:
+      {
+        integrity: sha512-yh92MOcTpL/yXj0MjI9JqQpI33nj5ewdddt6enunU8pBpy6JqrMXF+O4WI1DbckhLIoXzp6hSxkeqXDqpqtKXw==,
+      }
+    peerDependencies:
+      vue: ^3
 
   vue-router@4.5.1:
     resolution:
@@ -3813,6 +3901,12 @@ packages:
         integrity: sha512-AyeEbWOu/TAXdxlV9wmGcR0+yh2j3vYPGOECcIj2S7MkrLyC7ne+oye2BKTItt0ii2PHk4cDy+95+LshzbXnGg==,
       }
     engines: { node: '>=12.20' }
+
+  yup@1.6.1:
+    resolution:
+      {
+        integrity: sha512-JED8pB50qbA4FOkDol0bYF/p60qSEDQqBD0/qeIrUCG1KbPBIQ776fCUNb9ldbPcSTxA69g/47XTo4TqWiuXOA==,
+      }
 
 snapshots:
   '@ampproject/remapping@2.3.0':
@@ -4162,7 +4256,15 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
+  '@primeuix/forms@0.0.4':
+    dependencies:
+      '@primeuix/utils': 0.4.1
+
   '@primeuix/styled@0.5.1':
+    dependencies:
+      '@primeuix/utils': 0.5.3
+
+  '@primeuix/styled@0.6.1':
     dependencies:
       '@primeuix/utils': 0.5.3
 
@@ -4174,6 +4276,8 @@ snapshots:
     dependencies:
       '@primeuix/styled': 0.5.1
 
+  '@primeuix/utils@0.4.1': {}
+
   '@primeuix/utils@0.5.3': {}
 
   '@primevue/core@4.3.3(vue@3.5.13(typescript@5.7.3))':
@@ -4181,6 +4285,20 @@ snapshots:
       '@primeuix/styled': 0.5.1
       '@primeuix/utils': 0.5.3
       vue: 3.5.13(typescript@5.7.3)
+
+  '@primevue/core@4.3.4(vue@3.5.13(typescript@5.7.3))':
+    dependencies:
+      '@primeuix/styled': 0.6.1
+      '@primeuix/utils': 0.5.3
+      vue: 3.5.13(typescript@5.7.3)
+
+  '@primevue/forms@4.3.4(vue@3.5.13(typescript@5.7.3))':
+    dependencies:
+      '@primeuix/forms': 0.0.4
+      '@primeuix/utils': 0.5.3
+      '@primevue/core': 4.3.4(vue@3.5.13(typescript@5.7.3))
+    transitivePeerDependencies:
+      - vue
 
   '@primevue/icons@4.3.3(vue@3.5.13(typescript@5.7.3))':
     dependencies:
@@ -5497,6 +5615,8 @@ snapshots:
 
   prettier@3.5.3: {}
 
+  primeicons@7.0.0: {}
+
   primevue@4.3.3(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@primeuix/styled': 0.5.1
@@ -5506,6 +5626,8 @@ snapshots:
       '@primevue/icons': 4.3.3(vue@3.5.13(typescript@5.7.3))
     transitivePeerDependencies:
       - vue
+
+  property-expr@2.0.6: {}
 
   punycode@2.3.1: {}
 
@@ -5656,6 +5778,8 @@ snapshots:
 
   through@2.3.8: {}
 
+  tiny-case@1.0.3: {}
+
   tinybench@2.9.0: {}
 
   tinyexec@0.3.2: {}
@@ -5681,6 +5805,8 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
+  toposort@2.0.2: {}
+
   tough-cookie@5.1.2:
     dependencies:
       tldts: 6.1.86
@@ -5696,6 +5822,8 @@ snapshots:
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
+
+  type-fest@2.19.0: {}
 
   typescript-eslint@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3):
     dependencies:
@@ -5816,6 +5944,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  vue-inline-svg@4.0.1(vue@3.5.13(typescript@5.7.3)):
+    dependencies:
+      vue: 3.5.13(typescript@5.7.3)
+
   vue-router@4.5.1(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@vue/devtools-api': 6.6.4
@@ -5914,3 +6046,10 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.2.1: {}
+
+  yup@1.6.1:
+    dependencies:
+      property-expr: 2.0.6
+      tiny-case: 1.0.3
+      toposort: 2.0.2
+      type-fest: 2.19.0
