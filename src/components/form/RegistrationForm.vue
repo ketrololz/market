@@ -44,16 +44,16 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
   <Panel
     header=" Create New Customer Account"
     pt:header:class="justify-self-center text-xl pb-0!"
-    pt:root:class="pb-10 text-center"
-    ><span class="text-gray-500 font-medium text-xs"
-      >If you have an account,
+    pt:root:class="pb-10"
+    ><p class="text-gray-500 font-medium text-xs text-center">
+      If you have an account,
       <a
         href="/login"
         class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
         >sign in</a
       >
-      with your email address.</span
-    >
+      with your email address.
+    </p>
     <div class="flex flex-col items-center w-full px-8">
       <div class="text-center mb-8"></div>
       <Form
@@ -65,6 +65,7 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
         <h2 class="text-gray-700 font-medium text-center">Login Information</h2>
         <FormField v-slot="slotProps" name="email">
           <BaseInput
+            input-id="email"
             :model-value="slotProps.value"
             :error-message="slotProps.error"
             placeholder="Email"
@@ -88,29 +89,30 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
         </h2>
         <div class="flex gap-2">
           <FormField v-slot="slotProps" name="firstName" class="w-1/2">
+            <label for="first-name" class="text-xs">First Name</label>
             <BaseInput
-              id="firstName"
-              label="First Name"
+              input-id="first-name"
               :model-value="slotProps.value"
               :error-message="slotProps.error"
             />
           </FormField>
           <FormField v-slot="slotProps" name="lastName" class="w-1/2">
+            <label for="last-name" class="text-xs">Last Name</label>
             <BaseInput
-              id="lastName"
-              label="Last Name"
+              input-id="last-name"
               :model-value="slotProps.value"
               :error-message="slotProps.error"
             />
           </FormField>
         </div>
         <FormField v-slot="slotProps" name="dateOfBirth">
+          <label for="birthday" class="text-xs">Date of Birth</label>
           <BaseInputDate
             :model-value="slotProps.value"
+            input-id="birthday"
             :error-message="slotProps.error"
             placeholder="YYYY-MM-DD"
             show-icon
-            label="Date of Birth"
             icon-class="pi pi-calendar"
           />
         </FormField>
@@ -118,17 +120,18 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
         <h2 class="text-gray-700 font-medium text-center mt-5">Address</h2>
         <div class="flex gap-2">
           <FormField v-slot="slotProps" name="address.street" class="w-1/2">
+            <label for="street1" class="text-xs">Street</label>
             <BaseInput
-              id="street1"
-              label="Street"
+              input-id="street1"
               :model-value="slotProps.value"
               :error-message="slotProps.error"
             />
           </FormField>
+
           <FormField v-slot="slotProps" name="address.city" class="w-1/2">
+            <label for="city1" class="text-xs">City</label>
             <BaseInput
-              id="city1"
-              label="City"
+              input-id="city1"
               :model-value="slotProps.value"
               :error-message="slotProps.error"
             />
@@ -136,21 +139,20 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
         </div>
         <div class="flex gap-2">
           <FormField v-slot="slotProps" name="address.postalCode" class="w-1/2">
-            <label for="postal-code1" class="text-sm">Postal Code</label>
+            <label for="postal-code1" class="text-xs">Postal Code</label>
             <BaseInput
-              id="postal-code1"
               v-model="slotProps.value"
+              input-id="postal-code1"
               :error-message="slotProps.error"
               filter
               class="w-full"
             />
           </FormField>
           <FormField v-slot="slotProps" name="address.country" class="w-1/2">
-            <label for="country" class="text-sm">Country</label>
+            <label class="text-xs">Country</label>
             <Select
               v-model="slotProps.value"
               :options="countries"
-              filter
               size="small"
               placeholder="Select a Country"
               class="w-full"

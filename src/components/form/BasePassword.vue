@@ -3,22 +3,17 @@ import Password from 'primevue/password';
 import Message from 'primevue/message';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
-import type { InputFieldProps } from './types/types';
+import type { InputFieldProps } from './types/InputFieldProps';
 
 const props = defineProps<InputFieldProps>();
 </script>
 
 <template>
   <div class="flex flex-col">
-    <label v-if="props.label" :for="id" class="text-sm ml-3">{{
-      props.label
-    }}</label>
-    <label v-else :for="id" class="sr-only">{{
-      props.placeholder || ''
-    }}</label>
     <IconField v-if="props.icon">
       <InputIcon :class="`pi ${props.icon}`" />
       <Password
+        :id="props.inputId"
         size="small"
         :model-value="props.modelValue ? String(props.modelValue) : null"
         :placeholder="props.placeholder"
@@ -30,6 +25,7 @@ const props = defineProps<InputFieldProps>();
 
     <Password
       v-else
+      :id="props.inputId"
       size="small"
       :model-value="props.modelValue ? String(props.modelValue) : null"
       :placeholder="props.placeholder"
