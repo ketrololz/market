@@ -23,7 +23,7 @@ const initialValues = {
     street: '',
     city: '',
     postalCode: '',
-    country: '',
+    country: null,
   },
 };
 
@@ -108,7 +108,7 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           <BaseInputDate
             :model-value="slotProps.value"
             :error-message="slotProps.error"
-            placeholder="DD/MM/YYYY"
+            placeholder="YYYY-MM-DD"
             show-icon
             label="Date of Birth"
             icon-class="pi pi-calendar"
@@ -141,7 +141,6 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
               id="postal-code1"
               v-model="slotProps.value"
               :error-message="slotProps.error"
-              :options="countries"
               filter
               class="w-full"
             />
