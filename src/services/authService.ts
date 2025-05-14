@@ -22,7 +22,7 @@ import {
   scopes,
 } from '@/api/ctpClient';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
-import { type RegistrationData } from '@/stores/authStore';
+import { type LoginData, type RegistrationData } from '@/stores/authStore';
 import { v4 as uuidv4 } from 'uuid';
 import { parseCtpError } from './authErrors';
 
@@ -104,7 +104,7 @@ class AuthService {
     appLogger.log('AuthService: Anonymous session data cleared.');
   }
 
-  public async login(email: string, password: string): Promise<Customer> {
+  public async login(data: LoginData): Promise<Customer> {
     appLogger.log('AuthService: Attempting login with /me/login strategy...');
 
     const anonymousSession = await this.getOrCreateAnonymousApiRoot();
@@ -118,8 +118,8 @@ class AuthService {
 
     try {
       const signInBody: MyCustomerSignin = {
-        email,
-        password,
+        email: data.email,
+        password: data.password,
         activeCartSignInMode: 'MergeWithExistingCustomerCart',
         updateProductData: true,
       };
@@ -146,8 +146,8 @@ class AuthService {
       userTokenCache.clear();
       const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot(
         {
-          email,
-          password,
+          email: data.email,
+          password: data.password,
         },
         false,
       );
@@ -167,8 +167,8 @@ class AuthService {
           },
           body: new URLSearchParams({
             grant_type: 'password',
-            username: email,
-            password: password,
+            username: data.email,
+            password: data.password,
             scope: scopes.join(' '),
           }),
         },
@@ -177,7 +177,7 @@ class AuthService {
       if (!tokenResponse.ok) {
         const errorBody = await tokenResponse.json();
         throw new Error(
-          `Ошибка получения токенов: ${errorBody.error_description || tokenResponse.statusText}`,
+          `Error getting tokens: ${errorBody.error_description || tokenResponse.statusText}`,
         );
       }
       const tokenData = await tokenResponse.json();

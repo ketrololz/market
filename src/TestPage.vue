@@ -44,6 +44,23 @@ const errorMessage = computed(() => authStore.authErrorMessage);
 const loggedInUser = computed(() => authStore.userProfile);
 const isLoggedIn = computed(() => authStore.isUserLoggedIn);
 
+// {
+//     "email": "test12345@gmail.com",
+//     "password": "12345678aA!",
+//     "firstName": "Тест",
+//     "lastName": "Тестов",
+//     "dateOfBirth": "2003-02-28T21:00:00.000Z",
+//     "address": {
+//         "street": "Пушкина 6",
+//         "city": "Москва",
+//         "postalCode": "12345",
+//         "country": {
+//             "name": "Russia",
+//             "code": "RU"
+//         }
+//     }
+// }
+
 // --- Обработчики ---
 async function handleRegister() {
   const shippingAddressPayload: AddressFormData = {

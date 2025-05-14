@@ -7,15 +7,29 @@ import { yupResolver } from '@primevue/forms/resolvers/yup';
 import BaseInput from './BaseTextInput.vue';
 import BasePassword from './../../components/form/BasePassword.vue';
 import type { FormSubmitEvent } from '@primevue/forms';
+import { useAuthStore, type LoginData } from '@stores/authStore';
+import appLogger from '@/utils/logger';
+
+const authStore = useAuthStore();
 
 const initialValues = {
   email: '',
   password: '',
 };
 
-function onFormSubmit({ values, valid }: FormSubmitEvent) {
+async function onFormSubmit({ values, valid }: FormSubmitEvent) {
   if (valid) {
     console.log('send data to server', values);
+    const loginPayload: LoginData = {
+      email: values.email,
+      password: values.password,
+    };
+    const success = await authStore.login(loginPayload);
+    if (success) {
+      appLogger.log('Login process initiated successfully from component.');
+    } else if (authStore.authErrorDetails) {
+      appLogger.log('Login failed with code:', authStore.authErrorDetails.code);
+    }
   }
 }
 </script>

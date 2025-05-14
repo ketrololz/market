@@ -19,6 +19,11 @@ export interface AddressFormData
   isDefaultBilling?: boolean;
 }
 
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
 export interface RegistrationData {
   email: string;
   password: string;
@@ -96,17 +101,11 @@ export const useAuthStore = defineStore('auth', () => {
     appLogger.log('AuthStore: User session cleared.');
   };
 
-  async function login(credentials: {
-    email: string;
-    password: string;
-  }): Promise<boolean> {
+  async function login(credentials: LoginData): Promise<boolean> {
     setLoading(true);
     clearError();
     try {
-      const loggedInUserData = await AuthService.login(
-        credentials.email,
-        credentials.password,
-      );
+      const loggedInUserData = await AuthService.login(credentials);
       setUserSession(loggedInUserData);
       showSuccessToast('Login successful! Welcome back.');
       return true;
@@ -140,10 +139,10 @@ export const useAuthStore = defineStore('auth', () => {
       appLogger.log(
         'AuthStore: Registration successful. Proceeding to auto-login...',
       );
-      const loggedInUserData = await AuthService.login(
-        data.email,
-        data.password,
-      );
+      const loggedInUserData = await AuthService.login({
+        email: data.email,
+        password: data.password,
+      });
       setUserSession(loggedInUserData);
       showSuccessToast('Registration successful! You are now logged in.');
       appLogger.log('AuthStore: Login successful.');

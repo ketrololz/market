@@ -10,8 +10,16 @@ import Panel from 'primevue/panel';
 import Divider from 'primevue/divider';
 import Select from 'primevue/select';
 import type { FormSubmitEvent } from '@primevue/forms';
+import {
+  useAuthStore,
+  type RegistrationData,
+  type AddressFormData,
+} from '@stores/authStore';
+import appLogger from '@utils/logger';
 
 import { ref } from 'vue';
+
+const authStore = useAuthStore();
 
 const initialValues = {
   firstName: '',
@@ -33,9 +41,59 @@ const countries = ref([
   { name: 'United State', code: 'US' },
 ]);
 
-function onFormSubmit({ values, valid }: FormSubmitEvent) {
+async function onFormSubmit({ values, valid }: FormSubmitEvent) {
   if (valid) {
     console.log('send data to server', values);
+    const shippingAddressPayload: AddressFormData = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      streetName: values.address.street,
+      city: values.address.city,
+      postalCode: values.address.postalCode,
+      // country: values.address.country.name, // TODO Переделать значения в коды стран RU и т.п
+      country: 'RU',
+      // isDefaultShipping: values.shippingIsDefault,
+      // isDefaultBilling: useShippingAsBilling.value
+      //   ? shippingIsBillingDefault.value
+      //   : false,
+    };
+
+    const registrationPayload: RegistrationData = {
+      email: values.email,
+      password: values.password,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      dateOfBirth: values.dateOfBirth.toISOString().substring(0, 10),
+      shippingAddress: shippingAddressPayload,
+      useShippingAsBilling: true, // TODO Заменить на определение через чекбокс
+      // useShippingAsBilling: values.useShippingAsBilling, // Пример
+    };
+
+    // TODO
+    // if (!values.useShippingAsBilling) {
+    //   registrationPayload.billingAddress = {
+    //     firstName: values.firstName,
+    //     lastName: values.lastName,
+    //     streetName: values.billingAddress.street,
+    //     city: values.billingAddress.city,
+    //     postalCode: values.billingAddress.postalCode,
+    //     country: values.billingAddress.country.name,
+    //     isDefaultBilling: values.billingIsDefault,
+    //   };
+    // }
+
+    console.log(registrationPayload);
+    const success = await authStore.register(registrationPayload);
+    if (success) {
+      appLogger.log(
+        'Registration process initiated successfully from component.',
+      );
+    } else if (authStore.authErrorDetails) {
+      appLogger.log(
+        'Registration failed with code:',
+        authStore.authErrorDetails.code,
+      );
+    }
   }
 }
 </script>
