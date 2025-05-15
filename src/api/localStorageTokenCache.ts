@@ -3,7 +3,7 @@ import type { TokenCache, TokenStore } from '@commercetools/ts-client';
 
 export const USER_TOKEN_CACHE_KEY = 'ctp_user_token_cache';
 export const ANONYMOUS_TOKEN_CACHE_KEY = 'ctp_anonymous_token_cache';
-const ANONYMOUS_ID_KEY = 'ctp_anonymous_id';
+export const ANONYMOUS_ID_KEY = 'ctp_anonymous_id';
 
 function createCacheInstance(storageKey: string): ClearableTokenCache {
   return {

@@ -70,15 +70,18 @@ export class CtpClientFactory {
 
   static createAnonymousFlowApiRoot(
     anonymousId: string,
+    useCache: boolean = true,
   ): ByProjectKeyRequestBuilder {
     const anonymousAuthOptions: AuthMiddlewareOptions = {
       host: authUrl,
       projectKey,
       credentials: { clientId, clientSecret, anonymousId },
       scopes,
-      tokenCache: anonymousTokenCache,
       httpClient: fetch,
     };
+    if (useCache) {
+      anonymousAuthOptions.tokenCache = anonymousTokenCache;
+    }
     const client = new ClientBuilder()
       .withAnonymousSessionFlow(anonymousAuthOptions)
       .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
@@ -89,7 +92,7 @@ export class CtpClientFactory {
   static createRefreshTokenFlowApiRoot(
     refreshToken: string,
     cacheToUse: ClearableTokenCache,
-    useCacheOptionForUser: boolean = true,
+    useCache: boolean = true,
   ): ByProjectKeyRequestBuilder {
     const refreshAuthOptions: RefreshAuthMiddlewareOptions = {
       host: authUrl,
@@ -98,9 +101,9 @@ export class CtpClientFactory {
       refreshToken,
       httpClient: fetch,
     };
-    if (cacheToUse === userTokenCache && useCacheOptionForUser) {
+    if (cacheToUse === userTokenCache && useCache) {
       refreshAuthOptions.tokenCache = userTokenCache;
-    } else if (cacheToUse === anonymousTokenCache) {
+    } else if (cacheToUse === anonymousTokenCache && useCache) {
       refreshAuthOptions.tokenCache = anonymousTokenCache;
     }
 

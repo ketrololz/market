@@ -19,7 +19,7 @@ const initialValues = {
 
 async function onFormSubmit({ values, valid }: FormSubmitEvent) {
   if (valid) {
-    console.log('send data to server', values);
+    appLogger.log('send data to server', values);
     const loginPayload: LoginData = {
       email: values.email,
       password: values.password,
