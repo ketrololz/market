@@ -17,46 +17,9 @@ import Tab from 'primevue/tab';
 import TabPanel from 'primevue/tabpanel';
 import AddressForm from './AddressForm.vue';
 
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const sameAddress = ref(true);
-
-const initialValues = ref({
-  firstName: '',
-  lastName: '',
-  dateOfBirth: null,
-  email: '',
-  password: '',
-  shippingAddress: {
-    street: '',
-    city: '',
-    postalCode: '',
-    country: null,
-    defaultShipping: false,
-  },
-  billingAddress: {
-    street: '',
-    city: '',
-    postalCode: '',
-    country: null,
-    defaultBilling: false,
-  },
-});
-
-watch(
-  [sameAddress, () => initialValues.value.shippingAddress],
-  ([same, shippingAddress]) => {
-    console.log('watch triggered, {same, shippingAddress}');
-    if (same) {
-      console.log('Copying address to billingAddress', shippingAddress);
-      initialValues.value.billingAddress = {
-        ...shippingAddress,
-        defaultBilling: shippingAddress.defaultShipping || false,
-      };
-    }
-  },
-  { deep: true },
-);
 
 const countries = ref([
   { name: 'Germany', code: 'DE' },
@@ -69,6 +32,19 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
     console.log('send data to server', values);
   }
 }
+
+/* watch(
+  () => sameAddress.value,
+  (enabled) => {
+    if (enabled) {
+      initialValues.value.billingAddress = {
+        ...initialValues.value.shippingAddress,
+        defaultBilling: initialValues.value.shippingAddress.defaultShipping,
+      };
+    }
+  },
+  { immediate: true, deep: true },
+); */
 </script>
 
 <template>
@@ -88,7 +64,6 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
     <div class="flex flex-col items-center w-full px-8">
       <div class="text-center mb-8"></div>
       <Form
-        :initial-values
         :resolver="yupResolver(registrationSchema)"
         class="flex flex-col gap-2 w-full"
         @submit="onFormSubmit"
@@ -155,11 +130,7 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           </TabList>
           <TabPanels class="px-0!">
             <TabPanel value="shipping">
-              <AddressForm
-                v-model="initialValues.shippingAddress"
-                :path="'shippingAddress'"
-                :countries="countries"
-              />
+              <AddressForm :path="'shippingAddress'" :countries="countries" />
               <div class="mt-2 flex items-center gap-2">
                 <Checkbox
                   v-model="sameAddress"
@@ -173,7 +144,6 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
             </TabPanel>
             <TabPanel value="billing">
               <AddressForm
-                v-model="initialValues.billingAddress"
                 :path="'billingAddress'"
                 :countries="countries"
                 :readonly="sameAddress"

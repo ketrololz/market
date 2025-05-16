@@ -20,7 +20,6 @@ const props = defineProps<InputFieldProps>();
         :feedback="false"
         fluid
         toggle-mask
-        @update:model-value="(value) => emit('update:model-value', value)"
       />
     </IconField>
 
@@ -33,7 +32,6 @@ const props = defineProps<InputFieldProps>();
       :feedback="false"
       fluid
       toggle-mask
-      @update:model-value="(value) => emit('update:model-value', value)"
     />
 
     <Message v-if="props.errorMessage" severity="error" variant="simple">{{
