@@ -40,10 +40,10 @@ export class CtpClientFactory {
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
   }
 
-  static createPasswordFlowApiRoot(
-    userCredentials: { email: string; password: string },
-    useCache: boolean = true,
-  ): ByProjectKeyRequestBuilder {
+  static createPasswordFlowApiRoot(userCredentials: {
+    email: string;
+    password: string;
+  }): ByProjectKeyRequestBuilder {
     const passwordAuthOptions: PasswordAuthMiddlewareOptions = {
       host: authUrl,
       projectKey,
@@ -57,10 +57,8 @@ export class CtpClientFactory {
       },
       scopes,
       httpClient: fetch,
+      tokenCache: userTokenCache,
     };
-    if (useCache) {
-      passwordAuthOptions.tokenCache = userTokenCache;
-    }
     const client = new ClientBuilder()
       .withPasswordFlow(passwordAuthOptions)
       .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
@@ -70,7 +68,6 @@ export class CtpClientFactory {
 
   static createAnonymousFlowApiRoot(
     anonymousId: string,
-    useCache: boolean = true,
   ): ByProjectKeyRequestBuilder {
     const anonymousAuthOptions: AuthMiddlewareOptions = {
       host: authUrl,
@@ -78,10 +75,8 @@ export class CtpClientFactory {
       credentials: { clientId, clientSecret, anonymousId },
       scopes,
       httpClient: fetch,
+      tokenCache: anonymousTokenCache,
     };
-    if (useCache) {
-      anonymousAuthOptions.tokenCache = anonymousTokenCache;
-    }
     const client = new ClientBuilder()
       .withAnonymousSessionFlow(anonymousAuthOptions)
       .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
@@ -92,7 +87,6 @@ export class CtpClientFactory {
   static createRefreshTokenFlowApiRoot(
     refreshToken: string,
     cacheToUse: ClearableTokenCache,
-    useCache: boolean = true,
   ): ByProjectKeyRequestBuilder {
     const refreshAuthOptions: RefreshAuthMiddlewareOptions = {
       host: authUrl,
@@ -101,9 +95,9 @@ export class CtpClientFactory {
       refreshToken,
       httpClient: fetch,
     };
-    if (cacheToUse === userTokenCache && useCache) {
+    if (cacheToUse === userTokenCache) {
       refreshAuthOptions.tokenCache = userTokenCache;
-    } else if (cacheToUse === anonymousTokenCache && useCache) {
+    } else if (cacheToUse === anonymousTokenCache) {
       refreshAuthOptions.tokenCache = anonymousTokenCache;
     }
 

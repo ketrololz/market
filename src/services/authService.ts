@@ -12,14 +12,9 @@ import {
   anonymousTokenCache,
   getStoredAnonymousId,
   clearStoredAnonymousId,
+  setStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import {
-  clientId,
-  clientSecret,
-  authUrl,
-  projectKey,
-  scopes,
-} from '@/api/ctpClient';
+import { clientId, clientSecret, authUrl } from '@/api/ctpClient';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type LoginData, type RegistrationData } from '@/stores/authStore';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,8 +22,6 @@ import { parseCtpError } from './authErrors';
 
 class AuthService {
   private currentAnonymousId: string | null = getStoredAnonymousId();
-  private currentUserAccessToken: string | null = null;
-  private currentUserRefreshToken: string | null = null;
 
   private async getOrCreateAnonymousApiRoot(): Promise<{
     apiRoot: ByProjectKeyRequestBuilder;
@@ -43,10 +36,8 @@ class AuthService {
         `AuthService: Attempting to refresh anonymous session for ID: ${anonymousIdToUse}`,
       );
       try {
-        const anonymousApiRoot = CtpClientFactory.createAnonymousFlowApiRoot(
-          anonymousIdToUse,
-          false,
-        );
+        const anonymousApiRoot =
+          CtpClientFactory.createAnonymousFlowApiRoot(anonymousIdToUse);
         appLogger.log(
           `AuthService: Anonymous session refreshed for ID: ${anonymousIdToUse}`,
         );
@@ -70,9 +61,7 @@ class AuthService {
       );
     }
     this.currentAnonymousId = anonymousIdToUse;
-    this.currentAnonymousId = uuidv4(); // TODO убрать после 2 спринта
-    // setStoredAnonymousId(this.currentAnonymousId); // TODO раскомментировать после 2 спринта
-    // TODO заменить все false на true после 2 спринта
+    setStoredAnonymousId(this.currentAnonymousId);
 
     appLogger.log(
       `AuthService: Creating new anonymous session with ID: ${this.currentAnonymousId}`,
@@ -80,7 +69,6 @@ class AuthService {
     try {
       const anonymousApiRoot = CtpClientFactory.createAnonymousFlowApiRoot(
         this.currentAnonymousId,
-        false,
       );
       appLogger.log(
         'AuthService: New anonymous session created and token cached.',
@@ -117,8 +105,6 @@ class AuthService {
     }
 
     userTokenCache.clear();
-    this.currentUserAccessToken = null;
-    this.currentUserRefreshToken = null;
 
     try {
       const signInBody: MyCustomerSignin = {
@@ -148,48 +134,12 @@ class AuthService {
         'AuthService: Performing Password Flow to get user tokens...',
       );
       userTokenCache.clear();
-      const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot(
-        {
-          email: data.email,
-          password: data.password,
-        },
-        false,
-      );
+      const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot({
+        email: data.email,
+        password: data.password,
+      });
 
       await userApiRoot.me().get().execute();
-
-      appLogger.log(
-        'AuthService: Explicitly fetching user tokens (not saving to localStorage)...',
-      );
-      const tokenResponse = await fetch(
-        `${authUrl}/oauth/${projectKey}/customers/token`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: 'Basic ' + btoa(`${clientId}:${clientSecret}`),
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            grant_type: 'password',
-            username: data.email,
-            password: data.password,
-            scope: scopes.join(' '),
-          }),
-        },
-      );
-
-      if (!tokenResponse.ok) {
-        const errorBody = await tokenResponse.json();
-        throw new Error(
-          `Error getting tokens: ${errorBody.error_description || tokenResponse.statusText}`,
-        );
-      }
-      const tokenData = await tokenResponse.json();
-      this.currentUserAccessToken = tokenData.access_token;
-      this.currentUserRefreshToken = tokenData.refresh_token;
-      appLogger.log(
-        `AuthService: User tokens obtained and stored in memory: access_token=${this.currentUserAccessToken}, refresh_token=${this.currentUserRefreshToken}`,
-      );
 
       if (anonymousSession?.anonymousId) {
         this.clearAnonymousSessionData();
@@ -317,7 +267,6 @@ class AuthService {
       const refreshApiRoot = CtpClientFactory.createRefreshTokenFlowApiRoot(
         initialTokenState.refreshToken,
         userTokenCache,
-        false,
       );
       const meResponse = await refreshApiRoot.me().get().execute();
       appLogger.log('AuthService: Session restored/refreshed successfully.');
