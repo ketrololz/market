@@ -1,64 +1,65 @@
+import { AuthMessageKey } from '@/localization/i18nKeys';
+
 export class AuthError extends Error {
+  public i18nKey: AuthMessageKey | string;
+  public i18nParams?: Record<string, unknown>;
   public statusCode?: number;
   public ctpErrorCode?: string;
   public details?: unknown;
 
   constructor(
-    message: string,
-    statusCode?: number,
-    ctpErrorCode?: string,
-    details?: unknown,
+    i18nKey: AuthMessageKey | string,
+    options?: {
+      statusCode?: number;
+      ctpErrorCode?: string;
+      details?: unknown;
+      i18nParams?: Record<string, unknown>;
+      messageForSuper?: string;
+    },
   ) {
-    super(message);
+    super(options?.messageForSuper || String(i18nKey));
     this.name = this.constructor.name;
-    this.statusCode = statusCode;
-    this.ctpErrorCode = ctpErrorCode;
-    this.details = details;
+    this.i18nKey = i18nKey;
+    this.statusCode = options?.statusCode;
+    this.ctpErrorCode = options?.ctpErrorCode;
+    this.details = options?.details;
+    this.i18nParams = options?.i18nParams;
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
 export class InvalidCredentialsError extends AuthError {
-  constructor(apiMessage?: string) {
-    super(
-      apiMessage || 'Invalid email or password.',
-      400,
-      'InvalidCredentials',
-      { originalApiMessage: apiMessage },
-    );
+  constructor(details?: unknown) {
+    super(AuthMessageKey.LoginInvalidCredentials, {
+      statusCode: 400,
+      ctpErrorCode: 'InvalidCredentials',
+      details,
+    });
   }
 }
 
 export class EmailInUseError extends AuthError {
-  constructor(apiMessage?: string) {
-    super(
-      apiMessage || 'This email address is already in use.',
-      400,
-      'DuplicateField',
-      { originalApiMessage: apiMessage },
-    );
+  constructor(details?: unknown) {
+    super(AuthMessageKey.RegisterEmailInUse, {
+      statusCode: 400,
+      ctpErrorCode: 'DuplicateField',
+      details,
+    });
   }
 }
 
 export class NetworkError extends AuthError {
-  constructor(apiMessage?: string) {
-    super(
-      apiMessage || 'Network error. Please check your connection.',
-      undefined,
-      'NetworkError',
-      { originalApiMessage: apiMessage },
-    );
+  constructor(details?: unknown) {
+    super(AuthMessageKey.NetworkError, { details });
   }
 }
 
 export class UnknownAuthError extends AuthError {
-  constructor(apiMessage?: string) {
-    super(
-      apiMessage || 'An unexpected authentication error occurred.',
-      undefined,
-      'UnknownAuthError',
-      { originalApiMessage: apiMessage },
-    );
+  constructor(details?: unknown, originalMessage?: string) {
+    super(AuthMessageKey.UnknownError, {
+      details: originalMessage || details,
+      i18nParams: originalMessage ? { details: originalMessage } : undefined,
+    });
   }
 }
 
@@ -97,48 +98,30 @@ function isCtpSdkError(error: unknown): error is CtpSdkError {
 export function parseCtpError(sdkError: unknown): AuthError {
   if (isCtpSdkError(sdkError)) {
     const body = sdkError.body!;
-    const detailedMessage =
+    const apiMessage =
       body.errors?.[0]?.message ||
       body.message ||
       sdkError.message ||
-      'An error occurred with the CommerceTools API.';
+      'API error';
     const oauthErrorDescription = body.error_description;
 
-    if (body.error === 'invalid_grant') {
-      return new InvalidCredentialsError(
-        oauthErrorDescription ||
-          'Invalid email or password provided to authentication server.',
-      );
+    if (body.errors?.[0]?.code === 'InvalidCredentials') {
+      return new InvalidCredentialsError({
+        originalApiMessage: oauthErrorDescription || apiMessage,
+      });
     }
-
-    if (body.errors && body.errors.length > 0) {
-      const firstError = body.errors[0];
-      if (
-        firstError.code === 'DuplicateField' &&
-        firstError.field === 'email'
-      ) {
-        return new EmailInUseError(firstError.message);
-      }
-      if (
-        firstError.code === 'InvalidOperation' &&
-        firstError.message?.toLowerCase().includes('password does not match')
-      ) {
-        return new InvalidCredentialsError(firstError.message);
-      }
-      return new AuthError(
-        detailedMessage,
-        sdkError.statusCode,
-        firstError.code,
-        body.errors,
-      );
+    if (
+      body.errors?.[0]?.code === 'DuplicateField' &&
+      body.errors?.[0]?.field === 'email'
+    ) {
+      return new EmailInUseError({ originalApiMessage: apiMessage });
     }
-
-    return new AuthError(
-      detailedMessage,
-      sdkError.statusCode,
-      body.error || 'CtpApiError',
-      body,
-    );
+    return new AuthError(AuthMessageKey.CtpApiGeneral, {
+      statusCode: sdkError.statusCode,
+      ctpErrorCode: body.errors?.[0]?.code || body.error || 'CtpApiError',
+      details: body.errors || body,
+      i18nParams: { details: apiMessage },
+    });
   }
 
   if (sdkError instanceof Error) {
@@ -146,13 +129,9 @@ export function parseCtpError(sdkError: unknown): AuthError {
       sdkError.message.toLowerCase().includes('failed to fetch') ||
       sdkError.message.toLowerCase().includes('networkerror')
     ) {
-      return new NetworkError(sdkError.message);
+      return new NetworkError({ originalMessage: sdkError.message });
     }
-    return new UnknownAuthError(sdkError.message);
+    return new UnknownAuthError(undefined, sdkError.message);
   }
-
-  console.error('Unknown error structure passed to parseCtpError:', sdkError);
-  return new UnknownAuthError(
-    'An unexpected error occurred (unknown structure).',
-  );
+  return new UnknownAuthError();
 }

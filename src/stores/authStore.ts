@@ -2,14 +2,22 @@ import { defineStore } from 'pinia';
 import type { Customer, BaseAddress } from '@commercetools/platform-sdk';
 import AuthService from '@/services/authService';
 import { ref, computed } from 'vue';
-import { AuthError } from '@/services/authErrors';
 import appLogger from '@/utils/logger';
-import { showErrorToast, showSuccessToast } from '@/utils/toaster';
+import {
+  showErrorToast,
+  showInfoToast,
+  showSuccessToast,
+} from '@/utils/toaster';
+import i18n from '@/plugins/i18n';
+import { AuthMessageKey } from '@/localization/i18nKeys';
+import { AuthError } from '@/services/authErrors';
 
 interface AuthStoreErrorDetails {
-  message: string;
+  i18nKey: AuthMessageKey | string;
+  i18nParams?: Record<string, unknown>;
   code?: string;
   details?: unknown;
+  message?: string;
 }
 
 export interface AddressFormData
@@ -45,7 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isUserLoggedIn = computed(() => !!user.value);
   const userProfile = computed(() => user.value);
   const authErrorDetails = computed(() => currentError.value);
-  const authErrorMessage = computed(() => currentError.value?.message || null);
+  const authErrorMessage = computed(() => currentError.value);
 
   // --- Actions ---
   const setLoading = (loadingState: boolean): void => {
@@ -57,32 +65,46 @@ export const useAuthStore = defineStore('auth', () => {
       currentError.value = null;
       return;
     }
+
     let errorPayload: AuthStoreErrorDetails;
+
     if (err instanceof AuthError) {
       errorPayload = {
-        message: err.message,
+        i18nKey: err.i18nKey,
+        i18nParams: err.i18nParams,
         code: err.ctpErrorCode || err.name,
         details: err.details,
       };
       appLogger.error(
-        `AuthStore Error: ${err.name} (Code: ${err.ctpErrorCode}) - ${err.message}`,
+        `AuthStore Error: ${err.name} (Key: ${err.i18nKey}, Code: ${err.ctpErrorCode}) - ${err.message}`,
         err.details || '',
       );
     } else if (err instanceof Error) {
-      errorPayload = { message: err.message, code: 'GenericError' };
+      errorPayload = {
+        i18nKey: AuthMessageKey.UnknownError,
+        i18nParams: { details: err.message },
+        code: 'GenericError',
+      };
       appLogger.error(`AuthStore Generic Error: ${err.message}`);
     } else if (typeof err === 'string') {
-      errorPayload = { message: err, code: 'StringError' };
+      errorPayload = {
+        i18nKey: AuthMessageKey.UnknownError,
+        i18nParams: { details: err },
+        code: 'StringError',
+      };
       appLogger.error(`AuthStore String Error: ${err}`);
     } else {
       errorPayload = {
-        message: 'An unknown error occurred in the store.',
+        i18nKey: AuthMessageKey.UnknownError,
+        message: 'An unknown error occurred.',
         code: 'UnknownErrorInStore',
       };
       appLogger.error('AuthStore Unknown Error Structure:', err);
     }
     currentError.value = errorPayload;
-    showErrorToast(errorPayload.message);
+    showErrorToast(
+      i18n.global.t(errorPayload.i18nKey, errorPayload.i18nParams || {}),
+    );
   };
 
   const clearError = (): void => {
@@ -107,16 +129,16 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const loggedInUserData = await AuthService.login(credentials);
       setUserSession(loggedInUserData);
-      showSuccessToast('Login successful! Welcome back.');
+      showSuccessToast(i18n.global.t('success.auth.login'));
       return true;
     } catch (error) {
-      if (error instanceof AuthError) {
-        setError(error);
-      } else if (error instanceof Error) {
-        setError(new AuthError(error.message));
-      } else {
-        setError(new AuthError('Unexpected error during login.'));
-      }
+      if (error instanceof AuthError) setError(error);
+      else
+        setError(
+          new AuthError(AuthMessageKey.LoginFailed, {
+            details: error instanceof Error ? error.message : String(error),
+          }),
+        );
       return false;
     } finally {
       setLoading(false);
@@ -144,17 +166,17 @@ export const useAuthStore = defineStore('auth', () => {
         password: data.password,
       });
       setUserSession(loggedInUserData);
-      showSuccessToast('Registration successful! You are now logged in.');
+      showSuccessToast(i18n.global.t('success.auth.register'));
       appLogger.log('AuthStore: Login successful.');
       return true;
     } catch (error) {
-      if (error instanceof AuthError) {
-        setError(error);
-      } else if (error instanceof Error) {
-        setError(new AuthError(error.message));
-      } else {
-        setError(new AuthError('Unexpected error during registration.'));
-      }
+      if (error instanceof AuthError) setError(error);
+      else
+        setError(
+          new AuthError(AuthMessageKey.RegisterFailed, {
+            details: error instanceof Error ? error.message : String(error),
+          }),
+        );
       return false;
     } finally {
       setLoading(false);
@@ -167,16 +189,17 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await AuthService.logout();
       clearUserSession();
+      showInfoToast(i18n.global.t('success.auth.logout'));
     } catch (error) {
       appLogger.error('Error during logout process in store:', error);
       clearUserSession();
-      if (error instanceof AuthError) {
-        setError(error);
-      } else if (error instanceof Error) {
-        setError(new AuthError(error.message));
-      } else {
-        setError(new AuthError('Error during logout process.'));
-      }
+      if (error instanceof AuthError) setError(error);
+      else
+        setError(
+          new AuthError(AuthMessageKey.LogoutFailed, {
+            details: error instanceof Error ? error.message : String(error),
+          }),
+        );
     } finally {
       setLoading(false);
     }

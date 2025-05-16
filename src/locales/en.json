@@ -1,0 +1,27 @@
+{
+  "errors": {
+    "auth": {
+      "unknown": "An unexpected authentication error occurred.",
+      "network": "Network error. Please check your connection.",
+      "ctpApiGeneral": "An API error occurred: {details}",
+      "login": {
+        "invalidCredentials": "Invalid email or password.",
+        "failedGeneral": "Login failed. Please try again."
+      },
+      "register": {
+        "emailInUse": "This email address is already in use.",
+        "failedGeneral": "Registration failed. Please try again."
+      },
+      "sessionRestoreFailed": "Failed to restore session. Please log in again.",
+      "logoutFailed": "An error occurred during logout."
+    }
+  },
+  "success": {
+    "auth": {
+      "login": "Login successful! Welcome back.",
+      "register": "Registration successful! You are now logged in.",
+      "logout": "You have been logged out successfully.",
+      "sessionRestored": "Session restored successfully."
+    }
+  }
+}

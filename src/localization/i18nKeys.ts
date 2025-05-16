@@ -1,0 +1,26 @@
+export enum AuthMessageKey {
+  // --- Error Keys ---
+  // General Authentication Errors
+  UnknownError = 'errors.auth.unknown',
+  NetworkError = 'errors.auth.network',
+  // CommerceTools API Errors (general)
+  CtpApiGeneral = 'errors.auth.ctpApiGeneral',
+
+  // Login Errors
+  LoginInvalidCredentials = 'errors.auth.login.invalidCredentials',
+  LoginFailed = 'errors.auth.login.failedGeneral',
+
+  // Registration Errors
+  RegisterEmailInUse = 'errors.auth.register.emailInUse',
+  RegisterFailed = 'errors.auth.register.failedGeneral',
+
+  // Session and Logout Errors
+  SessionRestoreFailed = 'errors.auth.sessionRestoreFailed',
+  LogoutFailed = 'errors.auth.logoutFailed',
+
+  // --- Success Message Keys ---
+  LoginSuccess = 'success.auth.login',
+  RegisterSuccess = 'success.auth.register',
+  LogoutSuccess = 'success.auth.logout',
+  SessionRestored = 'success.auth.sessionRestored',
+}

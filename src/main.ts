@@ -8,6 +8,7 @@ import App from './App.vue';
 import Toast, { type PluginOptions, POSITION } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 import { MAIN_THEME } from './theme/main-theme';
+import i18n from './plugins/i18n';
 
 const pinia = createPinia();
 const app = createApp(App);
@@ -41,6 +42,7 @@ app
   })
   .use(VueQueryPlugin)
   .use(pinia)
+  .use(i18n)
   .use(router)
   .use(Toast, toastOptions)
   .mount('#app');
