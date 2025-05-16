@@ -36,7 +36,7 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
 const form = ref();
 
 watch(
-  () => sameAddress.value && form.value, // следим за формой и чекбоксом
+  () => sameAddress.value && form.value,
   (enabled) => {
     if (enabled) {
       syncAddresses();
