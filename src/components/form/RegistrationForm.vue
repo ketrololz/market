@@ -79,17 +79,17 @@ function syncAddresses() {
 <template>
   <Panel
     header=" Create New Customer Account"
-    pt:header:class="justify-self-center text-xl !pb-0"
-    pt:root:class="pb-10"
-    ><p class="text-gray-500 font-medium text-xs text-center">
-      If you have an account,
-      <a
-        href="/login"
+    pt:header:class="justify-self-center text-xl pb-0!"
+    pt:root:class="pb-10 text-center"
+    ><span class="text-gray-500 font-medium text-xs"
+      >If you have an account,
+      <RouterLink
+        to="/login"
         class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
-        >sign in</a
+        >sign in</RouterLink
       >
       with your email address.
-    </p>
+    </span>
     <div class="flex flex-col items-center w-full px-8">
       <div class="text-center mb-8"></div>
       <Form
