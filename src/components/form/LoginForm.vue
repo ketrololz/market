@@ -27,10 +27,10 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
     pt:root:class="pb-5 text-center"
     ><span class="text-gray-500 font-medium text-xs"
       >Don't have a Senet account yet?
-      <a
-        href="/registration"
+      <RouterLink
+        to="/registration"
         class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
-        >Sign up!</a
+        >Sign up!</RouterLink
       ></span
     >
     <div class="flex flex-col items-center w-full px-8">

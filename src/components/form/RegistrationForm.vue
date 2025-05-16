@@ -47,10 +47,10 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
     pt:root:class="pb-10 text-center"
     ><span class="text-gray-500 font-medium text-xs"
       >If you have an account,
-      <a
-        href="/login"
+      <RouterLink
+        to="/login"
         class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
-        >sign in</a
+        >sign in</RouterLink
       >
       with your email address.</span
     >
