@@ -1,4 +1,5 @@
 import { AuthMessageKey } from '@/localization/i18nKeys';
+import type { ValidationError } from 'yup';
 
 export class AuthError extends Error {
   public i18nKey: AuthMessageKey | string;
@@ -60,6 +61,31 @@ export class UnknownAuthError extends AuthError {
       details: originalMessage || details,
       i18nParams: originalMessage ? { details: originalMessage } : undefined,
     });
+  }
+}
+
+export class ClientValidationError extends AuthError {
+  public yupErrors: Record<string, string>;
+
+  constructor(yupError: ValidationError) {
+    const errors: Record<string, string> = {};
+    if (yupError.inner && yupError.inner.length > 0) {
+      yupError.inner.forEach((err) => {
+        if (err.path && !errors[err.path]) {
+          errors[err.path] = err.message;
+        }
+      });
+    } else if (yupError.path && yupError.message) {
+      errors[yupError.path] = yupError.message;
+    }
+
+    super(AuthMessageKey.ClientValidationFailed, {
+      ctpErrorCode: 'ClientValidationError',
+      details: errors,
+      messageForSuper: 'Client-side validation failed.',
+    });
+    this.yupErrors = errors;
+    this.name = 'ClientValidationError';
   }
 }
 

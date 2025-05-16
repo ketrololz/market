@@ -14,6 +14,9 @@ export enum AuthMessageKey {
   RegisterEmailInUse = 'errors.auth.register.emailInUse',
   RegisterFailed = 'errors.auth.register.failedGeneral',
 
+  // Validation Errors
+  ClientValidationFailed = 'errors.auth.clientValidationFailed',
+
   // Session and Logout Errors
   SessionRestoreFailed = 'errors.auth.sessionRestoreFailed',
   LogoutFailed = 'errors.auth.logoutFailed',

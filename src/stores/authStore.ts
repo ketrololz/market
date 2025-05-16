@@ -10,7 +10,7 @@ import {
 } from '@/utils/toaster';
 import i18n from '@/plugins/i18n';
 import { AuthMessageKey } from '@/localization/i18nKeys';
-import { AuthError } from '@/services/authErrors';
+import { AuthError, ClientValidationError } from '@/services/authErrors';
 
 interface AuthStoreErrorDetails {
   i18nKey: AuthMessageKey | string;
@@ -18,6 +18,7 @@ interface AuthStoreErrorDetails {
   code?: string;
   details?: unknown;
   message?: string;
+  fieldErrors?: Record<string, string>;
 }
 
 export interface AddressFormData
@@ -68,7 +69,19 @@ export const useAuthStore = defineStore('auth', () => {
 
     let errorPayload: AuthStoreErrorDetails;
 
-    if (err instanceof AuthError) {
+    if (err instanceof ClientValidationError) {
+      errorPayload = {
+        i18nKey: err.i18nKey,
+        i18nParams: err.i18nParams,
+        code: err.ctpErrorCode || err.name,
+        details: err.details,
+        fieldErrors: err.yupErrors,
+      };
+      appLogger.warn(
+        `AuthStore ClientValidation Error: (Key: ${err.i18nKey})`,
+        err.yupErrors,
+      );
+    } else if (err instanceof AuthError) {
       errorPayload = {
         i18nKey: err.i18nKey,
         i18nParams: err.i18nParams,
@@ -129,7 +142,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const loggedInUserData = await AuthService.login(credentials);
       setUserSession(loggedInUserData);
-      showSuccessToast(i18n.global.t('success.auth.login'));
+      showSuccessToast(i18n.global.t(AuthMessageKey.LoginSuccess));
       return true;
     } catch (error) {
       if (error instanceof AuthError) setError(error);
@@ -166,7 +179,7 @@ export const useAuthStore = defineStore('auth', () => {
         password: data.password,
       });
       setUserSession(loggedInUserData);
-      showSuccessToast(i18n.global.t('success.auth.register'));
+      showSuccessToast(i18n.global.t(AuthMessageKey.RegisterSuccess));
       appLogger.log('AuthStore: Login successful.');
       return true;
     } catch (error) {
@@ -189,7 +202,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await AuthService.logout();
       clearUserSession();
-      showInfoToast(i18n.global.t('success.auth.logout'));
+      showInfoToast(i18n.global.t(AuthMessageKey.LogoutSuccess));
     } catch (error) {
       appLogger.error('Error during logout process in store:', error);
       clearUserSession();

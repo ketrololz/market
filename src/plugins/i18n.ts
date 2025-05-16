@@ -22,7 +22,7 @@ function getStartingLocale(): AvailableLocale {
   ) {
     return savedLocale;
   }
-  return 'ru';
+  return 'en';
 }
 
 const i18nOptions = {

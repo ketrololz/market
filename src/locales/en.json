@@ -13,7 +13,8 @@
         "failedGeneral": "Registration failed. Please try again."
       },
       "sessionRestoreFailed": "Failed to restore session. Please log in again.",
-      "logoutFailed": "An error occurred during logout."
+      "logoutFailed": "An error occurred during logout.",
+      "clientValidationFailed": "Well, well, well, trying to break the system, are we? 😉 Not this time! Please fix the errors."
     }
   },
   "success": {

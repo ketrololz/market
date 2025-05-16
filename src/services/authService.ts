@@ -18,7 +18,11 @@ import { clientId, clientSecret, authUrl } from '@/api/ctpClient';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type LoginData, type RegistrationData } from '@/stores/authStore';
 import { v4 as uuidv4 } from 'uuid';
-import { parseCtpError } from './authErrors';
+import { AuthError, ClientValidationError, parseCtpError } from './authErrors';
+import * as yup from 'yup';
+import { loginSchema } from '@/schemas/loginSchema';
+import { registrationSchema } from '@/schemas/registrationSchema';
+import { AuthMessageKey } from '@/localization/i18nKeys';
 
 class AuthService {
   private currentAnonymousId: string | null = getStoredAnonymousId();
@@ -99,6 +103,25 @@ class AuthService {
   public async login(data: LoginData): Promise<Customer> {
     appLogger.log('AuthService: Attempting login with /me/login strategy...');
 
+    try {
+      await loginSchema.validate(data, { abortEarly: false });
+      appLogger.log('AuthService: Login data passed service-level validation.');
+    } catch (validationError: unknown) {
+      if (validationError instanceof yup.ValidationError) {
+        appLogger.warn(
+          'AuthService: Login data failed service-level validation:',
+          validationError.errors,
+        );
+        throw new ClientValidationError(validationError);
+      }
+      throw new AuthError(AuthMessageKey.UnknownError, {
+        details:
+          validationError instanceof Error
+            ? validationError.message
+            : String(validationError),
+      });
+    }
+
     const anonymousSession = await this.getOrCreateAnonymousApiRoot();
     if (!anonymousSession) {
       throw new Error('Failed to get/create anonymous session for login.');
@@ -155,6 +178,28 @@ class AuthService {
 
   public async register(data: RegistrationData): Promise<CustomerSignInResult> {
     appLogger.log('AuthService: Attempting registration...');
+
+    try {
+      await registrationSchema.validate(data, { abortEarly: false });
+      appLogger.log(
+        'AuthService: Registration data passed service-level validation.',
+      );
+    } catch (validationError: unknown) {
+      if (validationError instanceof yup.ValidationError) {
+        appLogger.warn(
+          'AuthService: Registration data failed service-level validation:',
+          validationError.errors,
+        );
+        throw new ClientValidationError(validationError);
+      }
+      throw new AuthError(AuthMessageKey.UnknownError, {
+        details:
+          validationError instanceof Error
+            ? validationError.message
+            : String(validationError),
+      });
+    }
+
     const anonymousSession = await this.getOrCreateAnonymousApiRoot();
     if (!anonymousSession) {
       throw new Error(
