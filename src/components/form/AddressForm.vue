@@ -19,22 +19,22 @@ const props = defineProps<{
         :name="`${props.path}.street`"
         class="w-1/2"
       >
+        <label :for="`${props.path}-street`" class="text-xs">Street</label>
         <BaseInput
           :input-id="`${props.path}-street`"
           :model-value="slotProps.value"
           :error-message="slotProps.error"
           :readonly="props.readonly"
-          placeholder="Street"
         />
       </FormField>
 
       <FormField v-slot="slotProps" :name="`${props.path}.city`" class="w-1/2">
+        <label :for="`${props.path}-city`" class="text-xs">City</label>
         <BaseInput
           :input-id="`${props.path}-city`"
           :model-value="slotProps.value"
           :error-message="slotProps.error"
           :readonly="props.readonly"
-          placeholder="City"
         />
       </FormField>
     </div>
@@ -45,12 +45,14 @@ const props = defineProps<{
         :name="`${props.path}.postalCode`"
         class="w-1/2"
       >
+        <label :for="`${props.path}-postalCode`" class="text-xs"
+          >Postal Code</label
+        >
         <BaseInput
           :input-id="`${props.path}-postalCode`"
           :model-value="slotProps.value"
           :error-message="slotProps.error"
           :readonly="props.readonly"
-          placeholder="Postal Code"
         />
       </FormField>
 
@@ -59,6 +61,7 @@ const props = defineProps<{
         :name="`${props.path}.country`"
         class="w-1/2"
       >
+        <label :for="`${props.path}-country`" class="text-xs">Country</label>
         <Select
           :model-value="slotProps.value"
           :options="props.countries"

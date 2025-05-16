@@ -20,6 +20,7 @@ const emit = defineEmits(['update:modelValue']);
         :placeholder="props.placeholder"
         fluid
         :readonly="props.readonly"
+        :class="props.readonly ? 'input-readonly' : ''"
         @update:model-value="emit('update:modelValue', $event)"
       />
     </IconField>
@@ -36,6 +37,7 @@ const emit = defineEmits(['update:modelValue']);
       :placeholder="props.placeholder"
       fluid
       :readonly="props.readonly"
+      :class="props.readonly ? 'input-readonly' : ''"
       @update:model-value="emit('update:modelValue', $event)"
     />
 
