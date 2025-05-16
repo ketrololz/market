@@ -30,9 +30,6 @@ const i18nOptions = {
   locale: getStartingLocale(),
   fallbackLocale: 'en',
   messages: messages as LocaleMessages<MessageSchema>,
-  // silentTranslationWarn: true, // Раскомментируй, чтобы подавить варнинги о ненайденных ключах
-  // missingWarn: false, // Подавить варнинги о ненайденных ключах
-  // fallbackWarn: false, // Подавить варнинги о fallback
 };
 
 const i18n = createI18n(i18nOptions);
