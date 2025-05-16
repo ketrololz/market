@@ -17,7 +17,7 @@ import Tab from 'primevue/tab';
 import TabPanel from 'primevue/tabpanel';
 import AddressForm from './AddressForm.vue';
 
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const sameAddress = ref(true);
 
@@ -33,18 +33,54 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
   }
 }
 
-/* watch(
-  () => sameAddress.value,
+const form = ref();
+
+watch(
+  () => sameAddress.value && form.value, // следим за формой и чекбоксом
   (enabled) => {
     if (enabled) {
-      initialValues.value.billingAddress = {
-        ...initialValues.value.shippingAddress,
-        defaultBilling: initialValues.value.shippingAddress.defaultShipping,
-      };
+      syncAddresses();
     }
   },
-  { immediate: true, deep: true },
-); */
+  { immediate: true },
+);
+
+watch(
+  () => [
+    form.value?.getFieldState('shippingAddress.street')?.value,
+    form.value?.getFieldState('shippingAddress.city')?.value,
+    form.value?.getFieldState('shippingAddress.postalCode')?.value,
+    form.value?.getFieldState('shippingAddress.country')?.value,
+    form.value?.getFieldState('shippingAddress.defaultShipping')?.value,
+  ],
+  () => {
+    if (sameAddress.value) {
+      syncAddresses();
+    }
+  },
+  { deep: true },
+);
+
+function syncAddresses() {
+  const formInstance = form.value as FormInstance;
+  if (!formInstance) return;
+
+  const fieldsToCopy = [
+    'street',
+    'city',
+    'postalCode',
+    'country',
+    'defaultShipping',
+  ];
+
+  fieldsToCopy.forEach((field) => {
+    const source = formInstance.getFieldState(
+      `shippingAddress.${field}`,
+    )?.value;
+    const targetField = `billingAddress.${field === 'defaultShipping' ? 'defaultBilling' : field}`;
+    formInstance.setFieldValue(targetField, source);
+  });
+}
 </script>
 
 <template>
@@ -64,6 +100,7 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
     <div class="flex flex-col items-center w-full px-8">
       <div class="text-center mb-8"></div>
       <Form
+        ref="form"
         :resolver="yupResolver(registrationSchema)"
         class="flex flex-col gap-2 w-full"
         @submit="onFormSubmit"
@@ -131,16 +168,6 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           <TabPanels class="px-0!">
             <TabPanel value="shipping">
               <AddressForm :path="'shippingAddress'" :countries="countries" />
-              <div class="mt-2 flex items-center gap-2">
-                <Checkbox
-                  v-model="sameAddress"
-                  input-id="same-as-billing"
-                  binary
-                />
-                <label for="same-as-billing" class="text-xs">
-                  Shipping address is the same as billing address
-                </label>
-              </div>
             </TabPanel>
             <TabPanel value="billing">
               <AddressForm
@@ -152,6 +179,12 @@ function onFormSubmit({ values, valid }: FormSubmitEvent) {
           </TabPanels>
         </Tabs>
 
+        <div class="flex items-center gap-2">
+          <Checkbox v-model="sameAddress" input-id="same-as-billing" binary />
+          <label for="same-as-billing" class="text-xs">
+            Shipping address is the same as billing address
+          </label>
+        </div>
         <Button
           size="small"
           label="Sign up"
