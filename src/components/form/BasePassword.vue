@@ -15,11 +15,12 @@ const props = defineProps<InputFieldProps>();
       <Password
         :id="props.inputId"
         size="small"
-        :model-value="props.modelValue ? String(props.modelValue) : null"
+        :model-value="props.modelValue"
         :placeholder="props.placeholder"
         :feedback="false"
         fluid
         toggle-mask
+        @update:model-value="(value) => emit('update:model-value', value)"
       />
     </IconField>
 
@@ -27,11 +28,12 @@ const props = defineProps<InputFieldProps>();
       v-else
       :id="props.inputId"
       size="small"
-      :model-value="props.modelValue ? String(props.modelValue) : null"
+      :model-value="props.modelValue"
       :placeholder="props.placeholder"
       :feedback="false"
       fluid
       toggle-mask
+      @update:model-value="(value) => emit('update:model-value', value)"
     />
 
     <Message v-if="props.errorMessage" severity="error" variant="simple">{{

@@ -13,5 +13,7 @@ export const registrationSchema = yup.object({
   firstName: nameSchema,
   lastName: nameSchema,
   dateOfBirth: dateSchema,
-  address: addressSchema,
+  sameAsShipping: yup.boolean(),
+  shippingAddress: addressSchema,
+  billingAddress: addressSchema,
 });

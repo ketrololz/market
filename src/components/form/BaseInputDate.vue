@@ -15,11 +15,6 @@ const props = defineProps<InputFieldProps>();
       <DatePicker
         :input-id="props.inputId"
         size="small"
-        :model-value="
-          typeof props.modelValue === 'string'
-            ? new Date(props.modelValue)
-            : props.modelValue
-        "
         :placeholder="props.placeholder"
         :show-icon="props.showIcon ?? false"
         class="w-full"

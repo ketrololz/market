@@ -6,6 +6,7 @@ import IconField from 'primevue/iconfield';
 import type { InputFieldProps } from './types/InputFieldProps';
 
 const props = defineProps<InputFieldProps>();
+const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
@@ -18,6 +19,8 @@ const props = defineProps<InputFieldProps>();
         :model-value="props.modelValue ? String(props.modelValue) : null"
         :placeholder="props.placeholder"
         fluid
+        :readonly="props.readonly"
+        @update:model-value="emit('update:modelValue', $event)"
       />
     </IconField>
 
@@ -32,6 +35,8 @@ const props = defineProps<InputFieldProps>();
       "
       :placeholder="props.placeholder"
       fluid
+      :readonly="props.readonly"
+      @update:model-value="emit('update:modelValue', $event)"
     />
 
     <Message v-if="props.errorMessage" severity="error" variant="simple">{{

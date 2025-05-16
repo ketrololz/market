@@ -6,4 +6,5 @@ export interface InputFieldProps {
   showIconField?: boolean;
   showIcon?: boolean;
   inputId?: string;
+  readonly?: boolean;
 }
