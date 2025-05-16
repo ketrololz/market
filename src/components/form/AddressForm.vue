@@ -89,21 +89,20 @@ const props = defineProps<{
     <div class="mt-2 flex items-center gap-2">
       <FormField
         v-slot="slotProps"
-        :name="`${props.path}.${props.path === 'address' ? 'defaultShipping' : 'defaultBilling'}`"
+        :name="`${props.path}.${props.path === 'shippingAddress' ? 'defaultShipping' : 'defaultBilling'}`"
       >
         <Checkbox
           :model-value="slotProps.value"
-          :input-id="`${props.path}-default-${props.path === 'address' ? 'shipping' : 'billing'}`"
+          :input-id="`${props.path}-default-${props.path === 'shippingAddress' ? 'shipping' : 'billing'}`"
           binary
-          :disabled="props.readonly"
-          @update:model-value="slotProps.setValue"
         />
         <label
-          :for="`default-${props.path === 'address' ? 'shipping' : 'billing'}`"
+          :for="`default-${props.path === 'shippingAddress' ? 'shipping' : 'billing'}`"
           class="text-xs"
         >
           Set as default
-          {{ props.path === 'address' ? 'shipping' : 'billing' }} address
+          {{ props.path === 'shippingAddress' ? 'shipping' : 'billing' }}
+          address
         </label>
         <small v-if="slotProps.error" class="text-red-500 text-xs">{{
           slotProps.error.message

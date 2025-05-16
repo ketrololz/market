@@ -51,7 +51,6 @@ watch(
     form.value?.getFieldState('shippingAddress.city')?.value,
     form.value?.getFieldState('shippingAddress.postalCode')?.value,
     form.value?.getFieldState('shippingAddress.country')?.value,
-    form.value?.getFieldState('shippingAddress.defaultShipping')?.value,
   ],
   () => {
     if (sameAddress.value) {
@@ -65,13 +64,7 @@ function syncAddresses() {
   const formInstance = form.value as FormInstance;
   if (!formInstance) return;
 
-  const fieldsToCopy = [
-    'street',
-    'city',
-    'postalCode',
-    'country',
-    'defaultShipping',
-  ];
+  const fieldsToCopy = ['street', 'city', 'postalCode', 'country'];
 
   fieldsToCopy.forEach((field) => {
     const source = formInstance.getFieldState(
@@ -86,7 +79,7 @@ function syncAddresses() {
 <template>
   <Panel
     header=" Create New Customer Account"
-    pt:header:class="justify-self-center text-xl pb-0!"
+    pt:header:class="justify-self-center text-xl !pb-0"
     pt:root:class="pb-10"
     ><p class="text-gray-500 font-medium text-xs text-center">
       If you have an account,
@@ -162,10 +155,10 @@ function syncAddresses() {
 
         <Tabs value="shipping" class="w-full">
           <TabList>
-            <Tab value="shipping" class="text-sm pb-1!">Shipping Address</Tab>
-            <Tab value="billing" class="text-sm pb-1!">Billing Address</Tab>
+            <Tab value="shipping" class="text-sm !pb-1">Shipping Address</Tab>
+            <Tab value="billing" class="text-sm !pb-1">Billing Address</Tab>
           </TabList>
-          <TabPanels class="px-0!">
+          <TabPanels class="!px-0">
             <TabPanel value="shipping">
               <AddressForm :path="'shippingAddress'" :countries="countries" />
             </TabPanel>
