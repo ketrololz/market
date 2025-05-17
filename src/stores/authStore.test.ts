@@ -82,6 +82,7 @@ describe('authStore', () => {
     lastName: 'User',
     shippingAddress: mockAddress,
     useShippingAsBilling: true,
+    dateOfBirth: '2000-01-01',
   };
 
   beforeEach(() => {

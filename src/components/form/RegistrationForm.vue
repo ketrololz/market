@@ -63,7 +63,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
       password: values.password,
       firstName: values.firstName,
       lastName: values.lastName,
-      dateOfBirth: values.dateOfBirth.toISOString().substring(0, 10),
+      dateOfBirth: values.dateOfBirth?.toISOString().substring(0, 10),
       shippingAddress: shippingAddressPayload,
       useShippingAsBilling: true, // TODO Заменить на определение через чекбокс
       // useShippingAsBilling: values.useShippingAsBilling, // Пример

@@ -9,36 +9,19 @@ import {
 import { userTokenCache } from '@/api/localStorageTokenCache';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type LoginData, type RegistrationData } from '@/stores/authStore';
-import { AuthError, ClientValidationError, parseCtpError } from './authErrors';
-import * as yup from 'yup';
+import { AuthError, parseCtpError } from './authErrors';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 import { authUrl, clientId, clientSecret } from '@/api/ctpConfig';
 import AnonymousSessionService from './anonymousSessionService';
+import { validateData } from '@/utils/validationUtils';
 
 class AuthService {
   public async login(data: LoginData): Promise<Customer> {
     appLogger.log('AuthService: Attempting login with /me/login strategy...');
 
-    try {
-      await loginSchema.validate(data, { abortEarly: false });
-      appLogger.log('AuthService: Login data passed service-level validation.');
-    } catch (validationError: unknown) {
-      if (validationError instanceof yup.ValidationError) {
-        appLogger.warn(
-          'AuthService: Login data failed service-level validation:',
-          validationError.errors,
-        );
-        throw new ClientValidationError(validationError);
-      }
-      throw new AuthError(AuthMessageKey.UnknownError, {
-        details:
-          validationError instanceof Error
-            ? validationError.message
-            : String(validationError),
-      });
-    }
+    await validateData(loginSchema, data, 'Login Data');
 
     const anonymousSession = await AnonymousSessionService.ensureSession();
     if (!anonymousSession) {
@@ -94,26 +77,14 @@ class AuthService {
   public async register(data: RegistrationData): Promise<CustomerSignInResult> {
     appLogger.log('AuthService: Attempting registration...');
 
-    try {
-      await registrationSchema.validate(data, { abortEarly: false });
-      appLogger.log(
-        'AuthService: Registration data passed service-level validation.',
-      );
-    } catch (validationError: unknown) {
-      if (validationError instanceof yup.ValidationError) {
-        appLogger.warn(
-          'AuthService: Registration data failed service-level validation:',
-          validationError.errors,
-        );
-        throw new ClientValidationError(validationError);
-      }
-      throw new AuthError(AuthMessageKey.UnknownError, {
-        details:
-          validationError instanceof Error
-            ? validationError.message
-            : String(validationError),
-      });
-    }
+    await validateData(
+      registrationSchema,
+      {
+        ...data,
+        dateOfBirth: new Date(data.dateOfBirth),
+      },
+      'Registration Data',
+    );
 
     const anonymousSession = await AnonymousSessionService.ensureSession();
     if (!anonymousSession) {

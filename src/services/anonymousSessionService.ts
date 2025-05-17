@@ -111,4 +111,5 @@ class AnonymousSessionService {
   }
 }
 
+export { AnonymousSessionService };
 export default new AnonymousSessionService();

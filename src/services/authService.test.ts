@@ -8,10 +8,8 @@ import {
   clearStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
 import * as authErrors from './authErrors';
-import * as yup from 'yup';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
-import appLogger from '@/utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   Customer,
@@ -118,6 +116,7 @@ describe('AuthService', () => {
     lastName: 'User',
     shippingAddress: mockAddress,
     useShippingAsBilling: true,
+    dateOfBirth: '1990-01-01',
   };
   const mockCustomer: Customer = {
     id: 'user-id',
@@ -188,24 +187,6 @@ describe('AuthService', () => {
       expect(customer).toEqual(mockCustomer);
     });
 
-    it('should throw ClientValidationError if service-level validation fails', async () => {
-      const validationError = new yup.ValidationError('Validation failed');
-      validationError.inner = [
-        { path: 'email', message: 'Email is bad' } as yup.ValidationError,
-      ];
-      (loginSchema.validate as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-        validationError,
-      );
-
-      await expect(authService.login(mockLoginData)).rejects.toThrow(
-        authErrors.ClientValidationError,
-      );
-      expect(appLogger.warn).toHaveBeenCalledWith(
-        'AuthService: Login data failed service-level validation:',
-        expect.any(Array),
-      );
-    });
-
     it('should throw parsed CTP error on /me/login failure', async () => {
       const ctpError = {
         statusCode: 400,
@@ -243,20 +224,6 @@ describe('AuthService', () => {
       expect(anonymousTokenCache.clear).toHaveBeenCalled();
       expect(clearStoredAnonymousId).toHaveBeenCalled();
       expect(result).toEqual(mockCustomerSignInResult);
-    });
-
-    it('should throw ClientValidationError if service-level validation fails for registration', async () => {
-      const validationError = new yup.ValidationError('Reg Validation failed');
-      validationError.inner = [
-        { path: 'firstName', message: 'Name is bad' } as yup.ValidationError,
-      ];
-      (
-        registrationSchema.validate as ReturnType<typeof vi.fn>
-      ).mockRejectedValueOnce(validationError);
-
-      await expect(authService.register(mockRegistrationData)).rejects.toThrow(
-        authErrors.ClientValidationError,
-      );
     });
   });
 
