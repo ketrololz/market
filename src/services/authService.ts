@@ -14,7 +14,6 @@ import {
   clearStoredAnonymousId,
   setStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import { clientId, clientSecret, authUrl } from '@/api/ctpClient';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type LoginData, type RegistrationData } from '@/stores/authStore';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,6 +22,7 @@ import * as yup from 'yup';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
 import { AuthMessageKey } from '@/localization/i18nKeys';
+import { authUrl, clientId, clientSecret } from '@/api/ctpConfig';
 
 class AuthService {
   private currentAnonymousId: string | null = getStoredAnonymousId();
@@ -324,4 +324,5 @@ class AuthService {
   }
 }
 
+export { AuthService };
 export default new AuthService();

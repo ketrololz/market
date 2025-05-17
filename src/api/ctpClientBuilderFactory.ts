@@ -15,13 +15,13 @@ import {
   type ClearableTokenCache,
 } from '@/api/localStorageTokenCache';
 import {
+  authUrl,
   projectKey,
   clientId,
   clientSecret,
-  apiUrl,
-  authUrl,
   scopes,
-} from '@/api/ctpClient';
+  apiUrl,
+} from './ctpConfig';
 
 export class CtpClientFactory {
   static createAppApiRoot(): ByProjectKeyRequestBuilder {

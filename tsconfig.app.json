@@ -11,6 +11,7 @@
     "noUncheckedSideEffectImports": true,
     "allowJs": true,
     "baseUrl": ".",
+    "types": ["vite/client", "vitest/globals"],
 
     "paths": {
       "@/*": ["src/*"],

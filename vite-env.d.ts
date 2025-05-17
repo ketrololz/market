@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 /// <reference types="vite/types/importMeta.d.ts" />
+/// <reference types="vitest/globals" />
 
 interface ImportMetaEnv {
   readonly VITE_CTP_PROJECT_KEY: string;
