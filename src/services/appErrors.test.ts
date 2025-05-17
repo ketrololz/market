@@ -4,10 +4,10 @@ import {
   InvalidCredentialsError,
   EmailInUseError,
   NetworkError,
-  UnknownAuthError,
+  UnknownAppError,
   ClientValidationError,
-  parseCtpError,
-} from './authErrors';
+  parseError,
+} from './appErrors';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 import * as yup from 'yup';
 
@@ -59,13 +59,12 @@ describe('AuthError Classes', () => {
     expect(error.name).toBe('NetworkError');
     expect(error.i18nKey).toBe(AuthMessageKey.NetworkError);
     expect(error.statusCode).toBeUndefined();
-    expect(error.ctpErrorCode).toBeUndefined();
     expect(error.details).toEqual({ info: 'offline' });
   });
 
   it('UnknownAuthError should initialize with correct defaults', () => {
-    const error = new UnknownAuthError({ data: 'any' }, 'Original JS Message');
-    expect(error.name).toBe('UnknownAuthError');
+    const error = new UnknownAppError({ data: 'any' }, 'Original JS Message');
+    expect(error.name).toBe('UnknownAppError');
     expect(error.i18nKey).toBe(AuthMessageKey.UnknownError);
     expect(error.details).toEqual('Original JS Message');
     expect(error.i18nParams).toEqual({ details: 'Original JS Message' });
@@ -116,7 +115,7 @@ describe('parseCtpError', () => {
         error_description: 'Invalid email or password.',
       },
     };
-    const parsedError = parseCtpError(sdkError);
+    const parsedError = parseError(sdkError);
     expect(parsedError).toBeInstanceOf(InvalidCredentialsError);
     expect(parsedError.i18nKey).toBe(AuthMessageKey.LoginInvalidCredentials);
     if (
@@ -145,7 +144,7 @@ describe('parseCtpError', () => {
         ],
       },
     };
-    const parsedError = parseCtpError(sdkError);
+    const parsedError = parseError(sdkError);
     expect(parsedError).toBeInstanceOf(EmailInUseError);
     expect(parsedError.i18nKey).toBe(AuthMessageKey.RegisterEmailInUse);
     if (
@@ -168,11 +167,11 @@ describe('parseCtpError', () => {
         errors: [{ code: 'SomeOtherCode', message: 'Details for other code.' }],
       },
     };
-    const parsedError = parseCtpError(sdkError);
+    const parsedError = parseError(sdkError);
     expect(parsedError).toBeInstanceOf(AuthError);
     expect(parsedError.name).toBe('AuthError');
     expect(parsedError.i18nKey).toBe(AuthMessageKey.CtpApiGeneral);
-    expect(parsedError.ctpErrorCode).toBe('SomeOtherCode');
+    expect(parsedError.errorCode).toBe('SomeOtherCode');
     expect(parsedError.i18nParams).toEqual({
       details: 'Details for other code.',
     });
@@ -180,22 +179,22 @@ describe('parseCtpError', () => {
 
   it('should parse NetworkError from "failed to fetch"', () => {
     const error = new Error('failed to fetch');
-    const parsedError = parseCtpError(error);
+    const parsedError = parseError(error);
     expect(parsedError).toBeInstanceOf(NetworkError);
     expect(parsedError.i18nKey).toBe(AuthMessageKey.NetworkError);
   });
 
   it('should parse NetworkError from "networkerror" string', () => {
     const error = new Error('A networkerror occurred');
-    const parsedError = parseCtpError(error);
+    const parsedError = parseError(error);
     expect(parsedError).toBeInstanceOf(NetworkError);
   });
 
   it('should parse UnknownAuthError from generic Error', () => {
     const errorMessage = 'Just a generic error';
     const error = new Error(errorMessage);
-    const parsedError = parseCtpError(error);
-    expect(parsedError).toBeInstanceOf(UnknownAuthError);
+    const parsedError = parseError(error);
+    expect(parsedError).toBeInstanceOf(UnknownAppError);
     expect(parsedError.i18nKey).toBe(AuthMessageKey.UnknownError);
     if (
       parsedError.details &&
@@ -211,8 +210,8 @@ describe('parseCtpError', () => {
 
   it('should parse UnknownAuthError from unknown structure', () => {
     const error = { someWeirdError: 'data' };
-    const parsedError = parseCtpError(error);
-    expect(parsedError).toBeInstanceOf(UnknownAuthError);
+    const parsedError = parseError(error);
+    expect(parsedError).toBeInstanceOf(UnknownAppError);
     expect(parsedError.i18nKey).toBe(AuthMessageKey.UnknownError);
   });
 });

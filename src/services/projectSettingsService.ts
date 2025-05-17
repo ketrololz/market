@@ -1,10 +1,14 @@
 import appLogger from '@/utils/logger';
 import { type Project } from '@commercetools/platform-sdk';
-import { appApiRoot } from '@/api/ctpClient';
-import { parseCtpError, AuthError } from './authErrors';
-import { AuthMessageKey } from '@/localization/i18nKeys';
+import { getAppApiRoot } from '@/api/ctpClient';
+import { parseError } from './appErrors';
+import {
+  ProjectSettingsFetchError,
+  ProjectDataUnavailableError,
+  AppError,
+} from './appErrors';
 
-interface ProjectSettings {
+export interface ProjectSettings {
   languages: string[];
   countries: string[];
   currencies: string[];
@@ -12,86 +16,71 @@ interface ProjectSettings {
 }
 
 class ProjectSettingsService {
-  private projectCache: Project | null = null;
+  private projectDataCache: Project | null = null;
 
-  private async fetchFullProjectData(): Promise<Project> {
-    if (this.projectCache) {
+  /**
+   * Fetches project data from the API.
+   * Uses a simple in-memory cache.
+   * Throws ProjectSettingsFetchError or ProjectDataUnavailableError on failure.
+   */
+  public async fetchProjectData(): Promise<Project> {
+    if (this.projectDataCache) {
       appLogger.log('ProjectSettingsService: Returning cached project data.');
-      return this.projectCache;
+      return this.projectDataCache;
     }
 
     appLogger.log('ProjectSettingsService: Fetching project data from API...');
     try {
-      const projectResponse = await appApiRoot.get().execute();
+      const apiRoot = getAppApiRoot();
+      const projectResponse = await apiRoot.get().execute();
 
       if (projectResponse.body) {
-        this.projectCache = projectResponse.body;
+        this.projectDataCache = projectResponse.body;
         appLogger.log(
           'ProjectSettingsService: Project data fetched and cached successfully.',
         );
-        return this.projectCache;
+        return this.projectDataCache;
       }
-      throw new AuthError(AuthMessageKey.UnknownError, {
-        details: 'Project data body is empty',
+      throw new ProjectDataUnavailableError({
+        details: 'Project data body is empty from API response.',
       });
     } catch (error: unknown) {
       appLogger.error(
         'ProjectSettingsService: Failed to fetch project data:',
         error,
       );
-      this.projectCache = null;
-      throw parseCtpError(error);
+      this.projectDataCache = null;
+      const parsed = parseError(error);
+      if (parsed instanceof AppError) {
+        throw new ProjectSettingsFetchError({
+          details: parsed.details || parsed.message,
+          statusCode: parsed.statusCode,
+          errorCode: parsed.errorCode || parsed.errorCode,
+        });
+      }
+      throw new ProjectSettingsFetchError({ details: String(error) });
     }
   }
 
-  async getProjectSettings(): Promise<ProjectSettings | null> {
-    try {
-      const projectData = await this.fetchFullProjectData();
-      return {
-        languages: projectData.languages || [],
-        countries: projectData.countries || [],
-        currencies: projectData.currencies || [],
-        name: projectData.name || 'Unknown Project',
-      };
-    } catch (error) {
-      appLogger.error(
-        'ProjectSettingsService: Failed to fetch project settings:',
-        error,
-      );
-      return null;
-    }
-  }
-
-  async getProjectLanguages(): Promise<string[]> {
-    try {
-      const projectData = await this.fetchFullProjectData();
-      return projectData.languages || [];
-    } catch (error) {
-      appLogger.error(
-        'ProjectSettingsService: Failed to fetch project languages:',
-        error,
-      );
-      return [];
-    }
-  }
-
-  async getProjectCountries(): Promise<string[]> {
-    try {
-      const projectData = await this.fetchFullProjectData();
-      return projectData.countries || [];
-    } catch (error) {
-      appLogger.error(
-        'ProjectSettingsService: Failed to fetch project countries:',
-        error,
-      );
-      return [];
-    }
+  /**
+   * Gets structured project settings.
+   * Relies on fetchProjectData.
+   */
+  async getProjectSettings(): Promise<ProjectSettings> {
+    const projectData = await this.fetchProjectData();
+    return {
+      languages: projectData.languages || [],
+      countries: projectData.countries || [],
+      currencies: projectData.currencies || [],
+      name: projectData.name || 'Unknown Project',
+    };
   }
 
   public clearProjectCache(): void {
-    this.projectCache = null;
+    this.projectDataCache = null;
     appLogger.log('ProjectSettingsService: Project data cache cleared.');
   }
 }
 
+export { ProjectSettingsService };
 export default new ProjectSettingsService();

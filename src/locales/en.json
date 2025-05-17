@@ -15,6 +15,10 @@
       "sessionRestoreFailed": "Failed to restore session. Please log in again.",
       "logoutFailed": "An error occurred during logout.",
       "clientValidationFailed": "Well, well, well, trying to break the system, are we? 😉 Not this time! Please fix the errors."
+    },
+    "projectSettings": {
+      "fetchFailed": "Failed to load project settings. Please try again later.",
+      "dataUnavailable": "Project configuration data is currently unavailable."
     }
   },
   "success": {
@@ -23,6 +27,9 @@
       "register": "Registration successful! You are now logged in.",
       "logout": "You have been logged out successfully.",
       "sessionRestored": "Session restored successfully."
+    },
+    "projectSettings": {
+      "loaded": "Project settings loaded."
     }
   }
 }

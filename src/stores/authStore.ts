@@ -10,7 +10,7 @@ import {
 } from '@/utils/toaster';
 import i18n from '@/plugins/i18n';
 import { AuthMessageKey } from '@/localization/i18nKeys';
-import { AuthError, ClientValidationError } from '@/services/authErrors';
+import { AuthError, ClientValidationError } from '@/services/appErrors';
 
 interface AuthStoreErrorDetails {
   i18nKey: AuthMessageKey | string;
@@ -44,6 +44,9 @@ export interface RegistrationData {
   billingAddress?: AddressFormData;
 }
 
+/**
+ * The store for authentication and user session.
+ */
 export const useAuthStore = defineStore('auth', () => {
   // --- State ---
   const user = ref<Customer | null>(null);
@@ -57,10 +60,18 @@ export const useAuthStore = defineStore('auth', () => {
   const authErrorMessage = computed(() => currentError.value);
 
   // --- Actions ---
+  /**
+   * Set the loading state of the store.
+   * @param loadingState - A boolean indicating if loading is in progress.
+   */
   const setLoading = (loadingState: boolean): void => {
     isLoading.value = loadingState;
   };
 
+  /**
+   * Set the current error in the store.
+   * @param err - The error object or message to set as the current error.
+   */
   const setError = (err: AuthError | Error | string | null): void => {
     if (!err) {
       currentError.value = null;
@@ -120,22 +131,37 @@ export const useAuthStore = defineStore('auth', () => {
     );
   };
 
+  /**
+   * Clear the current error in the store.
+   */
   const clearError = (): void => {
     currentError.value = null;
   };
 
+  /**
+   * Set the user session with provided user data.
+   * @param userData - The customer data to set as the current user session.
+   */
   const setUserSession = (userData: Customer): void => {
     user.value = userData;
     currentError.value = null;
     appLogger.log('AuthStore: User session established.', userData);
   };
 
+  /**
+   * Clear the current user session.
+   */
   const clearUserSession = (): void => {
     user.value = null;
     currentError.value = null;
     appLogger.log('AuthStore: User session cleared.');
   };
 
+  /**
+   * Log in a user with the provided credentials.
+   * @param credentials - The login data containing user email and password.
+   * @returns A promise that resolves to a boolean indicating login success.
+   */
   async function login(credentials: LoginData): Promise<boolean> {
     setLoading(true);
     clearError();
@@ -158,6 +184,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Register a new user with the provided registration data.
+   * @param data - The registration data containing user details.
+   * @returns A promise that resolves to a boolean indicating registration success.
+   */
   async function register(data: RegistrationData): Promise<boolean> {
     setLoading(true);
     clearError();
@@ -196,6 +227,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Log out the current user.
+   * @returns A promise that resolves when logout is complete.
+   */
   async function logout(): Promise<void> {
     setLoading(true);
     clearError();
@@ -218,6 +253,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Restore the user session on application load.
+   */
   async function restoreUserSession() {
     appLogger.log('AuthStore: Attempting to restore session on load...');
     clearError();

@@ -1,9 +1,16 @@
 import appLogger from '@/utils/logger';
 import { CtpClientFactory } from './ctpClientBuilderFactory';
 import { projectKey } from './ctpConfig';
+import type { ByProjectKeyRequestBuilder } from '@commercetools/platform-sdk';
 
-export const appApiRoot = CtpClientFactory.createAppApiRoot();
+let memoizedAppApiRoot: ByProjectKeyRequestBuilder | null = null;
 
-appLogger.log(
-  `ctpClient.ts: Initialized apiRoot for project ${projectKey} using Client Credentials Flow.`,
-);
+export function getAppApiRoot(): ByProjectKeyRequestBuilder {
+  if (!memoizedAppApiRoot) {
+    memoizedAppApiRoot = CtpClientFactory.createAppApiRoot();
+    appLogger.log(
+      `ctpClient.ts: Initialized appApiRoot for project ${projectKey} using Client Credentials Flow.`,
+    );
+  }
+  return memoizedAppApiRoot;
+}

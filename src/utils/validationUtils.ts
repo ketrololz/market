@@ -1,6 +1,6 @@
 import appLogger from '@/utils/logger';
 import * as yup from 'yup';
-import { ClientValidationError, AuthError } from '@/services/authErrors';
+import { ClientValidationError, AuthError } from '@/services/appErrors';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 
 /**

@@ -11,7 +11,7 @@ import {
   AuthError,
   EmailInUseError,
   InvalidCredentialsError,
-} from '@/services/authErrors';
+} from '@/services/appErrors';
 import * as toasterUtils from '@/utils/toaster';
 import i18n from '@/plugins/i18n';
 import type {

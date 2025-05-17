@@ -9,7 +9,7 @@ import {
 import { userTokenCache } from '@/api/localStorageTokenCache';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type LoginData, type RegistrationData } from '@/stores/authStore';
-import { AuthError, parseCtpError } from './authErrors';
+import { AuthError, parseError } from './appErrors';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
 import { AuthMessageKey } from '@/localization/i18nKeys';
@@ -18,6 +18,11 @@ import AnonymousSessionService from './anonymousSessionService';
 import { validateData } from '@/utils/validationUtils';
 
 class AuthService {
+  /**
+   * Attempt to log in a user using the provided login data.
+   * @param data - The login data containing email and password.
+   * @returns The logged-in customer information.
+   */
   public async login(data: LoginData): Promise<Customer> {
     appLogger.log('AuthService: Attempting login with /me/login strategy...');
 
@@ -70,10 +75,15 @@ class AuthService {
     } catch (error) {
       appLogger.error('AuthService Login Error:', error);
       userTokenCache.clear();
-      throw parseCtpError(error);
+      throw parseError(error);
     }
   }
 
+  /**
+   * Register a new user with the provided registration data.
+   * @param data - The registration data containing user details.
+   * @returns The result of the customer sign-in.
+   */
   public async register(data: RegistrationData): Promise<CustomerSignInResult> {
     appLogger.log('AuthService: Attempting registration...');
 
@@ -149,10 +159,13 @@ class AuthService {
       return response.body;
     } catch (error) {
       appLogger.error('AuthService Register Error:', error);
-      throw parseCtpError(error);
+      throw parseError(error);
     }
   }
 
+  /**
+   * Log out the current user and revoke their session token.
+   */
   public async logout(): Promise<void> {
     appLogger.log('AuthService: Logging out...');
     const tokenCache = userTokenCache;
@@ -184,6 +197,10 @@ class AuthService {
     }
   }
 
+  /**
+   * Restore the user session if a valid refresh token is available.
+   * @returns The restored customer information or null if restoration fails.
+   */
   public async restoreSession(): Promise<Customer | null> {
     appLogger.log('AuthService: Checking auth and refreshing token...');
     const initialTokenState = userTokenCache.get();

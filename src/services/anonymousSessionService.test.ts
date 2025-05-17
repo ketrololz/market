@@ -7,7 +7,7 @@ import {
   setStoredAnonymousId,
   clearStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import * as authErrors from './authErrors';
+import * as authErrors from './appErrors';
 import { v4 as uuidv4 } from 'uuid';
 import type { ByProjectKeyRequestBuilder } from '@commercetools/platform-sdk';
 
@@ -43,7 +43,7 @@ vi.mock('@/api/ctpClientBuilderFactory', () => ({
   },
 }));
 
-vi.spyOn(authErrors, 'parseCtpError').mockImplementation((err: unknown) => {
+vi.spyOn(authErrors, 'parseError').mockImplementation((err: unknown) => {
   if (err instanceof authErrors.AuthError) {
     return err;
   }
@@ -225,14 +225,14 @@ describe('AnonymousSessionService', () => {
         throw creationError;
       });
       const parsedErrorInstance = new authErrors.AuthError('parsed error');
-      (authErrors.parseCtpError as ReturnType<typeof vi.fn>).mockReturnValue(
+      (authErrors.parseError as ReturnType<typeof vi.fn>).mockReturnValue(
         parsedErrorInstance,
       );
 
       await expect(serviceInstance.ensureSession()).rejects.toThrow(
         parsedErrorInstance,
       );
-      expect(authErrors.parseCtpError).toHaveBeenCalledWith(creationError);
+      expect(authErrors.parseError).toHaveBeenCalledWith(creationError);
       expect(clearStoredAnonymousId).toHaveBeenCalledTimes(1);
       expect(anonymousTokenCache.clear).toHaveBeenCalledTimes(1);
     });

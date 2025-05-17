@@ -7,7 +7,7 @@ import {
   getStoredAnonymousId,
   clearStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import * as authErrors from './authErrors';
+import * as authErrors from './appErrors';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
 import { v4 as uuidv4 } from 'uuid';
@@ -62,7 +62,7 @@ vi.mock('@/api/ctpClientBuilderFactory', () => ({
   },
 }));
 
-vi.spyOn(authErrors, 'parseCtpError').mockImplementation((err: unknown) => {
+vi.spyOn(authErrors, 'parseError').mockImplementation((err: unknown) => {
   if (err instanceof authErrors.AuthError) {
     return err;
   }
@@ -195,14 +195,14 @@ describe('AuthService', () => {
       (mockApiRoot.execute as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
         ctpError,
       );
-      (
-        authErrors.parseCtpError as ReturnType<typeof vi.fn>
-      ).mockReturnValueOnce(new authErrors.InvalidCredentialsError());
+      (authErrors.parseError as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+        new authErrors.InvalidCredentialsError(),
+      );
 
       await expect(authService.login(mockLoginData)).rejects.toThrow(
         authErrors.InvalidCredentialsError,
       );
-      expect(authErrors.parseCtpError).toHaveBeenCalledWith(ctpError);
+      expect(authErrors.parseError).toHaveBeenCalledWith(ctpError);
       expect(userTokenCache.clear).toHaveBeenCalled();
     });
   });

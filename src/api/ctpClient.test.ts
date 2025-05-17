@@ -1,10 +1,12 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ByProjectKeyRequestBuilder } from '@commercetools/platform-sdk';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const mockAppApiRootInstance = {
+const mockCreatedApiRootInstance = {
+  _isMockCreatedInstance: true,
   withProjectKey: vi.fn().mockReturnThis(),
 } as unknown as ByProjectKeyRequestBuilder;
-const mockCreateAppApiRoot = vi.fn(() => mockAppApiRootInstance);
+
+const mockCreateAppApiRoot = vi.fn(() => mockCreatedApiRootInstance);
 
 vi.mock('./ctpClientBuilderFactory', () => ({
   CtpClientFactory: {
@@ -33,31 +35,55 @@ vi.mock('./ctpConfig', () => ({
   scopes: ['mockScope'],
 }));
 
-describe('ctpClient.ts', () => {
-  let appApiRootModule: typeof import('./ctpClient');
+describe('ctpClient.ts - getAppApiRoot', () => {
+  let getAppApiRootFunction: () => ByProjectKeyRequestBuilder;
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    appApiRootModule = await import('./ctpClient');
-  });
-
-  afterEach(() => {
     vi.resetModules();
+    const ctpClientModule = await import('./ctpClient');
+    getAppApiRootFunction = ctpClientModule.getAppApiRoot;
   });
 
-  it('should call CtpClientFactory.createAppApiRoot on initialization', () => {
+  it('should call CtpClientFactory.createAppApiRoot and log on first call', () => {
+    const apiRoot = getAppApiRootFunction();
+
     expect(mockCreateAppApiRoot).toHaveBeenCalledTimes(1);
-  });
-
-  it('should log a message on initialization with the correct projectKey', () => {
     expect(mockAppLoggerLog).toHaveBeenCalledTimes(1);
     expect(mockAppLoggerLog).toHaveBeenCalledWith(
-      `ctpClient.ts: Initialized apiRoot for project ${MOCK_PROJECT_KEY} using Client Credentials Flow.`,
+      `ctpClient.ts: Initialized appApiRoot for project ${MOCK_PROJECT_KEY} using Client Credentials Flow.`,
     );
+    expect(apiRoot).toBe(mockCreatedApiRootInstance);
   });
 
-  it('should export appApiRoot, and it should be the result from the factory', () => {
-    expect(appApiRootModule.appApiRoot).toBeDefined();
-    expect(appApiRootModule.appApiRoot).toBe(mockAppApiRootInstance);
+  it('should return cached instance and NOT call factory or log on subsequent calls', () => {
+    const firstApiRoot = getAppApiRootFunction();
+    expect(mockCreateAppApiRoot).toHaveBeenCalledTimes(1);
+    expect(mockAppLoggerLog).toHaveBeenCalledTimes(1);
+
+    mockCreateAppApiRoot.mockClear();
+    mockAppLoggerLog.mockClear();
+
+    const secondApiRoot = getAppApiRootFunction();
+
+    expect(mockCreateAppApiRoot).not.toHaveBeenCalled();
+    expect(mockAppLoggerLog).not.toHaveBeenCalled();
+    expect(secondApiRoot).toBe(firstApiRoot);
+  });
+
+  it('should re-initialize if modules are reset (simulating fresh import)', async () => {
+    getAppApiRootFunction();
+    expect(mockCreateAppApiRoot).toHaveBeenCalledTimes(1);
+    expect(mockAppLoggerLog).toHaveBeenCalledTimes(1);
+
+    vi.resetModules();
+    vi.clearAllMocks();
+
+    const ctpClientModuleFresh = await import('./ctpClient');
+    const freshGetAppApiRoot = ctpClientModuleFresh.getAppApiRoot;
+
+    freshGetAppApiRoot();
+    expect(mockCreateAppApiRoot).toHaveBeenCalledTimes(1);
+    expect(mockAppLoggerLog).toHaveBeenCalledTimes(1);
   });
 });

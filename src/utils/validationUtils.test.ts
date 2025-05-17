@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { validateData } from '@/utils/validationUtils';
 import * as yup from 'yup';
-import { ClientValidationError, AuthError } from '@/services/authErrors';
+import { ClientValidationError, AuthError } from '@/services/appErrors';
 import appLogger from '@/utils/logger';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 

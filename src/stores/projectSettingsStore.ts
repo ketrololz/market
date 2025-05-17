@@ -1,98 +1,101 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import ProjectSettingsService from '@/services/projectSettingsService';
+import ProjectSettingsService, {
+  type ProjectSettings,
+} from '@/services/projectSettingsService';
 import appLogger from '@/utils/logger';
 import { showErrorToast } from '@/utils/toaster';
 import i18n from '@/plugins/i18n';
-import { AuthError } from '@/services/authErrors';
-import { AuthMessageKey } from '@/localization/i18nKeys';
+import { AppError } from '@/services/appErrors';
+import { ProjectSettingsMessageKey } from '@/localization/i18nKeys';
 
-// interface ProjectSettingsState {
-//   projectName: string | null;
-//   availableLanguages: string[];
-//   availableCountries: string[];
-//   availableCurrencies: string[];
-//   isLoading: boolean;
-//   error: string | null;
-// }
+interface SettingsStoreError {
+  i18nKey: ProjectSettingsMessageKey | string;
+  i18nParams?: Record<string, unknown>;
+  message?: string;
+}
 
+/**
+ * The store for project settings.
+ */
 export const useProjectSettingsStore = defineStore('projectSettings', () => {
   // --- State ---
-  const projectName = ref<string | null>(null);
-  const availableLanguages = ref<string[]>([]);
-  const availableCountries = ref<string[]>([]);
-  const availableCurrencies = ref<string[]>([]);
+  const settings = ref<ProjectSettings | null>(null);
   const isLoading = ref(false);
-  const error = ref<string | null>(null);
+  const error = ref<SettingsStoreError | null>(null);
 
   // --- Getters ---
-  const getProjectName = computed(() => projectName.value);
-  const getAvailableLanguages = computed(() => availableLanguages.value);
-  const getAvailableCountries = computed(() => availableCountries.value);
-  const getAvailableCurrencies = computed(() => availableCurrencies.value);
+  const getProjectName = computed(() => settings.value?.name || null);
+  const getLanguages = computed(() => settings.value?.languages || []);
+  const getCountries = computed(() => settings.value?.countries || []);
+  const getCurrencies = computed(() => settings.value?.currencies || []);
   const isLoadingSettings = computed(() => isLoading.value);
-  const settingsError = computed(() => error.value);
+  const settingsErrorDetails = computed(() => error.value);
 
   // --- Actions ---
+  /**
+   * Fetch the project settings from the API.
+   */
   async function fetchProjectSettings() {
-    if (projectName.value && availableLanguages.value.length > 0) {
+    if (settings.value) {
       appLogger.log(
         'ProjectSettingsStore: Settings already loaded, returning cached.',
       );
       return;
     }
-
     isLoading.value = true;
     error.value = null;
     appLogger.log('ProjectSettingsStore: Fetching project settings...');
     try {
-      const settings = await ProjectSettingsService.getProjectSettings();
-      if (settings) {
-        projectName.value = settings.name;
-        availableLanguages.value = settings.languages;
-        availableCountries.value = settings.countries;
-        availableCurrencies.value = settings.currencies;
-        appLogger.log(
-          'ProjectSettingsStore: Project settings loaded successfully:',
-          settings,
-        );
-      }
+      const fetchedSettings = await ProjectSettingsService.getProjectSettings();
+      settings.value = fetchedSettings;
+      appLogger.log(
+        'ProjectSettingsStore: Project settings loaded successfully:',
+        fetchedSettings,
+      );
     } catch (e: unknown) {
       appLogger.error(
         'ProjectSettingsStore: Error fetching project settings',
         e,
       );
-      let errorMessageKey = AuthMessageKey.UnknownError;
-      let errorParams: Record<string, unknown> | undefined = undefined;
-
-      if (e instanceof AuthError) {
-        errorMessageKey = e.i18nKey as AuthMessageKey;
-        errorParams = e.i18nParams;
+      let errorPayload: SettingsStoreError;
+      if (e instanceof AppError) {
+        errorPayload = {
+          i18nKey: e.i18nKey,
+          i18nParams: e.i18nParams,
+          message: e.message,
+        };
       } else if (e instanceof Error) {
-        errorParams = { details: e.message };
+        errorPayload = {
+          i18nKey: ProjectSettingsMessageKey.FetchFailed,
+          i18nParams: { details: e.message },
+          message: e.message,
+        };
+      } else {
+        errorPayload = {
+          i18nKey: ProjectSettingsMessageKey.FetchFailed,
+          message: 'An unknown error occurred.',
+        };
       }
-
-      const translatedError = i18n.global.t(errorMessageKey, errorParams || {});
-      error.value = translatedError;
-      showErrorToast(translatedError);
+      error.value = errorPayload;
+      showErrorToast(
+        i18n.global.t(errorPayload.i18nKey, errorPayload.i18nParams || {}),
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
   return {
-    projectName,
-    availableLanguages,
-    availableCountries,
-    availableCurrencies,
+    settings,
     isLoading,
     error,
     getProjectName,
-    getAvailableLanguages,
-    getAvailableCountries,
-    getAvailableCurrencies,
+    getAvailableLanguages: getLanguages,
+    getAvailableCountries: getCountries,
+    getAvailableCurrencies: getCurrencies,
     isLoadingSettings,
-    settingsError,
+    settingsErrorDetails,
     fetchProjectSettings,
   };
 });

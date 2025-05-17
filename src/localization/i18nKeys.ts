@@ -27,3 +27,12 @@ export enum AuthMessageKey {
   LogoutSuccess = 'success.auth.logout',
   SessionRestored = 'success.auth.sessionRestored',
 }
+
+export enum ProjectSettingsMessageKey {
+  // --- Error Keys ---
+  FetchFailed = 'errors.projectSettings.fetchFailed',
+  DataUnavailable = 'errors.projectSettings.dataUnavailable',
+
+  // --- Success Message Keys ---
+  SettingsLoaded = 'success.projectSettings.loaded',
+}
