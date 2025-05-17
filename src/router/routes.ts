@@ -1,4 +1,4 @@
-import NotFound from '../page/NotFound.vue'
+import NotFound from '../page/NotFound.vue';
 import type { RouteRecordRaw } from 'vue-router';
 import RegistrationPage from '../pages/RegistrationPage.vue';
 import LoginPage from '../pages/LoginPage.vue';
@@ -12,5 +12,5 @@ export const ROUTES: RouteRecordRaw[] = [
   // { path: '/', component: Main },
   { path: '/login', component: LoginPage },
   { path: '/registration', component: RegistrationPage },
-  { path: '/:pathMatch(.*)*', component: NotFound }, // Должен всегда быть последним
+  { path: '/:pathMatch(.*)*', name: '404', component: NotFound }, // Должен всегда быть последним
 ];

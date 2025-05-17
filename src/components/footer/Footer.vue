@@ -19,18 +19,18 @@
         <a
           target="_blank"
           rel="noopener"
-          href="https://github.com/YaroshenkoAnna"
+          href="https://github.com/zilusion"
           class="text-white font-medium hover:text-indigo-400 transition duration-100 ease-in-out"
-          >YaroshenkoAnna</a
+          >zilusion</a
         >
       </li>
       <li>
         <a
           target="_blank"
           rel="noopener"
-          href="https://github.com/zilusion"
+          href="https://github.com/YaroshenkoAnna"
           class="text-white font-medium hover:text-indigo-400 transition duration-100 ease-in-out"
-          >zilusion</a
+          >YaroshenkoAnna</a
         >
       </li>
       <li>
