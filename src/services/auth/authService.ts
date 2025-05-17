@@ -9,7 +9,7 @@ import {
 import { userTokenCache } from '@/api/localStorageTokenCache';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type LoginData, type RegistrationData } from '@/stores/authStore';
-import { AuthError, parseError } from './appErrors';
+import { AuthError, parseError } from '../appErrors';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
 import { AuthMessageKey } from '@/localization/i18nKeys';

@@ -3,14 +3,14 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useProjectSettingsStore } from './projectSettingsStore';
 import ProjectSettingsService, {
   type ProjectSettings,
-} from '@/services/projectSettingsService';
+} from '@/services/project/projectSettingsService';
 import * as toasterUtils from '@/utils/toaster';
 import i18n from '@/plugins/i18n';
 import appLogger from '@/utils/logger';
 import { ProjectSettingsFetchError } from '@/services/appErrors';
 import { ProjectSettingsMessageKey } from '@/localization/i18nKeys';
 
-vi.mock('@/services/projectSettingsService');
+vi.mock('@/services/project/projectSettingsService');
 vi.mock('@/utils/toaster');
 vi.mock('@/plugins/i18n', () => ({
   default: {

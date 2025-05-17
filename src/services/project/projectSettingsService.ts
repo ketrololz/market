@@ -1,12 +1,12 @@
 import appLogger from '@/utils/logger';
 import { type Project } from '@commercetools/platform-sdk';
 import { getAppApiRoot } from '@/api/ctpClient';
-import { parseError } from './appErrors';
+import { parseError } from '../appErrors';
 import {
   ProjectSettingsFetchError,
   ProjectDataUnavailableError,
   AppError,
-} from './appErrors';
+} from '../appErrors';
 
 export interface ProjectSettings {
   languages: string[];

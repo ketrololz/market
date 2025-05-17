@@ -6,7 +6,7 @@ import {
   type LoginData,
   type RegistrationData,
 } from './authStore';
-import AuthService from '@/services/authService';
+import AuthService from '@/services/auth/authService';
 import {
   AuthError,
   EmailInUseError,
@@ -20,7 +20,7 @@ import type {
 } from '@commercetools/platform-sdk';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 
-vi.mock('@/services/authService');
+vi.mock('@/services/auth/authService');
 vi.mock('@/utils/logger', () => ({
   default: {
     log: vi.fn(),

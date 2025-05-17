@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Customer, BaseAddress } from '@commercetools/platform-sdk';
-import AuthService from '@/services/authService';
+import AuthService from '@/services/auth/authService';
 import { ref, computed } from 'vue';
 import appLogger from '@/utils/logger';
 import {

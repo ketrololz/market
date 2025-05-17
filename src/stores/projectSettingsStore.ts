@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import ProjectSettingsService, {
   type ProjectSettings,
-} from '@/services/projectSettingsService';
+} from '@/services/project/projectSettingsService';
 import appLogger from '@/utils/logger';
 import { showErrorToast } from '@/utils/toaster';
 import i18n from '@/plugins/i18n';

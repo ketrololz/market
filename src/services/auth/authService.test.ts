@@ -7,7 +7,7 @@ import {
   getStoredAnonymousId,
   clearStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import * as authErrors from './appErrors';
+import * as authErrors from '../appErrors';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
 import { v4 as uuidv4 } from 'uuid';

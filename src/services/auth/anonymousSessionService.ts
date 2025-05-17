@@ -8,7 +8,7 @@ import {
 } from '@/api/localStorageTokenCache';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { v4 as uuidv4 } from 'uuid';
-import { parseError } from './appErrors';
+import { parseError } from '../appErrors';
 
 export interface AnonymousSession {
   apiRoot: ByProjectKeyRequestBuilder;

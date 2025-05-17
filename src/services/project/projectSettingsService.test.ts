@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as appErrors from './appErrors';
+import * as appErrors from '../appErrors';
 import appLogger from '@/utils/logger';
 import type { Project } from '@commercetools/platform-sdk';
 import { ProjectSettingsService } from './projectSettingsService';

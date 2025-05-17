@@ -7,7 +7,7 @@ import {
   setStoredAnonymousId,
   clearStoredAnonymousId,
 } from '@/api/localStorageTokenCache';
-import * as authErrors from './appErrors';
+import * as authErrors from '../appErrors';
 import { v4 as uuidv4 } from 'uuid';
 import type { ByProjectKeyRequestBuilder } from '@commercetools/platform-sdk';
 
