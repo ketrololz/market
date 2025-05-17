@@ -5,6 +5,13 @@
   font-size: 12px !important;
 }
 
+.input-readonly:focus,
+.input-readonly:hover {
+  box-shadow: none !important;
+  outline: none !important;
+  border-color: rgb(212, 212, 216) !important;
+}
+
 @media screen and (max-width: 960px) {
   .p-menubar-end {
     margin-left: 0 !important;
