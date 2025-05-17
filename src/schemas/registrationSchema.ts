@@ -5,7 +5,6 @@ import {
   nameSchema,
   dateSchema,
   addressSchema,
-  // addressSchema,
 } from './validators';
 
 export const registrationSchema = yup.object({

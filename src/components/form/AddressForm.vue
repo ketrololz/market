@@ -9,6 +9,12 @@ const props = defineProps<{
   countries: { name: string; code: string }[];
   readonly?: boolean;
 }>();
+
+const getCountryNameByCode = (code: string | undefined | null) => {
+  if (!code) return undefined;
+  const country = props.countries.find((c) => c.code === code);
+  return country?.name;
+};
 </script>
 
 <template>
@@ -16,12 +22,12 @@ const props = defineProps<{
     <div class="flex gap-2">
       <FormField
         v-slot="slotProps"
-        :name="`${props.path}.street`"
+        :name="`${props.path}.streetName`"
         class="w-1/2"
       >
-        <label :for="`${props.path}-street`" class="text-xs">Street</label>
+        <label :for="`${props.path}-streetName`" class="text-xs">Street</label>
         <BaseInput
-          :input-id="`${props.path}-street`"
+          :input-id="`${props.path}-streetName`"
           :model-value="slotProps.value"
           :error-message="slotProps.error"
           :readonly="props.readonly"
@@ -70,11 +76,15 @@ const props = defineProps<{
           class="w-full"
           :disabled="props.readonly"
           option-label="name"
+          option-value="code"
           :input-id="`${props.path}-country`"
-          @update:model-value="slotProps.setValue"
         >
-          <template #value="{ value }">
-            <span>{{ value?.name || 'Select a Country' }}</span>
+          <template #value="{ value: selectedCode, placeholder }">
+            <span>{{
+              getCountryNameByCode(selectedCode) ||
+              placeholder ||
+              'Select a Country'
+            }}</span>
           </template>
           <template #option="{ option }">
             {{ option.name }}

@@ -87,14 +87,7 @@ class AuthService {
   public async register(data: RegistrationData): Promise<CustomerSignInResult> {
     appLogger.log('AuthService: Attempting registration...');
 
-    await validateData(
-      registrationSchema,
-      {
-        ...data,
-        dateOfBirth: new Date(data.dateOfBirth),
-      },
-      'Registration Data',
-    );
+    await validateData(registrationSchema, data, 'Registration Data');
 
     const anonymousSession = await AnonymousSessionService.ensureSession();
     if (!anonymousSession) {
@@ -110,7 +103,7 @@ class AuthService {
       addresses.push(shippingAddr);
 
       let billingAddr: BaseAddress = shippingAddr;
-      if (!data.useShippingAsBilling && data.billingAddress) {
+      if (!data.sameAsShipping && data.billingAddress) {
         billingAddr = { ...data.billingAddress };
         addresses.push(billingAddr);
       }
@@ -122,10 +115,10 @@ class AuthService {
         defaultShippingAddressIndex = addresses.indexOf(shippingAddr);
       }
 
-      if (data.useShippingAsBilling && data.shippingAddress.isDefaultBilling) {
+      if (data.sameAsShipping && data.shippingAddress.isDefaultBilling) {
         defaultBillingAddressIndex = addresses.indexOf(shippingAddr);
       } else if (
-        !data.useShippingAsBilling &&
+        !data.sameAsShipping &&
         data.billingAddress?.isDefaultBilling
       ) {
         defaultBillingAddressIndex = addresses.indexOf(billingAddr);

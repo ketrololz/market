@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Customer, BaseAddress } from '@commercetools/platform-sdk';
+import type { Customer } from '@commercetools/platform-sdk';
 import AuthService from '@/services/auth/authService';
 import { ref, computed } from 'vue';
 import appLogger from '@/utils/logger';
@@ -21,8 +21,13 @@ interface AuthStoreErrorDetails {
   fieldErrors?: Record<string, string>;
 }
 
-export interface AddressFormData
-  extends Omit<BaseAddress, 'id' | 'key' | 'country'> {
+export interface AddressFormData {
+  firstName?: string;
+  lastName?: string;
+  streetName: string;
+  streetNumber?: string;
+  city: string;
+  postalCode: string;
   country: string;
   isDefaultShipping?: boolean;
   isDefaultBilling?: boolean;
@@ -40,8 +45,8 @@ export interface RegistrationData {
   lastName: string;
   dateOfBirth: string;
   shippingAddress: AddressFormData;
-  useShippingAsBilling: boolean;
-  billingAddress?: AddressFormData;
+  sameAsShipping: boolean;
+  billingAddress: AddressFormData;
 }
 
 /**

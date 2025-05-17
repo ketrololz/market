@@ -24,32 +24,68 @@ import Tab from 'primevue/tab';
 import TabPanel from 'primevue/tabpanel';
 import AddressForm from './AddressForm.vue';
 
-import { ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
 
 const authStore = useAuthStore();
+const projectSettingsStore = useProjectSettingsStore();
+import countriesLib from 'i18n-iso-countries';
+import countriesEn from 'i18n-iso-countries/langs/en.json';
+import countriesRu from 'i18n-iso-countries/langs/ru.json';
+import { useI18n } from 'vue-i18n';
+
+const { locale } = useI18n();
+countriesLib.registerLocale(countriesEn);
+countriesLib.registerLocale(countriesRu);
+
 const sameAddress = ref(true);
 
-const countries = ref([
-  { name: 'Germany', code: 'DE' },
-  { name: 'Russia', code: 'RU' },
-  { name: 'United States', code: 'US' },
-]);
+const countries = computed(() => {
+  const projectCountryCodes = projectSettingsStore.getAvailableCountries;
+  const langForCountryNames = locale.value.startsWith('ru') ? 'ru' : 'en';
+
+  return projectCountryCodes
+    .map((code) => ({
+      code: code,
+      name:
+        countriesLib.getName(code, langForCountryNames, {
+          select: 'official',
+        }) || code,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+});
+
+onMounted(async () => {
+  if (projectSettingsStore.getAvailableCountries.length === 0) {
+    await projectSettingsStore.fetchProjectSettings();
+  }
+});
 
 async function onFormSubmit({ values, valid }: FormSubmitEvent) {
   if (valid) {
-    console.log('send data to server', values);
+    appLogger.log('Form is valid, received values:', values);
+
     const shippingAddressPayload: AddressFormData = {
       firstName: values.firstName,
       lastName: values.lastName,
-      streetName: values.address.street,
-      city: values.address.city,
-      postalCode: values.address.postalCode,
-      // country: values.address.country.name, // TODO Переделать значения в коды стран RU и т.п
-      country: 'RU',
-      // isDefaultShipping: values.shippingIsDefault,
-      // isDefaultBilling: useShippingAsBilling.value
-      //   ? shippingIsBillingDefault.value
-      //   : false,
+      streetName: values.shippingAddress.streetName,
+      city: values.shippingAddress.city,
+      postalCode: values.shippingAddress.postalCode,
+      country: values.shippingAddress.country,
+      isDefaultShipping: values.shippingAddress.defaultShipping,
+      isDefaultBilling: values.sameAsShipping
+        ? values.shippingAddress.defaultBilling
+        : false,
+    };
+
+    const billingAddressPayload: AddressFormData = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      streetName: values.billingAddress.streetName,
+      city: values.billingAddress.city,
+      postalCode: values.billingAddress.postalCode,
+      country: values.billingAddress.country,
+      isDefaultBilling: values.billingAddress.defaultBilling,
     };
 
     const registrationPayload: RegistrationData = {
@@ -57,39 +93,26 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
       password: values.password,
       firstName: values.firstName,
       lastName: values.lastName,
-      dateOfBirth: values.dateOfBirth?.toISOString().substring(0, 10),
+      dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
       shippingAddress: shippingAddressPayload,
-      useShippingAsBilling: true, // TODO Заменить на определение через чекбокс
-      // useShippingAsBilling: values.useShippingAsBilling, // Пример
+      sameAsShipping: values.sameAsShipping,
+      billingAddress: values.sameAsShipping
+        ? shippingAddressPayload
+        : billingAddressPayload,
     };
-
-    // TODO
-    // if (!values.useShippingAsBilling) {
-    //   registrationPayload.billingAddress = {
-    //     firstName: values.firstName,
-    //     lastName: values.lastName,
-    //     streetName: values.billingAddress.street,
-    //     city: values.billingAddress.city,
-    //     postalCode: values.billingAddress.postalCode,
-    //     country: values.billingAddress.country.name,
-    //     isDefaultBilling: values.billingIsDefault,
-    //   };
-    // }
-
-    console.log(registrationPayload);
+    appLogger.log('Submitting Registration Payload:', registrationPayload);
     const success = await authStore.register(registrationPayload);
     if (success) {
-      appLogger.log(
-        'Registration process initiated successfully from component.',
-      );
-    } else if (authStore.authErrorDetails) {
-      appLogger.log(
-        'Registration failed with code:',
-        authStore.authErrorDetails.code,
+      appLogger.log('Registration & auto-login successful from component.');
+    } else {
+      appLogger.warn(
+        'Registration or auto-login failed. Error details in store:',
+        authStore.authErrorDetails,
       );
     }
   }
 }
+const isLoading = computed(() => authStore.isLoading);
 
 const form = ref();
 
@@ -105,7 +128,7 @@ watch(
 
 watch(
   () => [
-    form.value?.getFieldState('shippingAddress.street')?.value,
+    form.value?.getFieldState('shippingAddress.streetName')?.value,
     form.value?.getFieldState('shippingAddress.city')?.value,
     form.value?.getFieldState('shippingAddress.postalCode')?.value,
     form.value?.getFieldState('shippingAddress.country')?.value,
@@ -122,7 +145,7 @@ function syncAddresses() {
   const formInstance = form.value as FormInstance;
   if (!formInstance) return;
 
-  const fieldsToCopy = ['street', 'city', 'postalCode', 'country'];
+  const fieldsToCopy = ['streetName', 'city', 'postalCode', 'country'];
 
   fieldsToCopy.forEach((field) => {
     const source = formInstance.getFieldState(
@@ -241,6 +264,8 @@ function syncAddresses() {
           label="Sign up"
           type="submit"
           class="w-full mt-8"
+          :loading="isLoading"
+          :disabled="isLoading"
         />
       </Form>
     </div>

@@ -101,22 +101,29 @@ describe('AuthService', () => {
     email: 'test@example.com',
     password: 'password123',
   };
-  const mockAddress: AddressFormData = {
+  const mockShippingAddress: AddressFormData = {
+    streetName: '123 Main',
+    city: 'Testville',
+    postalCode: '12345',
+    country: 'US',
+    isDefaultShipping: true,
+  };
+  const mockBillingAddress: AddressFormData = {
     streetName: '123 Main',
     city: 'Testville',
     postalCode: '12345',
     country: 'US',
     isDefaultBilling: true,
-    isDefaultShipping: true,
   };
   const mockRegistrationData: RegistrationData = {
     email: 'new@example.com',
     password: 'newPassword123',
     firstName: 'New',
     lastName: 'User',
-    shippingAddress: mockAddress,
-    useShippingAsBilling: true,
+    shippingAddress: mockShippingAddress,
+    sameAsShipping: true,
     dateOfBirth: '1990-01-01',
+    billingAddress: mockBillingAddress,
   };
   const mockCustomer: Customer = {
     id: 'user-id',
