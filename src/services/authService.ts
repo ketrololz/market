@@ -3,103 +3,21 @@ import {
   type Customer,
   type MyCustomerDraft,
   type CustomerSignInResult,
-  ByProjectKeyRequestBuilder,
   type MyCustomerSignin,
   type BaseAddress,
 } from '@commercetools/platform-sdk';
-import {
-  userTokenCache,
-  anonymousTokenCache,
-  getStoredAnonymousId,
-  clearStoredAnonymousId,
-  setStoredAnonymousId,
-} from '@/api/localStorageTokenCache';
+import { userTokenCache } from '@/api/localStorageTokenCache';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 import { type LoginData, type RegistrationData } from '@/stores/authStore';
-import { v4 as uuidv4 } from 'uuid';
 import { AuthError, ClientValidationError, parseCtpError } from './authErrors';
 import * as yup from 'yup';
 import { loginSchema } from '@/schemas/loginSchema';
 import { registrationSchema } from '@/schemas/registrationSchema';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 import { authUrl, clientId, clientSecret } from '@/api/ctpConfig';
+import AnonymousSessionService from './anonymousSessionService';
 
 class AuthService {
-  private currentAnonymousId: string | null = getStoredAnonymousId();
-
-  private async getOrCreateAnonymousApiRoot(): Promise<{
-    apiRoot: ByProjectKeyRequestBuilder;
-    anonymousId: string;
-  } | null> {
-    appLogger.log('AuthService: Ensuring anonymous session...');
-    let anonymousIdToUse = this.currentAnonymousId || getStoredAnonymousId();
-
-    const currentAnonymousTokens = anonymousTokenCache.get();
-    if (anonymousIdToUse && currentAnonymousTokens.refreshToken) {
-      appLogger.log(
-        `AuthService: Attempting to refresh anonymous session for ID: ${anonymousIdToUse}`,
-      );
-      try {
-        const anonymousApiRoot =
-          CtpClientFactory.createAnonymousFlowApiRoot(anonymousIdToUse);
-        appLogger.log(
-          `AuthService: Anonymous session refreshed for ID: ${anonymousIdToUse}`,
-        );
-        this.currentAnonymousId = anonymousIdToUse;
-        return { apiRoot: anonymousApiRoot, anonymousId: anonymousIdToUse };
-      } catch (refreshError) {
-        appLogger.warn(
-          'AuthService: Failed to refresh anonymous token, will create a new one.',
-          refreshError,
-        );
-        anonymousTokenCache.clear();
-        clearStoredAnonymousId();
-        anonymousIdToUse = null;
-      }
-    }
-
-    if (!anonymousIdToUse) {
-      anonymousIdToUse = uuidv4();
-      appLogger.log(
-        `AuthService: Generating new anonymous ID: ${anonymousIdToUse}`,
-      );
-    }
-    this.currentAnonymousId = anonymousIdToUse;
-    setStoredAnonymousId(this.currentAnonymousId);
-
-    appLogger.log(
-      `AuthService: Creating new anonymous session with ID: ${this.currentAnonymousId}`,
-    );
-    try {
-      const anonymousApiRoot = CtpClientFactory.createAnonymousFlowApiRoot(
-        this.currentAnonymousId,
-      );
-      appLogger.log(
-        'AuthService: New anonymous session created and token cached.',
-      );
-      return {
-        apiRoot: anonymousApiRoot,
-        anonymousId: this.currentAnonymousId,
-      };
-    } catch (error) {
-      appLogger.error(
-        'AuthService: Failed to create anonymous session:',
-        error,
-      );
-      clearStoredAnonymousId();
-      this.currentAnonymousId = null;
-      anonymousTokenCache.clear();
-      throw parseCtpError(error);
-    }
-  }
-
-  private clearAnonymousSessionData(): void {
-    anonymousTokenCache.clear();
-    clearStoredAnonymousId();
-    this.currentAnonymousId = null;
-    appLogger.log('AuthService: Anonymous session data cleared.');
-  }
-
   public async login(data: LoginData): Promise<Customer> {
     appLogger.log('AuthService: Attempting login with /me/login strategy...');
 
@@ -122,9 +40,11 @@ class AuthService {
       });
     }
 
-    const anonymousSession = await this.getOrCreateAnonymousApiRoot();
+    const anonymousSession = await AnonymousSessionService.ensureSession();
     if (!anonymousSession) {
-      throw new Error('Failed to get/create anonymous session for login.');
+      throw new AuthError(AuthMessageKey.UnknownError, {
+        details: 'Failed to ensure anonymous session for login.',
+      });
     }
 
     userTokenCache.clear();
@@ -147,11 +67,11 @@ class AuthService {
         .execute();
       const signInResult = meLoginResponse.body as CustomerSignInResult;
       appLogger.log(
-        'AuthService: /me/login successful, customer data obtained. Cart (if any):',
+        'AuthService: Login successful, customer data obtained. Cart (if any):',
         signInResult.cart,
       );
 
-      this.clearAnonymousSessionData();
+      AnonymousSessionService.clearData();
 
       appLogger.log(
         'AuthService: Performing Password Flow to get user tokens...',
@@ -163,11 +83,6 @@ class AuthService {
       });
 
       await userApiRoot.me().get().execute();
-
-      if (anonymousSession?.anonymousId) {
-        this.clearAnonymousSessionData();
-      }
-
       return signInResult.customer;
     } catch (error) {
       appLogger.error('AuthService Login Error:', error);
@@ -200,11 +115,11 @@ class AuthService {
       });
     }
 
-    const anonymousSession = await this.getOrCreateAnonymousApiRoot();
+    const anonymousSession = await AnonymousSessionService.ensureSession();
     if (!anonymousSession) {
-      throw new Error(
-        'Failed to initialize anonymous session for registration.',
-      );
+      throw new AuthError(AuthMessageKey.UnknownError, {
+        details: 'Failed to ensure anonymous session for registration.',
+      });
     }
 
     try {
@@ -258,8 +173,7 @@ class AuthService {
       appLogger.log(
         'AuthService: Registration part successful. Attempting auto-login...',
       );
-
-      this.clearAnonymousSessionData();
+      AnonymousSessionService.clearData();
 
       return response.body;
     } catch (error) {
@@ -275,7 +189,7 @@ class AuthService {
     const tokenToRevoke = currentTokens.refreshToken || currentTokens.token;
 
     tokenCache.clear();
-    this.clearAnonymousSessionData();
+    AnonymousSessionService.clearData();
 
     if (tokenToRevoke) {
       try {
