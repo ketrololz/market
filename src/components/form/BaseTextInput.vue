@@ -3,29 +3,31 @@ import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
-import type { InputFieldProps } from './types/types';
+import type { InputFieldProps } from './types/InputFieldProps';
 
 const props = defineProps<InputFieldProps>();
+const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
   <div class="flex flex-col">
-    <label v-if="props.label" :for="id" class="text-sm ml-3">{{
-      props.label
-    }}</label>
-    <label v-else :for="id" class="sr-only">{{ props.id }}</label>
     <IconField v-if="props.icon">
       <InputIcon :class="`pi ${props.icon}`" />
       <InputText
+        :id="props.inputId"
         size="small"
         :model-value="props.modelValue ? String(props.modelValue) : null"
         :placeholder="props.placeholder"
         fluid
+        :readonly="props.readonly"
+        :class="props.readonly ? 'input-readonly' : ''"
+        @update:model-value="emit('update:modelValue', $event)"
       />
     </IconField>
 
     <InputText
       v-else
+      :id="props.inputId"
       size="small"
       :model-value="
         props.modelValue instanceof Date
@@ -34,6 +36,9 @@ const props = defineProps<InputFieldProps>();
       "
       :placeholder="props.placeholder"
       fluid
+      :readonly="props.readonly"
+      :class="props.readonly ? 'input-readonly' : ''"
+      @update:model-value="emit('update:modelValue', $event)"
     />
 
     <Message v-if="props.errorMessage" severity="error" variant="simple">{{

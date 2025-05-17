@@ -12,5 +12,5 @@ export const ROUTES: RouteRecordRaw[] = [
   // { path: '/', component: Main },
   { path: '/login', component: LoginPage },
   { path: '/registration', component: RegistrationPage },
-  { path: '/:pathMatch(.*)*', component: NotFound }, // Должен всегда быть последним
+  { path: '/:pathMatch(.*)*', name: '404', component: NotFound }, // Должен всегда быть последним
 ];

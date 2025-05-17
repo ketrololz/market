@@ -34,17 +34,51 @@ export const nameSchema = yup
 const minRequiredAge = 13;
 
 export const dateSchema = yup
-  .date()
-  .typeError('Invalid date')
-  .min(
-    new Date(new Date().setFullYear(new Date().getFullYear() - 100)),
+  .mixed()
+  .required('Date of birth is required')
+  .transform((value) => {
+    if (value instanceof Date) return value;
+
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-').map(Number);
+      const parsed = new Date(year, month - 1, day);
+
+      if (
+        parsed.getFullYear() === year &&
+        parsed.getMonth() === month - 1 &&
+        parsed.getDate() === day
+      ) {
+        return parsed;
+      }
+    }
+
+    return new Date('Invalid Date');
+  })
+  .test(
+    'is-valid-date',
+    'Invalid date format or non-existent date (YYYY-MM-DD)',
+    (value) => value instanceof Date && !isNaN(value.getTime()),
+  )
+  .test(
+    'min-age',
     'Date of birth must be within the last 100 years',
+    (value) => {
+      if (!(value instanceof Date)) return false;
+      const hundredYearsAgo = new Date();
+      hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
+      return value >= hundredYearsAgo;
+    },
   )
-  .max(
-    new Date(new Date().setFullYear(new Date().getFullYear() - minRequiredAge)),
-    `A User must be at least ${minRequiredAge} years old`,
-  )
-  .required('Date of birth is required');
+  .test(
+    'max-age',
+    `User must be at least ${minRequiredAge} years old`,
+    (value) => {
+      if (!(value instanceof Date)) return false;
+      const minAgeDate = new Date();
+      minAgeDate.setFullYear(minAgeDate.getFullYear() - minRequiredAge);
+      return value <= minAgeDate;
+    },
+  );
 
 export const addressSchema = yup.object({
   street: yup.string().min(1, 'Street  is required'),
@@ -54,15 +88,66 @@ export const addressSchema = yup.object({
     .matches(/^[A-Za-zА-Яа-яёЁ\s-]+$/, 'Only letters and spaces are allowed'),
   postalCode: yup
     .string()
-    .required('Postal code is required')
-    .matches(
-      /^\d{5}$|^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$/,
-      'Postal code must match the country format',
-    ),
+    .nullable()
+    .when('country', {
+      is: (country) => country && country.code,
+      then: (schema) =>
+        schema
+          .required('Postal code is required')
+          .test('postalCodeValidation', function (value) {
+            const { country } = this.parent;
+            const code = country?.code;
+
+            switch (code) {
+              case 'RU':
+                return /^\d{6}$/.test(value)
+                  ? true
+                  : this.createError({
+                      message: 'Postal code must be 6 digits (Russia)',
+                    });
+              case 'US':
+                return /^\d{5}(-\d{4})?$/.test(value)
+                  ? true
+                  : this.createError({
+                      message: 'ZIP code must be 12345 or 12345-6789 (US)',
+                    });
+              case 'DE':
+                return /^\d{5}$/.test(value)
+                  ? true
+                  : this.createError({
+                      message: 'Postal code must be 5 digits (Germany)',
+                    });
+              default:
+                return true;
+            }
+          }),
+      otherwise: (schema) =>
+        schema
+          .required('Postal code is required')
+          .test('defaultPostalCodeValidation', function (value) {
+            if (!value) {
+              return this.createError({
+                message: 'Postal code is required',
+              });
+            }
+
+            const isValidRussia = /^\d{6}$/.test(value);
+            const isValidUS = /^\d{5}(-\d{4})?$/.test(value);
+            const isValidGermany = /^\d{5}$/.test(value);
+
+            if (isValidRussia || isValidUS || isValidGermany) {
+              return true;
+            }
+
+            return this.createError({
+              message: 'Invalid postal code.',
+            });
+          }),
+    }),
   country: yup
     .object({
       name: yup.string().required(),
       code: yup.string().oneOf(['DE', 'RU', 'US']).required(),
     })
-    .required(),
+    .required('Country is required'),
 });

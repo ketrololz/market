@@ -22,6 +22,9 @@ app
         darkModeSelector: false,
       },
     },
+    locale: {
+      dateFormat: 'yy-mm-dd',
+    },
   })
   .use(VueQueryPlugin)
   .use(pinia)
