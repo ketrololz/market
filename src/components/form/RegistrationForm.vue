@@ -241,13 +241,18 @@ function syncAddresses() {
           </TabList>
           <TabPanels class="!px-0">
             <TabPanel value="shipping">
-              <AddressForm :path="'shippingAddress'" :countries="countries" />
+              <AddressForm
+                :path="'shippingAddress'"
+                :countries="countries"
+                :form="form"
+              />
             </TabPanel>
             <TabPanel value="billing">
               <AddressForm
                 :path="'billingAddress'"
                 :countries="countries"
                 :readonly="sameAddress"
+                :form="form"
               />
             </TabPanel>
           </TabPanels>
