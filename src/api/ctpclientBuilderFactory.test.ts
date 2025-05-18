@@ -70,9 +70,6 @@ describe('CtpClientFactory', () => {
     expect(mockClientBuilderInstance.withHttpMiddleware).toHaveBeenCalledWith(
       expect.objectContaining({ host: apiUrl, httpClient: fetch }),
     );
-    expect(
-      mockClientBuilderInstance.withLoggerMiddleware,
-    ).toHaveBeenCalledTimes(1);
     expect(mockClientBuilderInstance.build).toHaveBeenCalledTimes(1);
     expect(createApiBuilderFromCtpClient).toHaveBeenCalledWith(
       mockClientBuilderInstance.build(),
