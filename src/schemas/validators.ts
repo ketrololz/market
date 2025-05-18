@@ -29,6 +29,7 @@ export const nameSchema = yup
   .string()
   .trim()
   .min(1, 'Minimum 1 character')
+  .required('Name is required')
   .matches(/^[A-Za-zА-Яа-яёЁ0-9]+$/, 'Only letters and numbers are allowed');
 
 const minRequiredAge = 13;
@@ -81,7 +82,10 @@ export const dateSchema = yup
   );
 
 export const addressSchema = yup.object({
-  street: yup.string().min(1, 'Street  is required'),
+  streetName: yup
+    .string()
+    .min(1, 'Street  is required')
+    .required('Street is required'),
   city: yup
     .string()
     .required('City is required')
@@ -144,10 +148,5 @@ export const addressSchema = yup.object({
             });
           }),
     }),
-  country: yup
-    .object({
-      name: yup.string().required(),
-      code: yup.string().oneOf(['DE', 'RU', 'US']).required(),
-    })
-    .required('Country is required'),
+  country: yup.string().required('Country is required'),
 });

@@ -5,7 +5,11 @@ import { VueQueryPlugin } from '@tanstack/vue-query';
 import { router } from './router/router';
 import './style.css';
 import App from './App.vue';
+import 'vue-toastification/dist/index.css';
 import { MAIN_THEME } from './theme/main-theme';
+import { toastOptions } from './plugins/toastification';
+import toast from 'vue-toastification';
+import i18n from './plugins/i18n';
 
 const pinia = createPinia();
 const app = createApp(App);
@@ -24,5 +28,7 @@ app
   })
   .use(VueQueryPlugin)
   .use(pinia)
+  .use(i18n)
   .use(router)
+  .use(toast, toastOptions)
   .mount('#app');
