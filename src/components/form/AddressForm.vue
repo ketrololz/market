@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FormField } from '@primevue/forms';
+import { FormField, type FormInstance } from '@primevue/forms';
 import BaseInput from './BaseTextInput.vue';
 import Select from 'primevue/select';
 import Checkbox from 'primevue/checkbox';
@@ -8,6 +8,7 @@ const props = defineProps<{
   path: string;
   countries: { name: string; code: string }[];
   readonly?: boolean;
+  form: FormInstance | undefined;
 }>();
 
 const getCountryNameByCode = (code: string | undefined | null) => {
@@ -15,6 +16,16 @@ const getCountryNameByCode = (code: string | undefined | null) => {
   const country = props.countries.find((c) => c.code === code);
   return country?.name;
 };
+
+function forceRevalidatePostalCode() {
+  const path = `${props.path}.postalCode`;
+  const currentValue = props.form?.getFieldState(path)?.value;
+
+  props.form?.setFieldValue(path, '');
+  setTimeout(() => {
+    props.form?.setFieldValue(path, currentValue);
+  }, 0);
+}
 </script>
 
 <template>
@@ -49,6 +60,7 @@ const getCountryNameByCode = (code: string | undefined | null) => {
       <FormField
         v-slot="slotProps"
         :name="`${props.path}.postalCode`"
+        :validate-on-value-update="true"
         class="w-1/2"
       >
         <label :for="`${props.path}-postalCode`" class="text-xs"
@@ -78,6 +90,7 @@ const getCountryNameByCode = (code: string | undefined | null) => {
           option-label="name"
           option-value="code"
           :input-id="`${props.path}-country`"
+          @update:model-value="forceRevalidatePostalCode"
         >
           <template #value="{ value: selectedCode, placeholder }">
             <span>{{

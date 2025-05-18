@@ -4,10 +4,10 @@ import { ValidationError, reach, StringSchema } from 'yup';
 
 describe('addressSchema', () => {
   const baseData = {
-    street: 'Main St',
+    streetName: 'Main St',
     city: 'Moscow',
-    postalCode: '',
-    country: { name: 'Russia', code: 'RU' },
+    postalCode: '123456',
+    country: 'RU',
   };
 
   it('validates correct Russian address', async () => {
@@ -25,7 +25,7 @@ describe('addressSchema', () => {
   it('validates correct German postal code', async () => {
     const data = {
       ...baseData,
-      country: { name: 'Germany', code: 'DE' },
+      country: 'DE',
       postalCode: '12345',
     };
     await expect(addressSchema.validate(data)).resolves.toBeDefined();
@@ -34,7 +34,7 @@ describe('addressSchema', () => {
   it('fails on invalid German postal code', async () => {
     const data = {
       ...baseData,
-      country: { name: 'Germany', code: 'DE' },
+      country: 'DE',
       postalCode: '12As',
     };
     await expect(
@@ -45,7 +45,7 @@ describe('addressSchema', () => {
   it('validates correct US ZIP code', async () => {
     const data = {
       ...baseData,
-      country: { name: 'United States', code: 'US' },
+      country: 'US',
       postalCode: '12345-6789',
     };
     await expect(addressSchema.validate(data)).resolves.toBeDefined();
@@ -54,7 +54,7 @@ describe('addressSchema', () => {
   it('fails on invalid US ZIP code', async () => {
     const data = {
       ...baseData,
-      country: { name: 'United States', code: 'US' },
+      country: 'US',
       postalCode: '12',
     };
     await expect(
