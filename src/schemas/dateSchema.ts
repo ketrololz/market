@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 
 const minRequiredAge = 13;
+const maxAllowedAge = 100;
 
 export const dateSchema = yup
   .mixed()
@@ -29,17 +30,19 @@ export const dateSchema = yup
     (value) => value instanceof Date && !isNaN(value.getTime()),
   )
   .test(
-    'min-age',
-    'Date of birth must be within the last 100 years',
+    'max-age',
+    `Date of birth must be within the last ${maxAllowedAge} years`,
     (value) => {
       if (!(value instanceof Date)) return false;
       const hundredYearsAgo = new Date();
-      hundredYearsAgo.setFullYear(hundredYearsAgo.getFullYear() - 100);
+      hundredYearsAgo.setFullYear(
+        hundredYearsAgo.getFullYear() - maxAllowedAge,
+      );
       return value >= hundredYearsAgo;
     },
   )
   .test(
-    'max-age',
+    'min-age',
     `User must be at least ${minRequiredAge} years old`,
     (value) => {
       if (!(value instanceof Date)) return false;
