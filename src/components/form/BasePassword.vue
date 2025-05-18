@@ -3,9 +3,9 @@ import Password from 'primevue/password';
 import Message from 'primevue/message';
 import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield';
-import type { InputFieldProps } from './types/InputFieldProps';
+import type { InputFieldPropsPass } from './types/InputFieldProps';
 
-const props = defineProps<InputFieldProps>();
+const props = defineProps<InputFieldPropsPass>();
 </script>
 
 <template>
