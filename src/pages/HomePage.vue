@@ -6,11 +6,11 @@
       <div
         class="bg-[url(/images/home-page-ill.png)] w-full h-full bg-center bg-contain bg-no-repeat min-h-60 min-w-100 md:w-120 md:min-h-70"
       />
-      <div class="flex flex-col gap-y-6">
+      <div class="flex flex-col gap-y-4">
         <h1
-          class="font-bold w-full max-w-140 text-(--p-primary-color) text-center md:text-left text-4xl md:text-5xl"
+          class="font-bold w-full max-w-140 text-(--p-primary-color) text-center md:text-left text-4xl md:text-5xl/14"
         >
-          Welcome to Senet board game store
+          Welcome to Senet — board game store
         </h1>
         <h2
           class="font-regular w-full max-w-140 text-center md:text-left text-2xl md:text-xl"
