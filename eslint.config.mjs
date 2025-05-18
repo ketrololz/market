@@ -16,7 +16,10 @@ export default typescriptEslint.config(
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        vi: true,
+      },
       parserOptions: {
         parser: typescriptEslint.parser,
       },
