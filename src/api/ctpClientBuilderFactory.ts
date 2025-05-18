@@ -35,7 +35,6 @@ export class CtpClientFactory {
     const client = new ClientBuilder()
       .withClientCredentialsFlow(appAuthOptions)
       .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
-      .withLoggerMiddleware()
       .build();
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
   }

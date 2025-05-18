@@ -11,6 +11,7 @@ import {
 import i18n from '@/plugins/i18n';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 import { AuthError, ClientValidationError } from '@/services/appErrors';
+import { router } from '@/router/router';
 
 interface AuthStoreErrorDetails {
   i18nKey: AuthMessageKey | string;
@@ -174,6 +175,7 @@ export const useAuthStore = defineStore('auth', () => {
       const loggedInUserData = await AuthService.login(credentials);
       setUserSession(loggedInUserData);
       showSuccessToast(i18n.global.t(AuthMessageKey.LoginSuccess));
+      router.push({ name: 'Home' });
       return true;
     } catch (error) {
       if (error instanceof AuthError) setError(error);
@@ -217,6 +219,7 @@ export const useAuthStore = defineStore('auth', () => {
       setUserSession(loggedInUserData);
       showSuccessToast(i18n.global.t(AuthMessageKey.RegisterSuccess));
       appLogger.log('AuthStore: Login successful.');
+      router.push({ name: 'Home' });
       return true;
     } catch (error) {
       if (error instanceof AuthError) setError(error);
@@ -243,6 +246,7 @@ export const useAuthStore = defineStore('auth', () => {
       await AuthService.logout();
       clearUserSession();
       showInfoToast(i18n.global.t(AuthMessageKey.LogoutSuccess));
+      router.push({ name: 'Login' });
     } catch (error) {
       appLogger.error('Error during logout process in store:', error);
       clearUserSession();
