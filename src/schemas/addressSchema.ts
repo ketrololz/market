@@ -94,7 +94,7 @@ export const addressSchema = yup.object({
     .string()
     .nullable()
     .when('country', {
-      is: (country) => country && country.code,
+      is: (country: Record<string, string>) => country && country.code,
       then: (schema) =>
         schema
           .required('Postal code is required')
