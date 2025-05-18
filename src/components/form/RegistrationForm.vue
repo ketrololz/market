@@ -93,7 +93,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
       password: values.password,
       firstName: values.firstName,
       lastName: values.lastName,
-      dateOfBirth: values.dateOfBirth.toISOString().split('T')[0],
+      dateOfBirth: values.dateOfBirth?.toISOString().split('T')[0],
       shippingAddress: shippingAddressPayload,
       sameAsShipping: values.sameAsShipping,
       billingAddress: values.sameAsShipping
