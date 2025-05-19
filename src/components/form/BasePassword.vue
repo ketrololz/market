@@ -34,10 +34,16 @@ const props = defineProps<InputFieldPropsPass>();
       toggle-mask
     />
 
-    <Message v-if="props.errorMessage" severity="error" variant="simple">{{
-      typeof props.errorMessage === 'string'
-        ? props.errorMessage
-        : props.errorMessage?.message
-    }}</Message>
+    <Message
+      v-if="props.errorMessage"
+      severity="error"
+      variant="simple"
+      class="text-left"
+      >{{
+        typeof props.errorMessage === 'string'
+          ? props.errorMessage
+          : props.errorMessage?.message
+      }}</Message
+    >
   </div>
 </template>

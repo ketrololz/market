@@ -11,7 +11,7 @@ const route = useRoute();
 <template>
   <div class="flex flex-col min-h-screen justify-between">
     <Header :nav-list="NAV_LINKS" :user-login-options="USER_NAV_LINKS"></Header>
-    <RouterView class="flex-1"></RouterView>
+    <RouterView></RouterView>
     <Footer v-if="route.name !== '404'"></Footer>
   </div>
 </template>
