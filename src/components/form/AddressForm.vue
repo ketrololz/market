@@ -3,6 +3,7 @@ import { FormField, type FormInstance } from '@primevue/forms';
 import BaseInput from './BaseTextInput.vue';
 import Select from 'primevue/select';
 import Checkbox from 'primevue/checkbox';
+import Message from 'primevue/message';
 
 const props = defineProps<{
   path: string;
@@ -107,9 +108,17 @@ function forceRevalidatePostalCode() {
             {{ option.name }}
           </template>
         </Select>
-        <small v-if="slotProps.error" class="text-red-500 text-xs">{{
-          slotProps.error.message
-        }}</small>
+        <Message
+          v-if="slotProps.error"
+          severity="error"
+          variant="simple"
+          class="text-left"
+          >{{
+            typeof slotProps.error === 'string'
+              ? slotProps.error
+              : slotProps.error?.message
+          }}</Message
+        >
       </FormField>
     </div>
 
@@ -131,9 +140,17 @@ function forceRevalidatePostalCode() {
           {{ props.path === 'shippingAddress' ? 'shipping' : 'billing' }}
           address
         </label>
-        <small v-if="slotProps.error" class="text-red-500 text-xs">{{
-          slotProps.error.message
-        }}</small>
+        <Message
+          v-if="slotProps.error"
+          severity="error"
+          variant="simple"
+          class="text-left"
+          >{{
+            typeof slotProps.error === 'string'
+              ? slotProps.error
+              : slotProps.error?.message
+          }}</Message
+        >
       </FormField>
     </div>
   </div>
