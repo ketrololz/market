@@ -9,9 +9,9 @@ const route = useRoute();
 </script>
 
 <template>
-  <Header :nav-list="NAV_LINKS" :user-login-options="USER_NAV_LINKS"></Header>
-  <RouterView></RouterView>
-  <Footer v-if="route.name !== '404'"></Footer>
-  <!-- Use the following template to add a link to the page:
-  <RouterLink to="/link-example">Some text</RouterLink> -->
+  <div class="flex flex-col min-h-screen justify-between">
+    <Header :nav-list="NAV_LINKS" :user-login-options="USER_NAV_LINKS"></Header>
+    <RouterView></RouterView>
+    <Footer v-if="route.name !== '404'"></Footer>
+  </div>
 </template>
