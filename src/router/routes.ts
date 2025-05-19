@@ -1,7 +1,7 @@
 import NotFound from '../pages/NotFound.vue';
 import type { RouteRecordRaw } from 'vue-router';
-import RegistrationPage from '../pages/RegistrationPage.vue';
-import LoginPage from '../pages/LoginPage.vue';
+import RegistrationPage from '../pages/registration-page/RegistrationPage.vue';
+import LoginPage from '../pages/login-page/LoginPage.vue';
 import HomePage from '@/pages/HomePage.vue';
 
 export const ROUTES: RouteRecordRaw[] = [

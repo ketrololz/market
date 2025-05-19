@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { addressSchema } from '../../../schemas/addressSchema';
+import { addressSchema } from './../addressSchema';
 import { ValidationError, reach, StringSchema } from 'yup';
 
 describe('addressSchema', () => {

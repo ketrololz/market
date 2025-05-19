@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { dateSchema } from '../../../schemas/dateSchema';
+import { dateSchema } from './../dateSchema';
 import { ValidationError } from 'yup';
 
 const validate = (input: unknown) =>

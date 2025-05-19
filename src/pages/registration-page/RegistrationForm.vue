@@ -22,7 +22,7 @@ import TabList from 'primevue/tablist';
 import TabPanels from 'primevue/tabpanels';
 import Tab from 'primevue/tab';
 import TabPanel from 'primevue/tabpanel';
-import AddressForm from './AddressForm.vue';
+import AddressForm from './../../components/form/AddressForm.vue';
 
 import { computed, onMounted, ref, watch } from 'vue';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
@@ -171,7 +171,7 @@ function syncAddresses() {
       >
       with your email address.
     </span>
-    <div class="flex flex-col items-center w-full px-8">
+    <div class="flex flex-col items-center w-full min-[400px]:px-8">
       <div class="text-center mb-8"></div>
       <Form
         ref="form"
@@ -205,7 +205,11 @@ function syncAddresses() {
           Personal Information
         </h2>
         <div class="flex gap-2">
-          <FormField v-slot="slotProps" name="firstName" class="w-1/2">
+          <FormField
+            v-slot="slotProps"
+            name="firstName"
+            class="w-1/2 max-w-[178px]"
+          >
             <label for="first-name" class="text-xs">First Name</label>
             <BaseInput
               input-id="first-name"
@@ -213,7 +217,11 @@ function syncAddresses() {
               :error-message="slotProps.error"
             />
           </FormField>
-          <FormField v-slot="slotProps" name="lastName" class="w-1/2">
+          <FormField
+            v-slot="slotProps"
+            name="lastName"
+            class="w-1/2 max-w-[178px]"
+          >
             <label for="last-name" class="text-xs">Last Name</label>
             <BaseInput
               input-id="last-name"

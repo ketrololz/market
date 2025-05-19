@@ -4,7 +4,7 @@ import { loginSchema } from './../../schemas/loginSchema';
 import Button from 'primevue/button';
 import Panel from 'primevue/panel';
 import { yupResolver } from '@primevue/forms/resolvers/yup';
-import BaseInput from './BaseTextInput.vue';
+import BaseInput from './../../components/form/BaseTextInput.vue';
 import BasePassword from './../../components/form/BasePassword.vue';
 import type { FormSubmitEvent } from '@primevue/forms';
 import { useAuthStore, type LoginData } from '@stores/authStore';
