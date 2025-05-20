@@ -4,7 +4,7 @@
       class="flex items-center gap-x-10 flex-col md:flex-row justify-start md:justify-center gap-y-10 md:gap-y-0"
     >
       <div
-        class="bg-[url(/images/home-page-ill.png)] w-full h-full bg-center bg-contain bg-no-repeat min-h-60 min-w-100 md:w-120 md:min-h-70"
+        class="bg-[url(/images/home-page-ill.png)] w-full h-full bg-center bg-contain bg-no-repeat min-h-60 md:w-120 md:min-h-70"
       />
       <div class="flex flex-col gap-y-4">
         <h1
