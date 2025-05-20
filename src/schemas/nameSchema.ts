@@ -4,4 +4,5 @@ export const nameSchema = yup
   .string()
   .trim()
   .min(1, 'Minimum 1 character')
-  .matches(/^[A-Za-zА-Яа-яёЁ0-9]+$/, 'Only letters and numbers are allowed');
+  .max(50, 'Maximum 50 characters')
+  .matches(/^[A-Za-zА-Яа-яёЁ\s]+$/, 'Only letters and spaces are allowed');
