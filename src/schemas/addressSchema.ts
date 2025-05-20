@@ -3,13 +3,15 @@ import * as yup from 'yup';
 export const addressSchema = yup.object({
   streetName: yup
     .string()
+    .trim()
     .min(1, 'Street  is required')
     .required('Street is required'),
 
   city: yup
     .string()
+    .trim()
     .required('City is required')
-    .matches(/^[A-Za-zА-Яа-яёЁ\s-]+$/, 'Only letters and spaces are allowed'),
+    .matches(/^[A-Za-zА-Яа-яёЁ\s]+$/, 'Only letters and spaces are allowed'),
 
   postalCode: yup
     .string()
