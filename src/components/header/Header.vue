@@ -43,7 +43,9 @@ const toggle = (event: Event) => {
     </template>
     <template #end>
       <div class="flex items-center gap-x-2">
-        <p>{{ authStore.userProfile?.firstName }}</p>
+        <p class="truncate max-w-25 md:max-w-50">
+          {{ authStore.userProfile?.firstName }}
+        </p>
         <Button
           type="button"
           class="ml-0"
