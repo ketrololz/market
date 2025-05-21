@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z]+\.[a-zA-Z]+$/;
 
 export const emailSchema = yup
   .string()
