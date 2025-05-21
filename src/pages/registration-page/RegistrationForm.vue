@@ -24,7 +24,7 @@ import Tab from 'primevue/tab';
 import TabPanel from 'primevue/tabpanel';
 import AddressForm from './../../components/form/AddressForm.vue';
 
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
 
 const authStore = useAuthStore();
@@ -33,6 +33,7 @@ import countriesLib from 'i18n-iso-countries';
 import countriesEn from 'i18n-iso-countries/langs/en.json';
 import countriesRu from 'i18n-iso-countries/langs/ru.json';
 import { useI18n } from 'vue-i18n';
+import { Message } from 'primevue';
 
 const { locale } = useI18n();
 countriesLib.registerLocale(countriesEn);
@@ -59,6 +60,12 @@ onMounted(async () => {
   if (projectSettingsStore.getAvailableCountries.length === 0) {
     await projectSettingsStore.fetchProjectSettings();
   }
+});
+
+const activeTab = ref<string | number>('shipping');
+const tabErrors = ref<{ shipping: boolean; billing: boolean }>({
+  shipping: false,
+  billing: false,
 });
 
 async function onFormSubmit({ values, valid }: FormSubmitEvent) {
@@ -140,6 +147,17 @@ watch(
   },
   { deep: true },
 );
+
+watchEffect(() => {
+  const shipping = form.value?.states?.shippingAddress ?? {};
+  const billing = form.value?.states?.billingAddress ?? {};
+  tabErrors.value.shipping = Object.values(
+    shipping as Record<string, { invalid?: boolean }>,
+  ).some((field) => field?.invalid === true);
+  tabErrors.value.billing = Object.values(
+    billing as Record<string, { invalid?: boolean }>,
+  ).some((field) => field?.invalid === true);
+});
 
 function syncAddresses() {
   const formInstance = form.value as FormInstance;
@@ -242,10 +260,28 @@ function syncAddresses() {
           />
         </FormField>
 
-        <Tabs value="shipping" class="w-full">
+        <Tabs
+          :value="activeTab"
+          class="w-full"
+          @update:value="(val) => (activeTab = val)"
+        >
           <TabList>
-            <Tab value="shipping" class="text-sm !pb-1">Shipping Address</Tab>
-            <Tab value="billing" class="text-sm !pb-1">Billing Address</Tab>
+            <Tab
+              value="shipping"
+              class="text-sm !pb-1"
+              :class="{
+                '!text-red-500': tabErrors.shipping && activeTab !== 'shipping',
+              }"
+              >Shipping Address</Tab
+            >
+            <Tab
+              value="billing"
+              class="text-sm !pb-1"
+              :class="{
+                '!text-red-500': tabErrors.billing && activeTab !== 'billing',
+              }"
+              >Billing Address</Tab
+            >
           </TabList>
           <TabPanels class="!px-0">
             <TabPanel value="shipping">
@@ -272,6 +308,26 @@ function syncAddresses() {
             Shipping address is the same as billing address
           </label>
         </div>
+
+        <Message
+          v-if="
+            (tabErrors.shipping && activeTab !== 'shipping') ||
+            (tabErrors.billing && activeTab !== 'billing')
+          "
+          severity="error"
+          variant="simple"
+          class="text-left mt-2"
+        >
+          Please check fields in the
+          <strong>{{
+            activeTab === 'shipping' && tabErrors.billing
+              ? 'Billing Address'
+              : activeTab === 'billing' && tabErrors.shipping
+                ? 'Shipping Address'
+                : ''
+          }}</strong>
+          tab.
+        </Message>
         <Button
           size="small"
           label="Sign up"
