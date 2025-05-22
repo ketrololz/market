@@ -90,7 +90,7 @@ function forceRevalidatePostalCode() {
           :options="props.countries"
           size="small"
           placeholder="Select a Country"
-          class="w-full"
+          class="w-full text-left"
           :disabled="props.readonly"
           option-label="name"
           option-value="code"
@@ -122,36 +122,24 @@ function forceRevalidatePostalCode() {
       </FormField>
     </div>
 
-    <div class="mt-2 flex items-center gap-2">
-      <FormField
-        v-slot="slotProps"
-        :name="`${props.path}.${props.path === 'shippingAddress' ? 'defaultShipping' : 'defaultBilling'}`"
+    <FormField
+      v-slot="slotProps"
+      :name="`${props.path}.${props.path === 'shippingAddress' ? 'defaultShipping' : 'defaultBilling'}`"
+      class="mt-2 flex items-center gap-2"
+    >
+      <Checkbox
+        :model-value="slotProps.value"
+        :input-id="`${props.path}-default-${props.path === 'shippingAddress' ? 'shipping' : 'billing'}`"
+        binary
+      />
+      <label
+        :for="`default-${props.path === 'shippingAddress' ? 'shipping' : 'billing'}`"
+        class="text-xs"
       >
-        <Checkbox
-          :model-value="slotProps.value"
-          :input-id="`${props.path}-default-${props.path === 'shippingAddress' ? 'shipping' : 'billing'}`"
-          binary
-        />
-        <label
-          :for="`default-${props.path === 'shippingAddress' ? 'shipping' : 'billing'}`"
-          class="text-xs"
-        >
-          Set as default
-          {{ props.path === 'shippingAddress' ? 'shipping' : 'billing' }}
-          address
-        </label>
-        <Message
-          v-if="slotProps.error"
-          severity="error"
-          variant="simple"
-          class="text-left"
-          >{{
-            typeof slotProps.error === 'string'
-              ? slotProps.error
-              : slotProps.error?.message
-          }}</Message
-        >
-      </FormField>
-    </div>
+        Set as default
+        {{ props.path === 'shippingAddress' ? 'shipping' : 'billing' }}
+        address
+      </label>
+    </FormField>
   </div>
 </template>
