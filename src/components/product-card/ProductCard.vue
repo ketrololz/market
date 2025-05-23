@@ -8,6 +8,7 @@ const cardInfo = reactive({
   description:
     '"Взрывные котята" – это карточная игра, дико популярная на "Кикстартере".',
   price: '990 ₽',
+  isAvailable: false,
 });
 </script>
 
@@ -17,6 +18,7 @@ const cardInfo = reactive({
       class="relative cursor-pointer hover:scale-102 transition duration-300 easy-in-out"
     >
       <p
+        v-if="!cardInfo.isAvailable"
         class="px-5 py-2 bg-(--p-rose-400) text-white font-medium absolute top-5 left-5 rounded-md"
       >
         Out of stock
@@ -26,13 +28,15 @@ const cardInfo = reactive({
           <img alt="product image" :src="cardInfo.image" class="p-5" />
         </template>
         <template #title>
-          <h2>{{ cardInfo.title }}</h2>
+          <h2 class="text-xl font-semibold text-(--p-primary-color)">
+            {{ cardInfo.title }}
+          </h2>
         </template>
         <template #subtitle>
-          <h4 class="truncate max-w-70 text-xs">{{ cardInfo.description }}</h4>
+          <h4 class="truncate text-xs">{{ cardInfo.description }}</h4>
         </template>
         <template #content>
-          <p class="text-xl font-bold">{{ cardInfo.price }}</p>
+          <p class="text-2xl font-bold py-2">{{ cardInfo.price }}</p>
         </template>
         <template #footer>
           <Button
