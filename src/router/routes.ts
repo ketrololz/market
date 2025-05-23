@@ -5,8 +5,12 @@ import LoginPage from '../pages/login-page/LoginPage.vue';
 import HomePage from '@/pages/HomePage.vue';
 
 export const ROUTES: RouteRecordRaw[] = [
-  { path: '/', name: 'Home', component: HomePage },
-  { path: '/login', name: 'Login', component: LoginPage },
-  { path: '/registration', name: 'Registration', component: RegistrationPage },
-  { path: '/:pathMatch(.*)*', name: '404', component: NotFound },
+  { path: '/', name: 'Home', component: () => HomePage },
+  { path: '/login', name: 'Login', component: () => LoginPage },
+  {
+    path: '/registration',
+    name: 'Registration',
+    component: () => RegistrationPage,
+  },
+  { path: '/:pathMatch(.*)*', name: '404', component: () => NotFound },
 ];
