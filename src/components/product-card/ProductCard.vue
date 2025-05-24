@@ -1,21 +1,16 @@
 <script setup lang="ts">
 import Card from 'primevue/card';
 import { Button } from 'primevue';
-import { reactive } from 'vue';
-const cardInfo = reactive({
-  image: '/images/products/explosive-cats/1.webp',
-  title: 'Взрывные котята',
-  description:
-    '"Взрывные котята" – это карточная игра, дико популярная на "Кикстартере".',
-  price: '990 ₽',
-  isAvailable: false,
-});
+import type { CardInfo } from './types/card-info';
+
+defineProps<{ cardInfo: CardInfo }>();
 </script>
 
 <template>
   <div class="w-full h-full flex items-center justify-center">
     <div
       class="relative cursor-pointer hover:scale-102 transition duration-300 easy-in-out"
+      @click="console.log('Open the product page')"
     >
       <p
         v-if="!cardInfo.isAvailable"
@@ -40,10 +35,20 @@ const cardInfo = reactive({
         </template>
         <template #footer>
           <Button
+            v-if="cardInfo.isAvailable"
             label="Add to cart"
             severity="primary"
             outlined
             class="w-full"
+            @click.stop="console.log('Add to cart')"
+          />
+          <Button
+            v-else
+            label="Add to cart"
+            severity="secondary"
+            outlined
+            class="w-full"
+            disabled
           />
         </template>
       </Card>
