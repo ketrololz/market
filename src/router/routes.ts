@@ -1,18 +1,25 @@
-import NotFound from '../pages/NotFound.vue';
 import type { RouteRecordRaw } from 'vue-router';
-import RegistrationPage from '../pages/registration-page/RegistrationPage.vue';
-import LoginPage from '../pages/login-page/LoginPage.vue';
-import HomePage from '@/pages/HomePage.vue';
-import CatalogPage from '@/pages/catalog-page/CatalogPage.vue';
 
 export const ROUTES: RouteRecordRaw[] = [
-  { path: '/', name: 'Home', component: () => HomePage },
-  { path: '/login', name: 'Login', component: () => LoginPage },
+  { path: '/', name: 'Home', component: () => import('../pages/HomePage.vue') },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../pages/login-page/LoginPage.vue'),
+  },
   {
     path: '/registration',
     name: 'Registration',
-    component: () => RegistrationPage,
+    component: () => import('../pages/registration-page/RegistrationPage.vue'),
   },
-  { path: '/catalog', name: 'Catalog', component: () => CatalogPage },
-  { path: '/:pathMatch(.*)*', name: '404', component: () => NotFound },
+  {
+    path: '/catalog',
+    name: 'Catalog',
+    component: () => import('../pages/catalog-page/CatalogPage.vue'),
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: '404',
+    component: () => import('../pages/NotFound.vue'),
+  },
 ];
