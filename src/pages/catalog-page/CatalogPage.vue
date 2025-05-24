@@ -8,7 +8,8 @@ const cardInfo = reactive({
   description:
     '"Взрывные котята" – это карточная игра, дико популярная на "Кикстартере".',
   price: '990 ₽',
-  isAvailable: false,
+  isAvailable: true,
+  route: '/',
 });
 </script>
 

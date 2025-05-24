@@ -4,4 +4,5 @@ export interface CardInfo {
   description: string;
   price: string;
   isAvailable: boolean;
+  route: string;
 }

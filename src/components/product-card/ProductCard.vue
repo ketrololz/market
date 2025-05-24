@@ -2,15 +2,20 @@
 import Card from 'primevue/card';
 import { Button } from 'primevue';
 import type { CardInfo } from './types/card-info';
+import { router } from '@/router/router';
 
 defineProps<{ cardInfo: CardInfo }>();
+
+function navigate(route: string) {
+  router.push(route);
+}
 </script>
 
 <template>
   <div class="w-full h-full flex items-center justify-center">
     <div
       class="relative cursor-pointer hover:scale-102 transition duration-300 easy-in-out"
-      @click="console.log('Open the product page')"
+      @click="navigate(cardInfo.route)"
     >
       <p
         v-if="!cardInfo.isAvailable"
