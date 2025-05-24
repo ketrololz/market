@@ -14,5 +14,7 @@ const cardInfo = reactive({
 </script>
 
 <template>
-  <ProductCard :card-info="cardInfo" />
+  <div class="w-full h-full flex items-center justify-center">
+    <ProductCard :card-info="cardInfo" />
+  </div>
 </template>
