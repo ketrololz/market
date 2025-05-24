@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import ProductCard from '../../components/product-card/ProductCard.vue';
+import Sidebar from '../../components/sidebar/Sidebar.vue';
 
 const cardInfo = reactive({
   image: '/images/products/explosive-cats/1.webp',
@@ -14,6 +15,7 @@ const cardInfo = reactive({
 </script>
 
 <template>
+  <Sidebar></Sidebar>
   <div class="w-full h-full flex items-center justify-center">
     <ProductCard :card-info="cardInfo" />
   </div>
