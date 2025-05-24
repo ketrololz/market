@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Select } from 'primevue';
+import { Select, Panel } from 'primevue';
 import { ref } from 'vue';
 
 const categories = ref([
@@ -19,15 +19,18 @@ function handleSwitch() {
 }
 </script>
 <template>
-  <aside class="flex gap-y-2 flex-col p-3">
-    <h2 class="text-xl font-bold">Category</h2>
-    <Select
-      v-model="selectedCategory"
-      :options="categories"
-      option-label="name"
-      class="w-50"
-      placeholder="Select category"
-      @change="handleSwitch"
-    ></Select>
-  </aside>
+  <Panel header="Filters" pt:header:class="text-xl" class="h-full">
+    <div class="flex gap-y-2 flex-col">
+      <h2 class="text-base font-semibold text-(--p-primary-color)">Category</h2>
+      <Select
+        v-model="selectedCategory"
+        :options="categories"
+        option-label="name"
+        class="w-50"
+        placeholder="Select category"
+        @change="handleSwitch"
+      ></Select>
+      <h2 class="text-base font-semibold text-(--p-primary-color)">Players</h2>
+    </div>
+  </Panel>
 </template>

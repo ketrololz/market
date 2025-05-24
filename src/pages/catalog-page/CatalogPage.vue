@@ -24,15 +24,22 @@ function handleSwitch(category: { name: string; code: string }) {
 </script>
 
 <template>
-  <Breadcrumb :home="home" :model="items">
-    <template #item="{ item }">
-      <RouterLink :to="item.route">
-        <span class="text-(--p-breadcrumb-item-color)">{{ item.label }}</span>
-      </RouterLink>
-    </template>
-  </Breadcrumb>
-  <Sidebar @switch-category="handleSwitch"></Sidebar>
-  <div class="w-full h-full flex items-center justify-center">
-    <ProductCard :card-info="cardInfo" />
+  <div class="px-4 relative">
+    <Breadcrumb :home="home" :model="items">
+      <template #item="{ item }">
+        <RouterLink :to="item.route">
+          <span class="text-(--p-breadcrumb-item-color)">{{ item.label }}</span>
+        </RouterLink>
+      </template>
+    </Breadcrumb>
+    <div class="flex gap-10 flex-col md:flex-row min-h-150">
+      <Sidebar
+        class="static top-4 md:sticky"
+        @switch-category="handleSwitch"
+      ></Sidebar>
+      <div class="w-full h-full flex items-center justify-center">
+        <ProductCard :card-info="cardInfo" />
+      </div>
+    </div>
   </div>
 </template>
