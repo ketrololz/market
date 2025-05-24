@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import AuthService from '@/services/auth/authService';
 import type { Customer, Address } from '@commercetools/platform-sdk';
+import { Panel } from 'primevue';
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
@@ -36,13 +37,17 @@ function isDefaultAddress(
 
 <template>
   <div>
-    <div v-if="isLoading">Загрузка...</div>
+    <div v-if="isLoading">Loading...</div>
     <div v-else-if="customer">
-      <h1>User Profile</h1>
-
+      <Panel
+        header=" User Profile"
+        pt:header:class="justify-self-center text-xl pb-0!"
+        pt:root:class="pb-10 text-center"
+      >
+      </Panel>
+      <h2>Личная информация</h2>
       <!-- Personal Info Section -->
       <section>
-        <h2>Личная информация</h2>
         <p><strong>Имя:</strong> {{ customer.firstName }}</p>
         <p><strong>Фамилия:</strong> {{ customer.lastName }}</p>
         <p><strong>Дата рождения:</strong> {{ customer.dateOfBirth }}</p>
@@ -62,7 +67,6 @@ function isDefaultAddress(
         >
           <p><strong>Улица:</strong> {{ address.streetName }}</p>
           <p><strong>Город:</strong> {{ address.city }}</p>
-          <p><strong>Регион:</strong> {{ address.region }}</p>
           <p><strong>Индекс:</strong> {{ address.postalCode }}</p>
           <p><strong>Страна:</strong> {{ address.country }}</p>
           <p v-if="isDefaultAddress(address, 'shipping')" class="label">
