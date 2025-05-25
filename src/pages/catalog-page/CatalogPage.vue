@@ -1,3 +1,9 @@
+<!-- TODO:
+      - search
+      - pagination
+      - filters
+      - scroll animation -->
+
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import ProductCard from '../../components/product-card/ProductCard.vue';

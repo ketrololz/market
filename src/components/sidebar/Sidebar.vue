@@ -30,7 +30,6 @@ function handleSwitch() {
         placeholder="Select category"
         @change="handleSwitch"
       ></Select>
-      <h2 class="text-base font-semibold text-(--p-primary-color)">Players</h2>
     </div>
   </Panel>
 </template>
