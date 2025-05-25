@@ -9,6 +9,7 @@ import { reactive, ref } from 'vue';
 import ProductCard from '../../components/product-card/ProductCard.vue';
 import Sidebar from '../../components/sidebar/Sidebar.vue';
 import { Breadcrumb } from 'primevue';
+import Paginator from 'primevue/paginator';
 
 const cardInfo = reactive({
   image: '/images/products/explosive-cats/1.webp',
@@ -43,8 +44,15 @@ function handleSwitch(category: { name: string; code: string }) {
         class="static top-4 md:sticky"
         @switch-category="handleSwitch"
       ></Sidebar>
-      <div class="w-full h-full flex items-center justify-center">
-        <ProductCard :card-info="cardInfo" />
+      <div class="flex flex-col w-full">
+        <div class="w-full h-full flex items-center justify-center">
+          <ProductCard :card-info="cardInfo" />
+        </div>
+        <Paginator
+          :rows="10"
+          :total-records="120"
+          template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        ></Paginator>
       </div>
     </div>
   </div>
