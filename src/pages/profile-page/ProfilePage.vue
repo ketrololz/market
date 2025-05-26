@@ -59,10 +59,10 @@ function onSetDefault(address: Address, type: 'shipping' | 'billing') {
 </script>
 
 <template>
-  <div class="text-sm">
+  <div class="text-sm mx-2">
     <div v-if="isLoading">Loading...</div>
     <div v-else-if="customer">
-      <h1 class="text-center">User Profile</h1>
+      <h1 class="text-center text-xl font-semibold mt-4">User Profile</h1>
       <Panel
         pt:root:class="p-2  bg-white rounded-lg shadow-md m-4 max-w-3xl mx-auto"
       >
