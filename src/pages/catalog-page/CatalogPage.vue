@@ -10,6 +10,7 @@ import ProductCard from '../../components/product-card/ProductCard.vue';
 import Sidebar from '../../components/sidebar/Sidebar.vue';
 import { Breadcrumb } from 'primevue';
 import Paginator from 'primevue/paginator';
+import 'primeicons/primeicons.css';
 
 const cardInfo = reactive({
   image: '/images/products/explosive-cats/1.webp',
@@ -45,7 +46,15 @@ function handleSwitch(category: { name: string; code: string }) {
         @switch-category="handleSwitch"
       ></Sidebar>
       <div class="flex flex-col w-full">
-        <div class="w-full h-full flex items-center justify-center">
+        <div
+          class="w-full h-full grid grid-cols-[repeat(auto-fill,_20rem)] gap-6 justify-center"
+        >
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
           <ProductCard :card-info="cardInfo" />
         </div>
         <Paginator
