@@ -8,8 +8,7 @@
 import { reactive, ref } from 'vue';
 import ProductCard from '../../components/product-card/ProductCard.vue';
 import Sidebar from '../../components/sidebar/Sidebar.vue';
-import { Breadcrumb, Select } from 'primevue';
-import Paginator from 'primevue/paginator';
+import { Breadcrumb, Select, InputText, Paginator, Button } from 'primevue';
 import 'primeicons/primeicons.css';
 
 const cardInfo = reactive({
@@ -38,6 +37,8 @@ const sortTypes = ref([
 ]);
 
 const selectedSortType = ref(sortTypes.value[0]);
+
+const searchValue = ref('');
 </script>
 
 <template>
@@ -49,14 +50,21 @@ const selectedSortType = ref(sortTypes.value[0]);
         </RouterLink>
       </template>
     </Breadcrumb>
-    <div class="flex gap-10 flex-col md:flex-row min-h-150">
+    <div class="flex gap-4 flex-col md:flex-row min-h-150">
       <Sidebar
         class="static top-4 md:sticky"
         @switch-category="handleSwitch"
       ></Sidebar>
       <div class="flex flex-col w-full gap-y-10">
         <div class="flex justify-between">
-          <div>search</div>
+          <Form class="flex gap-2" @submit.prevent>
+            <InputText
+              v-model="searchValue"
+              type="text"
+              placeholder="Search..."
+            />
+            <Button type="submit" severity="secondary" label="Search" />
+          </Form>
           <Select
             v-model="selectedSortType"
             :options="sortTypes"
