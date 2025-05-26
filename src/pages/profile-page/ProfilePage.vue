@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import AuthService from '@/services/auth/authService';
 import type { Customer, Address } from '@commercetools/platform-sdk';
 import { Panel } from 'primevue';
+import AddressSection from './AddressSection.vue';
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
@@ -20,87 +21,127 @@ onMounted(async () => {
   }
 });
 
-function isDefaultAddress(
-  address: Address,
-  type: 'shipping' | 'billing',
-): boolean {
-  if (!customer.value) return false;
+const shippingAddresses = computed(
+  () =>
+    customer.value?.addresses.filter((addr) =>
+      customer.value?.shippingAddressIds?.includes(addr.id ?? ''),
+    ) ?? [],
+);
 
-  const defaultId =
-    type === 'shipping'
-      ? customer.value.defaultShippingAddressId
-      : customer.value.defaultBillingAddressId;
+const billingAddresses = computed(
+  () =>
+    customer.value?.addresses.filter(
+      (addr) =>
+        customer.value?.billingAddressIds?.includes(addr.id ?? '') &&
+        !shippingAddresses.value.some((a) => a.id === addr.id),
+    ) ?? [],
+);
 
-  return defaultId === address.id;
+function onEdit() {
+  console.log('Edit personal information', customer.value);
+}
+
+function onAddNewAddress() {
+  console.log('Add new address');
+}
+
+function onEditAddress(address: Address) {
+  console.log('Edit address:', address);
+}
+
+function onDeleteAddress(address: Address) {
+  console.log('Delete address:', address);
+}
+
+function onSetDefault(address: Address, type: 'shipping' | 'billing') {
+  console.log(`Set address ${address.id} as default ${type} address`);
 }
 </script>
 
 <template>
-  <div>
+  <div class="text-sm">
     <div v-if="isLoading">Loading...</div>
     <div v-else-if="customer">
+      <h1 class="text-center">User Profile</h1>
       <Panel
-        header=" User Profile"
-        pt:header:class="justify-self-center text-xl pb-0!"
-        pt:root:class="pb-10 text-center"
+        pt:root:class="p-2  bg-white rounded-lg shadow-md m-4 max-w-3xl mx-auto"
       >
+        <template #header>
+          <div class="flex justify-between items-center w-full">
+            <span class="text-lg">Personal Information</span>
+            <button
+              class="text-xs text-blue-600 cursor-pointer text-blue-600 hover:underline"
+              @click="onEdit"
+            >
+              Edit
+            </button>
+          </div>
+        </template>
+        <p class="flex gap-2">
+          <strong class="w-48">Email:</strong> {{ customer.email }}
+        </p>
+        <p class="flex gap-2">
+          <strong class="w-48">First Name:</strong> {{ customer.firstName }}
+        </p>
+        <p class="flex gap-2">
+          <strong class="w-48">Last Name:</strong> {{ customer.lastName }}
+        </p>
+        <p class="flex gap-2">
+          <strong class="w-48">Date of Birth:</strong>
+          {{ customer.dateOfBirth }}
+        </p>
       </Panel>
-      <h2>Личная информация</h2>
-      <!-- Personal Info Section -->
-      <section>
-        <p><strong>Имя:</strong> {{ customer.firstName }}</p>
-        <p><strong>Фамилия:</strong> {{ customer.lastName }}</p>
-        <p><strong>Дата рождения:</strong> {{ customer.dateOfBirth }}</p>
-      </section>
 
-      <!-- Address Info Section -->
-      <section>
-        <h2>Сохранённые адреса</h2>
-        <div
-          v-for="address in customer.addresses"
-          :key="address.id"
-          class="address-card"
-          :class="{
-            'default-shipping': isDefaultAddress(address, 'shipping'),
-            'default-billing': isDefaultAddress(address, 'billing'),
-          }"
-        >
-          <p><strong>Улица:</strong> {{ address.streetName }}</p>
-          <p><strong>Город:</strong> {{ address.city }}</p>
-          <p><strong>Индекс:</strong> {{ address.postalCode }}</p>
-          <p><strong>Страна:</strong> {{ address.country }}</p>
-          <p v-if="isDefaultAddress(address, 'shipping')" class="label">
-            📦 Адрес доставки (по умолчанию)
-          </p>
-          <p v-if="isDefaultAddress(address, 'billing')" class="label">
-            💳 Адрес оплаты (по умолчанию)
-          </p>
+      <Panel
+        pt:root:class="p-2  bg-white rounded-lg shadow-md m-4  max-w-3xl mx-auto"
+      >
+        <template #header>
+          <div class="flex justify-between items-center w-full">
+            <span class="text-lg">Password</span>
+            <button
+              class="text-xs text-blue-600 cursor-pointer hover:underline"
+              @click="onEdit"
+            >
+              Edit
+            </button>
+          </div>
+        </template>
+        <p class="flex gap-2">
+          <strong class="w-48">Password:</strong> *********
+        </p>
+      </Panel>
+
+      <Panel
+        pt:root:class="p-2 bg-white rounded-lg shadow-md m-4  max-w-3xl mx-auto"
+      >
+        <template #header>
+          <div class="text-lg">Addresses</div>
+        </template>
+
+        <div>
+          <AddressSection
+            title="Shipping Addresses"
+            :addresses="shippingAddresses"
+            type="shipping"
+            :default-shipping-address-id="customer.defaultShippingAddressId"
+            @edit="onEditAddress"
+            @delete="onDeleteAddress"
+            @set-default="onSetDefault"
+            @add="onAddNewAddress"
+          />
+
+          <AddressSection
+            title="Billing Addresses"
+            :addresses="billingAddresses"
+            type="billing"
+            :default-billing-address-id="customer.defaultBillingAddressId"
+            @edit="onEditAddress"
+            @delete="onDeleteAddress"
+            @set-default="onSetDefault"
+            @add="onAddNewAddress"
+          />
         </div>
-      </section>
-    </div>
-
-    <div v-else>
-      <p>Не удалось загрузить данные пользователя.</p>
+      </Panel>
     </div>
   </div>
 </template>
-
-<style scoped>
-.address-card {
-  border: 1px solid #ddd;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-}
-.default-shipping {
-  background-color: #e6f7ff;
-}
-.default-billing {
-  background-color: #fffbe6;
-}
-.label {
-  font-weight: bold;
-  color: #1890ff;
-  margin-top: 0.5rem;
-}
-</style>

@@ -43,8 +43,11 @@ const toggle = (event: Event) => {
     </template>
     <template #end>
       <div class="flex items-center gap-x-2">
-        <RouterLink to="/profile" class="truncate max-w-25 md:max-w-50">
-          {{ authStore.userProfile?.firstName }}
+        <RouterLink to="/profile" class="flex items-center gap-2">
+          <span class="pi pi-user"></span>
+          <span class="truncate max-w-25 md:max-w-50">
+            {{ authStore.userProfile?.firstName }}</span
+          >
         </RouterLink>
         <Button
           type="button"
