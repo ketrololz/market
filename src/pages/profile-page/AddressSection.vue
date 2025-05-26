@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Address } from '@commercetools/platform-sdk';
-import { defineProps } from 'vue';
+import { defineProps, computed } from 'vue';
 
 defineEmits<{
   (e: 'add'): void;
@@ -24,6 +24,19 @@ function isDefaultAddress(address: Address): boolean {
       : props.defaultBillingAddressId;
   return defaultId === address.id;
 }
+
+const sortedAddresses = computed(() => {
+  const defaultId =
+    props.type === 'shipping'
+      ? props.defaultShippingAddressId
+      : props.defaultBillingAddressId;
+
+  return [...props.addresses].sort((a, b) => {
+    if (a.id === defaultId) return -1;
+    if (b.id === defaultId) return 1;
+    return 0;
+  });
+});
 </script>
 
 <template>
@@ -39,7 +52,7 @@ function isDefaultAddress(address: Address): boolean {
     </div>
 
     <div
-      v-for="address in addresses"
+      v-for="address in sortedAddresses"
       :key="address.id"
       class="address-section p-4 bg-white rounded-lg shadow mb-4"
       :class="{
