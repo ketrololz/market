@@ -10,7 +10,7 @@ const categories = ref([
   { name: 'Other' },
 ]);
 
-const selectedCategory = ref();
+const selectedCategory = ref(categories.value[0]);
 
 const emit = defineEmits(['switchCategory']);
 

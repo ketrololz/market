@@ -8,7 +8,7 @@
 import { reactive, ref } from 'vue';
 import ProductCard from '../../components/product-card/ProductCard.vue';
 import Sidebar from '../../components/sidebar/Sidebar.vue';
-import { Breadcrumb } from 'primevue';
+import { Breadcrumb, Select } from 'primevue';
 import Paginator from 'primevue/paginator';
 import 'primeicons/primeicons.css';
 
@@ -29,6 +29,15 @@ const items = ref([{ label: 'All games' }]);
 function handleSwitch(category: { name: string; code: string }) {
   items.value = [{ label: category.name }];
 }
+
+const sortTypes = ref([
+  { name: 'Default' },
+  { name: 'Name: A-Z' },
+  { name: 'Price: low to high' },
+  { name: 'Price: high to low' },
+]);
+
+const selectedSortType = ref(sortTypes.value[0]);
 </script>
 
 <template>
@@ -45,7 +54,17 @@ function handleSwitch(category: { name: string; code: string }) {
         class="static top-4 md:sticky"
         @switch-category="handleSwitch"
       ></Sidebar>
-      <div class="flex flex-col w-full">
+      <div class="flex flex-col w-full gap-y-10">
+        <div class="flex justify-between">
+          <div>search</div>
+          <Select
+            v-model="selectedSortType"
+            :options="sortTypes"
+            option-label="name"
+            class="w-50"
+            placeholder="Select category"
+          ></Select>
+        </div>
         <div
           class="w-full h-full grid grid-cols-[repeat(auto-fill,_20rem)] gap-6 justify-center"
         >
@@ -61,6 +80,7 @@ function handleSwitch(category: { name: string; code: string }) {
           :rows="10"
           :total-records="120"
           template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+          class="mb-10"
         ></Paginator>
       </div>
     </div>
