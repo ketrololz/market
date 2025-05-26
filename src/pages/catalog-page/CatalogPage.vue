@@ -8,7 +8,8 @@
 import { reactive, ref } from 'vue';
 import ProductCard from '../../components/product-card/ProductCard.vue';
 import Sidebar from '../../components/sidebar/Sidebar.vue';
-import { Breadcrumb } from 'primevue';
+import { Breadcrumb, Select, InputText, Paginator, Button } from 'primevue';
+import 'primeicons/primeicons.css';
 
 const cardInfo = reactive({
   image: '/images/products/explosive-cats/1.webp',
@@ -27,6 +28,17 @@ const items = ref([{ label: 'All games' }]);
 function handleSwitch(category: { name: string; code: string }) {
   items.value = [{ label: category.name }];
 }
+
+const sortTypes = ref([
+  { name: 'Default' },
+  { name: 'Name: A-Z' },
+  { name: 'Price: low to high' },
+  { name: 'Price: high to low' },
+]);
+
+const selectedSortType = ref(sortTypes.value[0]);
+
+const searchValue = ref('');
 </script>
 
 <template>
@@ -38,13 +50,46 @@ function handleSwitch(category: { name: string; code: string }) {
         </RouterLink>
       </template>
     </Breadcrumb>
-    <div class="flex gap-10 flex-col md:flex-row min-h-150">
+    <div class="flex gap-4 flex-col md:flex-row min-h-150">
       <Sidebar
         class="static top-4 md:sticky"
         @switch-category="handleSwitch"
       ></Sidebar>
-      <div class="w-full h-full flex items-center justify-center">
-        <ProductCard :card-info="cardInfo" />
+      <div class="flex flex-col w-full gap-y-10">
+        <div class="flex justify-between">
+          <Form class="flex gap-2" @submit.prevent>
+            <InputText
+              v-model="searchValue"
+              type="text"
+              placeholder="Search..."
+            />
+            <Button type="submit" severity="secondary" label="Search" />
+          </Form>
+          <Select
+            v-model="selectedSortType"
+            :options="sortTypes"
+            option-label="name"
+            class="w-50"
+            placeholder="Select category"
+          ></Select>
+        </div>
+        <div
+          class="w-full h-full grid grid-cols-[repeat(auto-fill,_20rem)] gap-6 justify-center"
+        >
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+          <ProductCard :card-info="cardInfo" />
+        </div>
+        <Paginator
+          :rows="10"
+          :total-records="120"
+          template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+          class="mb-10"
+        ></Paginator>
       </div>
     </div>
   </div>
