@@ -4,9 +4,17 @@ import AuthService from '@/services/auth/authService';
 import type { Customer, Address } from '@commercetools/platform-sdk';
 import { Panel } from 'primevue';
 import AddressSection from './AddressSection.vue';
+import EditableDialog from '@/components/editable-dialog/EditableDialog.vue';
+import { useDialogManager } from './../../composables/useDialogManager';
+import UserInfoForm from '@/components/form/UserInfoForm.vue';
+import type { UserInfoFormData } from '@/components/form/UserInfoForm.vue';
+
+const { activeDialog, openDialog, closeDialog, isProfileDialogVisible } =
+  useDialogManager();
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
+const formRef = ref();
 
 onMounted(async () => {
   try {
@@ -37,6 +45,37 @@ const billingAddresses = computed(
     ) ?? [],
 );
 
+const dialogTitle = computed(() => {
+  switch (activeDialog.value) {
+    case 'profile':
+      return 'Edit Personal Info';
+    case 'address':
+      return 'Edit Address';
+    case 'password':
+      return 'Change Password';
+    default:
+      return '';
+  }
+});
+
+const currentInitialValues = computed<UserInfoFormData | null>(() => {
+  if (customer.value) {
+    const { email, firstName, lastName, dateOfBirth } = customer.value;
+    return {
+      email: email ?? '',
+      firstName: firstName ?? '',
+      lastName: lastName ?? '',
+      dateOfBirth: dateOfBirth ?? '',
+    };
+  }
+  return null;
+});
+
+const currentFormComponent = computed(() => {
+  if (activeDialog.value === 'profile') return UserInfoForm;
+  return null;
+});
+
 function onEdit() {
   console.log('Edit personal information', customer.value);
 }
@@ -56,6 +95,15 @@ function onDeleteAddress(address: Address) {
 function onSetDefault(address: Address, type: 'shipping' | 'billing') {
   console.log(`Set address ${address.id} as default ${type} address`);
 }
+
+function triggerSubmit() {
+  formRef.value?.submit();
+}
+
+function handleSave(updated: UserInfoFormData) {
+  console.log('Updated personal info:', updated);
+  closeDialog();
+}
 </script>
 
 <template>
@@ -71,7 +119,7 @@ function onSetDefault(address: Address, type: 'shipping' | 'billing') {
             <span class="text-lg">Personal Information</span>
             <button
               class="text-xs text-blue-600 cursor-pointer text-blue-600 hover:underline"
-              @click="onEdit"
+              @click="openDialog('profile')"
             >
               Edit
             </button>
@@ -144,4 +192,21 @@ function onSetDefault(address: Address, type: 'shipping' | 'billing') {
       </Panel>
     </div>
   </div>
+
+  <EditableDialog
+    v-model="isProfileDialogVisible"
+    :title="dialogTitle"
+    :edit="true"
+    :initial-values="currentInitialValues"
+    @submit="triggerSubmit"
+  >
+    <template #default="{ initialValues }">
+      <component
+        :is="currentFormComponent"
+        ref="formRef"
+        :initial-values="initialValues as UserInfoFormData"
+        @submit="handleSave"
+      />
+    </template>
+  </EditableDialog>
 </template>
