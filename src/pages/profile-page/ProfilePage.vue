@@ -101,7 +101,7 @@ function triggerSubmit() {
 }
 
 function handleSave(updated: UserInfoFormData) {
-  console.log('Updated personal info:', updated);
+  console.log('Updated personal info:', customer.value?.dateOfBirth, updated);
   closeDialog();
 }
 </script>
