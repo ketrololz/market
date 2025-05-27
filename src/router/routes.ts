@@ -18,7 +18,7 @@ export const ROUTES: RouteRecordRaw[] = [
     component: () => import('../pages/catalog-page/CatalogPage.vue'),
   },
   {
-    path: '/catalog/:category',
+    path: '/catalog/:category/',
     name: 'CatalogCategory',
     component: () => import('../components/shop-view/ShopView.vue'),
   },

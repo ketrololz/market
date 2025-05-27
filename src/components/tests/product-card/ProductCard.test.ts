@@ -21,7 +21,7 @@ describe('ProductCard', () => {
         plugins: [PrimeVue, router],
       },
       props: {
-        cardInfo: cardInfo,
+        productInfo: cardInfo,
       },
     });
 

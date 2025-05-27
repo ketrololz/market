@@ -34,6 +34,30 @@ class productsService {
       // errorMessage.value = parsed.message;
     }
   }
+
+  async fetchProducts() {
+    appLogger.log('App.vue: Fetching products...');
+    try {
+      const response = await this.apiRoot
+
+        .productProjections()
+        .get({
+          queryArgs: {
+            limit: 500,
+            staged: false,
+          },
+        })
+        .execute();
+      const result = response.body.results;
+      return result;
+      appLogger.log('App.vue: Products fetched:', result);
+    } catch (error: unknown) {
+      appLogger.error('App.vue: Error fetching products:', error);
+      const parsed = parseError(error);
+      throw new Error(parsed.message);
+      // errorMessage.value = parsed.message;
+    }
+  }
 }
 
 export { productsService };
