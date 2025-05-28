@@ -4,15 +4,16 @@ import productsService, {
 } from '@/services/products/productsService';
 import { CascadeSelect, Panel } from 'primevue';
 import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
-interface CategoryItem {
+export interface CategoryItem {
   name: Name;
   id: string;
   slug: string;
   children: CategoryItem[];
 }
 
-type Name = {
+export type Name = {
   ru: string;
   en: string;
 };
@@ -21,7 +22,7 @@ const categoryList = ref<CategoryItem[]>([]);
 
 const lang = ref(categoriesLanguages.ru);
 
-const emit = defineEmits(['selectCategory']);
+const emit = defineEmits(['selectCategory', 'loadCategories']);
 const selectedCategory = ref<CategoryItem>(categoryList.value[0]);
 
 function handleSelect() {
@@ -79,9 +80,43 @@ async function createCategoryTree() {
   selectedCategory.value = categoryList.value[0];
 }
 
+const route = useRoute();
+
+function handleLoad() {
+  const slug = route.params.category;
+
+  function findCategoryBySlug(
+    categories: CategoryItem[],
+    slug: string | string[],
+  ): CategoryItem | null {
+    for (const category of categories) {
+      if (category.slug === slug) {
+        return category;
+      }
+
+      if (category.children?.length) {
+        const found = findCategoryBySlug(category.children, slug);
+        if (found) {
+          return found;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  const currentCategoryId = findCategoryBySlug(categoryList.value, slug);
+
+  if (currentCategoryId) {
+    selectedCategory.value = currentCategoryId;
+  }
+
+  handleSelect();
+}
+
 onMounted(async () => {
   await createCategoryTree();
-  handleSelect();
+  handleLoad();
 });
 </script>
 <template>

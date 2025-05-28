@@ -16,7 +16,6 @@ import productsService from '@/services/products/productsService';
 import type { Category, ProductProjection } from '@commercetools/platform-sdk';
 
 function handleSelect(category: Category) {
-  console.log(category);
   router.push({
     name: 'CatalogCategory',
     params: { category: normalizeRoute(category.name.en) },
