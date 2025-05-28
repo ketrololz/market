@@ -2,7 +2,7 @@
 import Sidebar from '../sidebar/Sidebar.vue';
 import ProductList from '../product-list/ProductList.vue';
 import { router } from '@/router/router';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import {
   Breadcrumb,
   Select,
@@ -15,9 +15,8 @@ import 'primeicons/primeicons.css';
 import productsService from '@/services/products/productsService';
 import type { Category, ProductProjection } from '@commercetools/platform-sdk';
 
-// const items = ref([{ label: 'All games' }]);
-
 function handleSelect(category: Category) {
+  console.log(category);
   router.push({
     name: 'CatalogCategory',
     params: { category: normalizeRoute(category.name.en) },
@@ -46,16 +45,6 @@ const searchValue = ref('');
 
 const categoryId = ref<string>('');
 
-// const cardInfo = reactive({
-//   image: '/images/products/explosive-cats/1.webp',
-//   title: 'Взрывные котята',
-//   description:
-//     '"Взрывные котята" – это карточная игра, дико популярная на "Кикстартере".',
-//   price: '990 ₽',
-//   isAvailable: true,
-//   route: '/',
-// });
-
 const items = ref([{ label: 'All games' }]);
 
 const products = ref<ProductProjection[]>();
@@ -78,28 +67,10 @@ async function getProductsByPage() {
   }
 }
 
-// async function getProductsByPage2() {
-//   const offset = page.value * limit;
-//   const result = await productsService.fetchProductsPageByCategory(
-//     categoryId.value,
-//     limit,
-//     offset,
-//   );
-
-//   products.value = result.results;
-//   if (result.total) {
-//     totalProducts.value = result.total;
-//   }
-// }
-
 function onPageChange(event: PageState) {
   page.value = event.page;
   getProductsByPage();
 }
-
-onMounted(async () => {
-  await getProductsByPage();
-});
 </script>
 
 <template>
