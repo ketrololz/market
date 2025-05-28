@@ -3,45 +3,50 @@ import Card from 'primevue/card';
 import { Button } from 'primevue';
 import { router } from '@/router/router';
 import type { ProductProjection } from '@commercetools/platform-sdk';
-import { categoriesLanguages } from '@/services/products/productsService';
+import { useUserPreferencesStore } from '@/stores/userpPreferencesStore';
 
 const props = defineProps<{
   productInfo: ProductProjection;
-  language: categoriesLanguages;
 }>();
 
-function convertCardInfo(
-  productInfo: ProductProjection,
-  language: categoriesLanguages,
-) {
+const userPreferencesStore = useUserPreferencesStore();
+
+function convertCardInfo(productInfo: ProductProjection) {
   const prices = productInfo.masterVariant.prices;
 
   if (!prices) {
     return;
   }
 
+  const currency = {
+    position: 0,
+    sign: ' ₽',
+  };
+
+  if (userPreferencesStore.currentLanguage === 'en') {
+    currency.position = 2;
+    currency.sign = ' €';
+  }
+
   const price =
-    language === 'ru'
-      ? prices[0].value.centAmount / 100 + ' ₽'
-      : prices[0].value.centAmount / 10000 + ' €';
-  const discounted = productInfo.masterVariant.prices[0].discounted;
+    prices[currency.position].value.centAmount / 100 + currency.sign;
+
+  const discounted =
+    productInfo.masterVariant.prices[currency.position].discounted;
 
   let newPrice;
 
   if (discounted) {
-    newPrice =
-      language === 'ru'
-        ? discounted.value.centAmount / 100 + ' ₽'
-        : discounted.value.centAmount / 10000 + ' €';
+    newPrice = discounted.value.centAmount / 100 + currency.sign;
   }
 
   const cardInfo = {
     image: productInfo.masterVariant.images
       ? productInfo.masterVariant.images[0].url
       : '/images/no-image.png',
-    name: productInfo.name[language],
+    name: productInfo.name[userPreferencesStore.currentLanguage],
     description: productInfo.description
-      ? productInfo.description[language]
+      ? productInfo.description[userPreferencesStore.currentLanguage]
       : 'No description',
     route: productInfo.slug.en,
     price: price,
@@ -55,7 +60,7 @@ function navigate(route: string) {
   router.push(route);
 }
 
-const cardInfo = convertCardInfo(props.productInfo, props.language);
+const cardInfo = convertCardInfo(props.productInfo);
 </script>
 
 <template>

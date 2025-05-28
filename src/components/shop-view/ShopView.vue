@@ -11,10 +11,9 @@ import {
   type PageState,
 } from 'primevue';
 import 'primeicons/primeicons.css';
-import productsService, {
-  categoriesLanguages,
-} from '@/services/products/productsService';
+import productsService from '@/services/products/productsService';
 import type { Category, ProductProjection } from '@commercetools/platform-sdk';
+import { useUserPreferencesStore } from '@/stores/userpPreferencesStore';
 
 function handleSelect(category: Category) {
   router.push({
@@ -31,7 +30,7 @@ function handleSortSelect() {
 }
 
 function handleSearch(value: string | undefined) {
-  getProductsByPage(categoriesLanguages.en, value);
+  getProductsByPage(value);
 }
 
 function normalizeRoute(category: string) {
@@ -62,14 +61,16 @@ const limit = 20;
 const page = ref(0);
 const totalProducts = ref(0);
 
-async function getProductsByPage(language = categoriesLanguages.en, text = '') {
+const userPreferencesStore = useUserPreferencesStore();
+
+async function getProductsByPage(text = '') {
   const offset = page.value * limit;
   const result = await productsService.fetchProductsPageByCategory(
     categoryId.value,
     limit,
     offset,
     selectedSortType.value.key,
-    language,
+    userPreferencesStore.currentLanguage,
     text,
   );
 

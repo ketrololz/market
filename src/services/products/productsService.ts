@@ -1,11 +1,7 @@
 import { getAppApiRoot } from '@/api/ctpClient';
 import appLogger from '@/utils/logger';
 import { parseError } from '../appErrors';
-
-export enum categoriesLanguages {
-  ru = 'ru',
-  en = 'en',
-}
+import { categoriesLanguages } from '@/stores/userpPreferencesStore';
 
 class productsService {
   apiRoot = getAppApiRoot();
@@ -60,7 +56,6 @@ class productsService {
               sort: sort,
               [`text.${language}`]: searchText,
               fuzzy: true,
-              // fuzzyLevel: 3,
             };
       const response = await this.apiRoot
         .productProjections()

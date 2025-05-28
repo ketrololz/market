@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import productsService, {
-  categoriesLanguages,
-} from '@/services/products/productsService';
+import productsService from '@/services/products/productsService';
 import { CascadeSelect, Panel } from 'primevue';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import type { CategoryItem } from './types/category-item';
+import { useUserPreferencesStore } from '@/stores/userpPreferencesStore';
 
 const categoryList = ref<CategoryItem[]>([]);
 
-const lang = ref(categoriesLanguages.ru);
+const userPreferencesStore = useUserPreferencesStore();
 
 const emit = defineEmits(['selectCategory', 'loadCategories']);
 const selectedCategory = ref<CategoryItem>(categoryList.value[0]);
@@ -115,10 +114,14 @@ onMounted(async () => {
       <h2 class="text-base font-semibold text-(--p-primary-color)">Category</h2>
       <CascadeSelect
         v-model="selectedCategory"
-        :option-label="lang === 'en' ? 'name.en' : 'name.ru'"
+        :option-label="
+          userPreferencesStore.currentLanguage === 'en' ? 'name.en' : 'name.ru'
+        "
         :options="categoryList"
         :option-group-children="['children']"
-        :option-group-label="lang === 'en' ? 'name.en' : 'name.ru'"
+        :option-group-label="
+          userPreferencesStore.currentLanguage === 'en' ? 'name.en' : 'name.ru'
+        "
         class="w-50"
         placeholder="Select category"
         @value-change="handleSelect"
