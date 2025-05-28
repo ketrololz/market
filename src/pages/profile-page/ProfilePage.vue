@@ -161,13 +161,16 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
           </div>
         </template>
         <p class="flex gap-2">
-          <strong class="w-48">Email:</strong> {{ customer.email }}
+          <strong class="w-48">Email:</strong>
+          {{ customer.email }}
         </p>
         <p class="flex gap-2">
-          <strong class="w-48">First Name:</strong> {{ customer.firstName }}
+          <strong class="w-48">First Name:</strong>
+          {{ customer.firstName }}
         </p>
         <p class="flex gap-2">
-          <strong class="w-48">Last Name:</strong> {{ customer.lastName }}
+          <strong class="w-48">Last Name:</strong>
+          {{ customer.lastName }}
         </p>
         <p class="flex gap-2">
           <strong class="w-48">Date of Birth:</strong>
