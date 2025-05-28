@@ -281,6 +281,46 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Update personal profile information.
+   * @param data - Object containing updated personal fields.
+   * @returns A promise that resolves to a boolean indicating update success.
+   */
+  async function updateProfile(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+  }): Promise<boolean> {
+    setLoading(true);
+    clearError();
+    console.log('Updated user profile:');
+    try {
+      const updatedUser = await AuthService.updatePersonalInfo(data);
+      setUserSession(updatedUser);
+      console.log('Updated user profile:', updatedUser);
+      showSuccessToast(
+        i18n.global.t(AuthMessageKey.ProfileUpdateSuccess, {
+          name: updatedUser.firstName,
+        }),
+      );
+
+      return true;
+    } catch (error) {
+      appLogger.error('Failed to update profile in store:', error);
+
+      setError(
+        new AuthError(AuthMessageKey.ProfileUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -291,6 +331,7 @@ export const useAuthStore = defineStore('auth', () => {
     authErrorDetails,
     authErrorMessage,
 
+    updateProfile,
     login,
     register,
     logout,

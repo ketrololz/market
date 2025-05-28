@@ -8,6 +8,7 @@ import EditableDialog from '@/components/editable-dialog/EditableDialog.vue';
 import { useDialogManager } from './../../composables/useDialogManager';
 import UserInfoForm from '@/components/form/UserInfoForm.vue';
 import type { UserInfoFormData } from '@/components/form/UserInfoForm.vue';
+import { useAuthStore } from '@/stores/authStore';
 
 const { activeDialog, openDialog, closeDialog, isProfileDialogVisible } =
   useDialogManager();
@@ -15,6 +16,8 @@ const { activeDialog, openDialog, closeDialog, isProfileDialogVisible } =
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
 const formRef = ref();
+
+const authStore = useAuthStore();
 
 onMounted(async () => {
   try {
@@ -100,9 +103,12 @@ function triggerSubmit() {
   formRef.value?.submit();
 }
 
-function handleSave(updated: UserInfoFormData) {
-  console.log('Updated personal info:', customer.value?.dateOfBirth, updated);
-  closeDialog();
+async function handleSave(data: UserInfoFormData) {
+  const success = await authStore.updateProfile(data);
+  if (success) {
+    customer.value = authStore.userProfile;
+    closeDialog();
+  }
 }
 </script>
 

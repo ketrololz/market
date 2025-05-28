@@ -217,6 +217,60 @@ class AuthService {
       return null;
     }
   }
+
+  public async updatePersonalInfo(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+  }): Promise<Customer> {
+    appLogger.log('AuthService: Updating personal information...');
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const current = await apiRoot.me().get().execute();
+
+      const actions: import('@commercetools/platform-sdk').MyCustomerUpdateAction[] =
+        [];
+
+      if (data.email !== current.body.email) {
+        actions.push({ action: 'changeEmail', email: data.email });
+      }
+      if (data.firstName !== current.body.firstName) {
+        actions.push({ action: 'setFirstName', firstName: data.firstName });
+      }
+      if (data.lastName !== current.body.lastName) {
+        actions.push({ action: 'setLastName', lastName: data.lastName });
+      }
+      if (data.dateOfBirth !== current.body.dateOfBirth) {
+        actions.push({
+          action: 'setDateOfBirth',
+          dateOfBirth: data.dateOfBirth,
+        });
+      }
+
+      if (actions.length === 0) {
+        appLogger.log('AuthService: No changes to update.');
+        return current.body;
+      }
+
+      const updated = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: current.body.version,
+            actions,
+          },
+        })
+        .execute();
+
+      appLogger.log('AuthService: Personal information updated.');
+      return updated.body;
+    } catch (error) {
+      appLogger.error('AuthService: Failed to update personal info:', error);
+      throw parseError(error);
+    }
+  }
 }
 
 export { AuthService };
