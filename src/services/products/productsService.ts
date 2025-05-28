@@ -32,64 +32,11 @@ class productsService {
     }
   }
 
-  async fetchProductsPage(limit: number, offset: number) {
-    appLogger.log('App.vue: Fetching products...');
-    try {
-      const response = await this.apiRoot
-
-        .productProjections()
-        .get({
-          queryArgs: {
-            limit: limit,
-            staged: false,
-            offset: offset,
-          },
-        })
-        .execute();
-      const result = response.body;
-      return result;
-      appLogger.log('App.vue: Products fetched:', result);
-    } catch (error: unknown) {
-      appLogger.error('App.vue: Error fetching products:', error);
-      const parsed = parseError(error);
-      throw new Error(parsed.message);
-      // errorMessage.value = parsed.message;
-    }
-  }
-
-  // async fetchProductsPageByCategory(
-  //   categoryId: string,
-  //   limit: number,
-  //   offset: number,
-  // ) {
-  //   appLogger.log('App.vue: Fetching products...');
-  //   try {
-  //     const response = await this.apiRoot
-  //       .productProjections()
-  //       .get({
-  //         queryArgs: {
-  //           filter: [`categories.id:"${categoryId}"`],
-  //           limit: limit,
-  //           staged: false,
-  //           offset: offset,
-  //         },
-  //       })
-  //       .execute();
-  //     const result = response.body;
-  //     return result;
-  //     appLogger.log('App.vue: Products fetched:', result);
-  //   } catch (error: unknown) {
-  //     appLogger.error('App.vue: Error fetching products:', error);
-  //     const parsed = parseError(error);
-  //     throw new Error(parsed.message);
-  //     // errorMessage.value = parsed.message;
-  //   }
-  // }
-
   async fetchProductsPageByCategory(
     categoryId: string,
     limit: number,
     offset: number,
+    sort: string,
   ) {
     appLogger.log('App.vue: Fetching products...');
     try {
@@ -100,11 +47,13 @@ class productsService {
               limit: limit,
               staged: false,
               offset: offset,
+              sort: sort,
             }
           : {
               limit: limit,
               staged: false,
               offset: offset,
+              sort: sort,
             };
       const response = await this.apiRoot
         .productProjections()
@@ -115,6 +64,7 @@ class productsService {
         .execute();
       const result = response.body;
       appLogger.log('App.vue: Products fetched:', result);
+      console.log(result);
       return result;
     } catch (error: unknown) {
       appLogger.error('App.vue: Error fetching products:', error);

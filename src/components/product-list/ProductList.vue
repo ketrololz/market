@@ -5,7 +5,6 @@ import ProductCard from '../product-card/ProductCard.vue';
 import type { ProductProjection } from '@commercetools/platform-sdk';
 
 defineProps<{ productList?: ProductProjection[] }>();
-// const products = ref<ProductProjection[]>([]);
 </script>
 
 <template>

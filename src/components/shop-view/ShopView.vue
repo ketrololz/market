@@ -25,6 +25,10 @@ function handleSelect(category: Category) {
   getProductsByPage();
 }
 
+function handleSortSelect() {
+  getProductsByPage();
+}
+
 function normalizeRoute(category: string) {
   return category.split(' ').join('-').toLowerCase();
 }
@@ -32,10 +36,11 @@ function normalizeRoute(category: string) {
 const home = ref({ label: 'Home', route: '/' });
 
 const sortTypes = ref([
-  { name: 'Default' },
-  { name: 'Name: A-Z' },
-  { name: 'Price: low to high' },
-  { name: 'Price: high to low' },
+  { name: 'Default', key: 'createdAt asc' },
+  { name: 'Name: A-Z', key: 'name.en asc' },
+  { name: 'Name: Z-A', key: 'name.en desc' },
+  { name: 'Price: low to high', key: 'price asc' },
+  { name: 'Price: high to low', key: 'price desc' },
 ]);
 
 const selectedSortType = ref(sortTypes.value[0]);
@@ -58,6 +63,7 @@ async function getProductsByPage() {
     categoryId.value,
     limit,
     offset,
+    selectedSortType.value.key,
   );
 
   products.value = result.results;
@@ -99,6 +105,7 @@ function onPageChange(event: PageState) {
             option-label="name"
             class="w-50"
             placeholder="Select category"
+            @value-change="handleSortSelect"
           ></Select>
         </div>
         <ProductList :product-list="products" />

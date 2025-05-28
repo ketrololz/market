@@ -34,7 +34,7 @@ function convertCardInfo(
         ? discounted.value.centAmount / 100 + ' ₽'
         : discounted.value.centAmount / 10000 + ' €';
   }
-  // const name = cardInfo.name[language];
+
   const cardInfo = {
     image: productInfo.masterVariant.images
       ? productInfo.masterVariant.images[0].url

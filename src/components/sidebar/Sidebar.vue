@@ -5,18 +5,7 @@ import productsService, {
 import { CascadeSelect, Panel } from 'primevue';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-
-export interface CategoryItem {
-  name: Name;
-  id: string;
-  slug: string;
-  children: CategoryItem[];
-}
-
-export type Name = {
-  ru: string;
-  en: string;
-};
+import type { CategoryItem } from './types/category-item';
 
 const categoryList = ref<CategoryItem[]>([]);
 
@@ -119,6 +108,7 @@ onMounted(async () => {
   handleLoad();
 });
 </script>
+
 <template>
   <Panel header="Filters" pt:header:class="text-xl" class="h-full">
     <div class="flex gap-y-2 flex-col">
