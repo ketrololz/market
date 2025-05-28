@@ -27,7 +27,9 @@ export enum AuthMessageKey {
   LogoutSuccess = 'success.auth.logout',
   SessionRestored = 'success.auth.sessionRestored',
   ProfileUpdateSuccess = 'success.auth.profileUpdate',
+  PasswordUpdateSuccess = 'success.auth.passwordUpdate',
 
+  PasswordUpdateFailed = 'errors.auth.passwordUpdateFailed',
   ProfileUpdateFailed = 'errors.auth.profileUpdateFailed',
 }
 

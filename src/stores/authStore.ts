@@ -12,6 +12,7 @@ import i18n from '@/plugins/i18n';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 import { AuthError, ClientValidationError } from '@/services/appErrors';
 import { router } from '@/router/router';
+import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
 
 interface AuthStoreErrorDetails {
   i18nKey: AuthMessageKey | string;
@@ -318,6 +319,45 @@ export const useAuthStore = defineStore('auth', () => {
       setLoading(false);
     }
   }
+  async function updatePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<boolean> {
+    setLoading(true);
+    clearError();
+    try {
+      const me = await CtpClientFactory.createApiRootWithUserSession()
+        .me()
+        .get()
+        .execute();
+
+      console.log('Current user data:', data);
+
+      const updatedUser = await AuthService.updatePassword({
+        id: me.body.id,
+        version: me.body.version,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      setUserSession(updatedUser);
+      showSuccessToast(
+        i18n.global.t(AuthMessageKey.PasswordUpdateSuccess, {
+          name: updatedUser.firstName,
+        }),
+      );
+      return true;
+    } catch (error) {
+      appLogger.error('Failed to update password in store:', error);
+      setError(
+        new AuthError(AuthMessageKey.PasswordUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return {
     user,
@@ -330,6 +370,7 @@ export const useAuthStore = defineStore('auth', () => {
     authErrorMessage,
 
     updateProfile,
+    updatePassword,
     login,
     register,
     logout,

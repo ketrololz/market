@@ -7,18 +7,34 @@ import AddressSection from './AddressSection.vue';
 import EditableDialog from '@/components/editable-dialog/EditableDialog.vue';
 import { useDialogManager } from './../../composables/useDialogManager';
 import UserInfoForm from '@/components/form/UserInfoForm.vue';
+import PasswordForm from '@/components/form/PasswordForm.vue';
+import type { PasswordFormData } from '@/components/form/PasswordForm.vue';
 import type { UserInfoFormData } from '@/components/form/UserInfoForm.vue';
 import { useAuthStore } from '@/stores/authStore';
 import type { UserInfoFormRef } from '@/components/form/types/UserFormRef';
 
-const { activeDialog, openDialog, closeDialog, isProfileDialogVisible } =
-  useDialogManager();
+const {
+  activeDialog,
+  openDialog,
+  closeDialog,
+  isProfileDialogVisible,
+  isPasswordDialogVisible,
+} = useDialogManager();
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
 const formRef = ref<UserInfoFormRef>();
 
 const authStore = useAuthStore();
+
+const isDialogVisible = computed({
+  get: () => isProfileDialogVisible.value || isPasswordDialogVisible.value,
+  set: (value: boolean) => {
+    if (!value) {
+      closeDialog();
+    }
+  },
+});
 
 onMounted(async () => {
   try {
@@ -62,8 +78,10 @@ const dialogTitle = computed(() => {
   }
 });
 
-const currentInitialValues = computed<UserInfoFormData | null>(() => {
-  if (customer.value) {
+const currentInitialValues = computed<
+  UserInfoFormData | PasswordFormData | null
+>(() => {
+  if (activeDialog.value === 'profile' && customer.value) {
     const { email, firstName, lastName, dateOfBirth } = customer.value;
     return {
       email: email ?? '',
@@ -71,18 +89,20 @@ const currentInitialValues = computed<UserInfoFormData | null>(() => {
       lastName: lastName ?? '',
       dateOfBirth: dateOfBirth ?? '',
     };
+  } else if (activeDialog.value === 'password') {
+    return {
+      currentPassword: '',
+      newPassword: '',
+    };
   }
   return null;
 });
 
 const currentFormComponent = computed(() => {
   if (activeDialog.value === 'profile') return UserInfoForm;
+  if (activeDialog.value === 'password') return PasswordForm;
   return null;
 });
-
-function onEdit() {
-  console.log('Edit personal information', customer.value);
-}
 
 function onAddNewAddress() {
   console.log('Add new address');
@@ -104,11 +124,19 @@ function triggerSubmit() {
   formRef.value?.submit();
 }
 
-async function handleSave(data: UserInfoFormData) {
-  const success = await authStore.updateProfile(data);
-  if (success) {
-    customer.value = authStore.userProfile;
-    closeDialog();
+async function handleSave(data: UserInfoFormData | PasswordFormData) {
+  if (activeDialog.value === 'profile') {
+    const success = await authStore.updateProfile(data as UserInfoFormData);
+    if (success) {
+      customer.value = authStore.userProfile;
+      closeDialog();
+    }
+  } else if (activeDialog.value === 'password') {
+    const success = await authStore.updatePassword(data as PasswordFormData);
+    if (success) {
+      customer.value = authStore.userProfile;
+      closeDialog();
+    }
   }
 }
 </script>
@@ -155,7 +183,7 @@ async function handleSave(data: UserInfoFormData) {
             <span class="text-lg">Password</span>
             <button
               class="text-xs text-blue-600 cursor-pointer hover:underline"
-              @click="onEdit"
+              @click="openDialog('password')"
             >
               Edit
             </button>
@@ -201,7 +229,7 @@ async function handleSave(data: UserInfoFormData) {
   </div>
 
   <EditableDialog
-    v-model="isProfileDialogVisible"
+    v-model="isDialogVisible"
     :title="dialogTitle"
     :edit="true"
     :initial-values="currentInitialValues"
@@ -211,8 +239,17 @@ async function handleSave(data: UserInfoFormData) {
       <component
         :is="currentFormComponent"
         ref="formRef"
-        :initial-values="initialValues as UserInfoFormData"
-        @submit="handleSave"
+        v-bind="
+          activeDialog === 'profile'
+            ? {
+                initialValues: initialValues as UserInfoFormData,
+                onSubmit: handleSave,
+              }
+            : {
+                initialValues: initialValues as PasswordFormData,
+                onSubmit: handleSave,
+              }
+        "
       />
     </template>
   </EditableDialog>

@@ -271,6 +271,36 @@ class AuthService {
       throw parseError(error);
     }
   }
+
+  public async updatePassword(data: {
+    id: string;
+    version: number;
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<Customer> {
+    appLogger.log('AuthService: Updating password...');
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const response = await apiRoot
+        .me()
+        .password()
+        .post({
+          body: {
+            version: data.version,
+            currentPassword: data.currentPassword,
+            newPassword: data.newPassword,
+          },
+        })
+        .execute();
+
+      appLogger.log('AuthService: Password updated successfully.');
+      return response.body;
+    } catch (error) {
+      appLogger.error('AuthService: Failed to update password:', error);
+      throw parseError(error);
+    }
+  }
 }
 
 export { AuthService };
