@@ -294,11 +294,9 @@ export const useAuthStore = defineStore('auth', () => {
   }): Promise<boolean> {
     setLoading(true);
     clearError();
-    console.log('Updated user profile:');
     try {
       const updatedUser = await AuthService.updatePersonalInfo(data);
       setUserSession(updatedUser);
-      console.log('Updated user profile:', updatedUser);
       showSuccessToast(
         i18n.global.t(AuthMessageKey.ProfileUpdateSuccess, {
           name: updatedUser.firstName,

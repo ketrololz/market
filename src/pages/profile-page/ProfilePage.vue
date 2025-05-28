@@ -9,13 +9,14 @@ import { useDialogManager } from './../../composables/useDialogManager';
 import UserInfoForm from '@/components/form/UserInfoForm.vue';
 import type { UserInfoFormData } from '@/components/form/UserInfoForm.vue';
 import { useAuthStore } from '@/stores/authStore';
+import type { UserInfoFormRef } from '@/components/form/types/UserFormRef';
 
 const { activeDialog, openDialog, closeDialog, isProfileDialogVisible } =
   useDialogManager();
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
-const formRef = ref();
+const formRef = ref<UserInfoFormRef>();
 
 const authStore = useAuthStore();
 

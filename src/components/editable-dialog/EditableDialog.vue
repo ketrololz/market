@@ -2,6 +2,8 @@
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import { computed } from 'vue';
+import { ref } from 'vue';
+import type { UserInfoFormRef } from '../form/types/UserFormRef';
 
 const visible = computed({
   get: () => props.modelValue,
@@ -13,12 +15,19 @@ const props = defineProps<{
   edit?: boolean;
   modelValue: boolean;
   initialValues?: unknown;
+  formRef?: UserInfoFormRef;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
   (e: 'submit'): void;
 }>();
+
+const formComponent = ref<UserInfoFormRef>();
+
+const isFormValid = computed(() => {
+  return formComponent.value?.isValid?.value ?? true;
+});
 </script>
 
 <template>
@@ -50,6 +59,7 @@ const emit = defineEmits<{
         label="Save"
         icon="pi pi-check"
         class="p-button-text"
+        :disabled="!isFormValid"
         @click="$emit('submit')"
       />
     </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits, ref, computed } from 'vue';
 import { Form, FormField } from '@primevue/forms';
 import type { FormInstance } from '@primevue/forms';
 import BaseInput from '@/components/form/BaseTextInput.vue';
@@ -26,11 +26,18 @@ const formRef = ref<FormInstance>();
 
 const formData = ref<UserInfoFormData>({ ...props.initialValues });
 
+const isValid = computed(() => {
+  console.log('UserInfoForm isValid:', formRef.value?.valid ?? false);
+  return formRef.value?.valid ?? false;
+});
+
 function submitForm() {
-  emit('submit', formData.value);
+  if (formRef.value?.valid) {
+    emit('submit', formData.value);
+  }
 }
 
-defineExpose({ submit: submitForm });
+defineExpose({ submit: submitForm, isValid });
 </script>
 
 <template>
