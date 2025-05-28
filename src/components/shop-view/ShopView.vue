@@ -8,11 +8,12 @@ import {
   Select,
   InputText,
   Paginator,
-  Button,
   type PageState,
 } from 'primevue';
 import 'primeicons/primeicons.css';
-import productsService from '@/services/products/productsService';
+import productsService, {
+  categoriesLanguages,
+} from '@/services/products/productsService';
 import type { Category, ProductProjection } from '@commercetools/platform-sdk';
 
 function handleSelect(category: Category) {
@@ -27,6 +28,10 @@ function handleSelect(category: Category) {
 
 function handleSortSelect() {
   getProductsByPage();
+}
+
+function handleSearch(value: string | undefined) {
+  getProductsByPage(categoriesLanguages.en, value);
 }
 
 function normalizeRoute(category: string) {
@@ -57,13 +62,15 @@ const limit = 20;
 const page = ref(0);
 const totalProducts = ref(0);
 
-async function getProductsByPage() {
+async function getProductsByPage(language = categoriesLanguages.en, text = '') {
   const offset = page.value * limit;
   const result = await productsService.fetchProductsPageByCategory(
     categoryId.value,
     limit,
     offset,
     selectedSortType.value.key,
+    language,
+    text,
   );
 
   products.value = result.results;
@@ -96,8 +103,9 @@ function onPageChange(event: PageState) {
               v-model="searchValue"
               type="text"
               placeholder="Search..."
+              @value-change="handleSearch"
             />
-            <Button type="submit" severity="secondary" label="Search" />
+            <!-- <Button type="submit" severity="secondary" label="Search" /> -->
           </Form>
           <Select
             v-model="selectedSortType"

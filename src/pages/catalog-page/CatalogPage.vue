@@ -1,10 +1,10 @@
 <!-- TODO:
       - search
-      - pagination
+      - pagination ✓
       - filters
       - scroll animation
       - loading animation
-      - load product by url
+      - load product by url ✓
       - € / $ -->
 
 <script setup lang="ts">

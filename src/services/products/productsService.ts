@@ -37,6 +37,8 @@ class productsService {
     limit: number,
     offset: number,
     sort: string,
+    language = categoriesLanguages.en,
+    searchText = '',
   ) {
     appLogger.log('App.vue: Fetching products...');
     try {
@@ -48,12 +50,17 @@ class productsService {
               staged: false,
               offset: offset,
               sort: sort,
+              [`text.${language}`]: searchText,
+              fuzzy: true,
             }
           : {
               limit: limit,
               staged: false,
               offset: offset,
               sort: sort,
+              [`text.${language}`]: searchText,
+              fuzzy: true,
+              // fuzzyLevel: 3,
             };
       const response = await this.apiRoot
         .productProjections()
