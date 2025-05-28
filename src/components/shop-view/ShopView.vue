@@ -13,15 +13,18 @@ import {
 } from 'primevue';
 import 'primeicons/primeicons.css';
 import productsService from '@/services/products/productsService';
-import type { ProductProjection } from '@commercetools/platform-sdk';
+import type { Category, ProductProjection } from '@commercetools/platform-sdk';
 
 // const items = ref([{ label: 'All games' }]);
 
-function handleSelect(category: string) {
+function handleSelect(category: Category) {
   router.push({
     name: 'CatalogCategory',
-    params: { category: normalizeRoute(category) },
+    params: { category: normalizeRoute(category.name.en) },
   });
+  categoryId.value = category.id;
+  page.value = 0;
+  getProductsByPage();
 }
 
 function normalizeRoute(category: string) {
@@ -41,6 +44,8 @@ const selectedSortType = ref(sortTypes.value[0]);
 
 const searchValue = ref('');
 
+const categoryId = ref<string>('');
+
 // const cardInfo = reactive({
 //   image: '/images/products/explosive-cats/1.webp',
 //   title: 'Взрывные котята',
@@ -57,23 +62,38 @@ const products = ref<ProductProjection[]>();
 
 const limit = 20;
 const page = ref(0);
-// const offset = (page.value - 1) * limit;
 const totalProducts = ref(0);
 
 async function getProductsByPage() {
   const offset = page.value * limit;
-  const result = await productsService.fetchProductsPage(limit, offset);
-  console.log(result);
+  const result = await productsService.fetchProductsPageByCategory(
+    categoryId.value,
+    limit,
+    offset,
+  );
+
   products.value = result.results;
   if (result.total) {
     totalProducts.value = result.total;
   }
 }
 
+// async function getProductsByPage2() {
+//   const offset = page.value * limit;
+//   const result = await productsService.fetchProductsPageByCategory(
+//     categoryId.value,
+//     limit,
+//     offset,
+//   );
+
+//   products.value = result.results;
+//   if (result.total) {
+//     totalProducts.value = result.total;
+//   }
+// }
+
 function onPageChange(event: PageState) {
-  console.log(event);
   page.value = event.page;
-  console.log(products.value);
   getProductsByPage();
 }
 
@@ -92,10 +112,7 @@ onMounted(async () => {
       </template>
     </Breadcrumb>
     <div class="flex gap-4 flex-col md:flex-row min-h-150">
-      <Sidebar
-        class="static top-4 md:sticky"
-        @select-category="handleSelect"
-      ></Sidebar>
+      <Sidebar class="top-4" @select-category="handleSelect"></Sidebar>
       <div class="flex flex-col w-full gap-y-10">
         <div class="flex justify-between">
           <Form class="flex gap-2" @submit.prevent>

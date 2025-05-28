@@ -5,19 +5,56 @@ import productsService, {
 import { Select, Panel } from 'primevue';
 import { onMounted, ref } from 'vue';
 
-const categories = ref<string[]>([]);
+interface CategoryItem {
+  name: Name;
+  id: string;
+  slug: string;
+}
+
+type Name = {
+  ru: string;
+  en: string;
+};
+
+const categoryList = ref<CategoryItem[]>([]);
+
+const lang = ref(categoriesLanguages.en);
 
 const emit = defineEmits(['selectCategory']);
-const selectedCategory = ref(categories.value[0]);
+const selectedCategory = ref<CategoryItem>(categoryList.value[0]);
+
+// const categoryList = ref<Category[]>()
 
 function handleSelect() {
   emit('selectCategory', selectedCategory.value);
 }
 
+//  categories.value = results.map(
+//         (categoryObj) => categoryObj.name[language],
+//       );
+
 onMounted(async () => {
-  const result = await productsService.fetchCategories(categoriesLanguages.en);
-  categories.value = result;
-  selectedCategory.value = categories.value[0];
+  const result = await productsService.fetchCategories();
+  categoryList.value = result.map((categoryObj) => {
+    return {
+      name: {
+        ru: categoryObj.name.ru,
+        en: categoryObj.name.en,
+      },
+      id: categoryObj.id,
+      slug: categoryObj.slug.en,
+    };
+  });
+  categoryList.value.splice(0, 0, {
+    name: {
+      ru: 'Все категории',
+      en: 'All categories',
+    },
+    id: '0',
+    slug: 'all-categories',
+  });
+
+  selectedCategory.value = categoryList.value[0];
 });
 </script>
 <template>
@@ -26,7 +63,8 @@ onMounted(async () => {
       <h2 class="text-base font-semibold text-(--p-primary-color)">Category</h2>
       <Select
         v-model="selectedCategory"
-        :options="categories"
+        :option-label="lang === 'en' ? 'name.en' : 'name.ru'"
+        :options="categoryList"
         class="w-50"
         placeholder="Select category"
         @value-change="handleSelect"
