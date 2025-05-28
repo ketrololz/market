@@ -294,7 +294,18 @@ class AuthService {
         })
         .execute();
 
-      appLogger.log('AuthService: Password updated successfully.');
+      appLogger.log('AuthService: Password updated, re-authenticating...');
+
+      const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot({
+        email: response.body.email,
+        password: data.newPassword,
+      });
+
+      await userApiRoot.me().get().execute();
+
+      appLogger.log(
+        'AuthService: Re-authentication successful after password change.',
+      );
       return response.body;
     } catch (error) {
       appLogger.error('AuthService: Failed to update password:', error);
