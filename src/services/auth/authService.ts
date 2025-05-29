@@ -350,6 +350,37 @@ class AuthService {
       throw parseError(error);
     }
   }
+
+  public async removeAddress(addressId: string): Promise<Customer> {
+    appLogger.log(`AuthService: Removing address with ID: ${addressId}`);
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const current = await apiRoot.me().get().execute();
+
+      const action: import('@commercetools/platform-sdk').MyCustomerUpdateAction =
+        {
+          action: 'removeAddress',
+          addressId,
+        };
+
+      const updated = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: current.body.version,
+            actions: [action],
+          },
+        })
+        .execute();
+
+      appLogger.log(`AuthService: Address removed.`);
+      return updated.body;
+    } catch (error) {
+      appLogger.error(`AuthService: Failed to remove address:`, error);
+      throw parseError(error);
+    }
+  }
 }
 
 export { AuthService };

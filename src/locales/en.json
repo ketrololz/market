@@ -1,6 +1,7 @@
 {
   "errors": {
     "auth": {
+      "addressRemoveFailed": "Failed to remove address. Please try again.",
       "defaultAddressUpdateFailed": "Failed to update default address. Please try again.",
       "profileUpdateFailed": "Failed to update profile. Please try again.",
       "passwordUpdateFailed": "Failed to update password. Please try again.",
@@ -32,7 +33,8 @@
       "login": "Login successful! Welcome back.",
       "register": "Registration successful! You are now logged in.",
       "logout": "You have been logged out successfully.",
-      "sessionRestored": "Session restored successfully."
+      "sessionRestored": "Session restored successfully.",
+      "addressRemove": "Address removed successfully."
     },
     "projectSettings": {
       "loaded": "Project settings loaded."

@@ -112,8 +112,17 @@ function onEditAddress(address: Address) {
   console.log('Edit address:', address);
 }
 
-function onDeleteAddress(address: Address) {
-  console.log('Delete address:', address);
+async function onDeleteAddress(address: Address) {
+  if (!address.id) {
+    console.warn('Address id is undefined, cannot delete.');
+    return;
+  }
+  try {
+    await authStore.removeAddress(address.id);
+    customer.value = authStore.userProfile;
+  } catch (error) {
+    console.error('Failed to delete address:', error);
+  }
 }
 
 async function onSetDefault(address: Address, type: 'shipping' | 'billing') {

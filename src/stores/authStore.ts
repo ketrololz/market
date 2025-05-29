@@ -391,6 +391,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function removeAddress(addressId: string): Promise<Customer> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedUser = await AuthService.removeAddress(addressId);
+      setUserSession(updatedUser);
+
+      showSuccessToast(i18n.global.t(AuthMessageKey.AddressRemoveSuccess));
+
+      return updatedUser;
+    } catch (error) {
+      appLogger.error(`Failed to remove address:`, error);
+      setError(
+        new AuthError(AuthMessageKey.AddressRemoveFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -401,6 +424,7 @@ export const useAuthStore = defineStore('auth', () => {
     authErrorDetails,
     authErrorMessage,
 
+    removeAddress,
     setDefaultAddress,
     updateProfile,
     updatePassword,
