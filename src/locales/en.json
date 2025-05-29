@@ -1,6 +1,7 @@
 {
   "errors": {
     "auth": {
+      "defaultAddressUpdateFailed": "Failed to update default address. Please try again.",
       "profileUpdateFailed": "Failed to update profile. Please try again.",
       "passwordUpdateFailed": "Failed to update password. Please try again.",
       "unknown": "An unexpected authentication error occurred.",
@@ -25,6 +26,7 @@
   },
   "success": {
     "auth": {
+      "defaultAddressUpdate": "Default address updated successfully.",
       "profileUpdate": "Profile updated successfully.",
       "passwordUpdate": "Password updated successfully.",
       "login": "Login successful! Welcome back.",

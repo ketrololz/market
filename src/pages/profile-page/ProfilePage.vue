@@ -117,7 +117,15 @@ function onDeleteAddress(address: Address) {
 }
 
 function onSetDefault(address: Address, type: 'shipping' | 'billing') {
-  console.log(`Set address ${address.id} as default ${type} address`);
+  if (!address.id) {
+    console.warn('Address id is undefined, cannot set as default.');
+    return;
+  }
+  if (type === 'shipping') {
+    authStore.setDefaultAddress(address.id, 'shipping');
+  } else {
+    authStore.setDefaultAddress(address.id, 'billing');
+  }
 }
 
 function triggerSubmit() {

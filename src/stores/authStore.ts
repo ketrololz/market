@@ -359,6 +359,38 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Update default shipping/billing address.
+   * @param data - object with addressId and flags
+   * @returns A promise that resolves to a boolean indicating success.
+   */
+  async function setDefaultAddress(
+    addressId: string,
+    type: 'shipping' | 'billing',
+  ): Promise<boolean> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedUser = await AuthService.setDefaultAddress(addressId, type);
+      setUserSession(updatedUser);
+
+      showSuccessToast(
+        i18n.global.t(AuthMessageKey.DefaultAddressUpdateSuccess),
+      );
+      return true;
+    } catch (error) {
+      appLogger.error(`Failed to set default ${type} address:`, error);
+      setError(
+        new AuthError(AuthMessageKey.DefaultAddressUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -369,6 +401,7 @@ export const useAuthStore = defineStore('auth', () => {
     authErrorDetails,
     authErrorMessage,
 
+    setDefaultAddress,
     updateProfile,
     updatePassword,
     login,

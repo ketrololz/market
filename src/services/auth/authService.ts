@@ -312,6 +312,44 @@ class AuthService {
       throw parseError(error);
     }
   }
+
+  public async setDefaultAddress(
+    addressId: string,
+    type: 'shipping' | 'billing',
+  ): Promise<Customer> {
+    appLogger.log(
+      `AuthService: Setting default ${type} address to ID: ${addressId}`,
+    );
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const current = await apiRoot.me().get().execute();
+
+      const action: import('@commercetools/platform-sdk').MyCustomerUpdateAction =
+        type === 'shipping'
+          ? { action: 'setDefaultShippingAddress' as const, addressId }
+          : { action: 'setDefaultBillingAddress' as const, addressId };
+
+      const updated = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: current.body.version,
+            actions: [action],
+          },
+        })
+        .execute();
+
+      appLogger.log(`AuthService: Default ${type} address updated.`);
+      return updated.body;
+    } catch (error) {
+      appLogger.error(
+        `AuthService: Failed to set default ${type} address:`,
+        error,
+      );
+      throw parseError(error);
+    }
+  }
 }
 
 export { AuthService };
