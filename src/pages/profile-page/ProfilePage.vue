@@ -116,15 +116,17 @@ function onDeleteAddress(address: Address) {
   console.log('Delete address:', address);
 }
 
-function onSetDefault(address: Address, type: 'shipping' | 'billing') {
+async function onSetDefault(address: Address, type: 'shipping' | 'billing') {
   if (!address.id) {
     console.warn('Address id is undefined, cannot set as default.');
     return;
   }
-  if (type === 'shipping') {
-    authStore.setDefaultAddress(address.id, 'shipping');
-  } else {
-    authStore.setDefaultAddress(address.id, 'billing');
+  try {
+    await authStore.setDefaultAddress(address.id, type);
+
+    customer.value = authStore.userProfile;
+  } catch (error) {
+    console.error(`Failed to set default ${type} address:`, error);
   }
 }
 
