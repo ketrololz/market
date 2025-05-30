@@ -3,7 +3,7 @@ import Card from 'primevue/card';
 import { Button } from 'primevue';
 import { router } from '@/router/router';
 import type { ProductProjection } from '@commercetools/platform-sdk';
-import { useUserPreferencesStore } from '@/stores/userpPreferencesStore';
+import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 
 const props = defineProps<{
   productInfo: ProductProjection;

@@ -1,20 +1,39 @@
 <script setup lang="ts">
 import productsService from '@/services/products/productsService';
-import { CascadeSelect, Panel } from 'primevue';
+import { CascadeSelect, Panel, Slider, InputNumber, Button } from 'primevue';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import type { CategoryItem } from './types/category-item';
-import { useUserPreferencesStore } from '@/stores/userpPreferencesStore';
+import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 
 const categoryList = ref<CategoryItem[]>([]);
 
 const userPreferencesStore = useUserPreferencesStore();
 
-const emit = defineEmits(['selectCategory', 'loadCategories']);
+const emit = defineEmits([
+  'selectCategory',
+  'loadCategories',
+  'searchProducts',
+]);
 const selectedCategory = ref<CategoryItem>(categoryList.value[0]);
 
-function handleSelect() {
-  emit('selectCategory', selectedCategory.value);
+async function handleSelect() {
+  await loadPrices(selectedCategory.value.id);
+  emit(
+    'selectCategory',
+    selectedCategory.value,
+    priceRange.value[0],
+    priceRange.value[1],
+  );
+}
+
+function search() {
+  emit(
+    'searchProducts',
+    selectedCategory.value,
+    priceRange.value[0],
+    priceRange.value[1],
+  );
 }
 
 async function createCategoryTree() {
@@ -102,30 +121,78 @@ function handleLoad() {
   handleSelect();
 }
 
+const priceMin = ref(0);
+const priceMax = ref(0);
+const priceRange = ref([priceMin.value, priceMax.value]);
+
 onMounted(async () => {
   await createCategoryTree();
   handleLoad();
 });
+
+async function loadPrices(categoryId: string) {
+  const prices = await productsService.fetchProductsPrice(categoryId);
+  priceMin.value = Math.abs(prices.priceMin) === Infinity ? 0 : prices.priceMin;
+  priceMax.value = Math.abs(prices.priceMax) === Infinity ? 0 : prices.priceMax;
+  priceRange.value = [priceMin.value, priceMax.value];
+}
 </script>
 
 <template>
   <Panel header="Filters" pt:header:class="text-xl" class="h-full">
-    <div class="flex gap-y-2 flex-col">
-      <h2 class="text-base font-semibold text-(--p-primary-color)">Category</h2>
-      <CascadeSelect
-        v-model="selectedCategory"
-        :option-label="
-          userPreferencesStore.currentLanguage === 'en' ? 'name.en' : 'name.ru'
-        "
-        :options="categoryList"
-        :option-group-children="['children']"
-        :option-group-label="
-          userPreferencesStore.currentLanguage === 'en' ? 'name.en' : 'name.ru'
-        "
-        class="w-50"
-        placeholder="Select category"
-        @value-change="handleSelect"
-      ></CascadeSelect>
+    <div class="flex gap-y-6 flex-col">
+      <div class="flex gap-y-2 flex-col">
+        <h2 class="text-base font-semibold text-(--p-primary-color)">
+          Category
+        </h2>
+        <CascadeSelect
+          v-model="selectedCategory"
+          :option-label="
+            userPreferencesStore.currentLanguage === 'en'
+              ? 'name.en'
+              : 'name.ru'
+          "
+          :options="categoryList"
+          :option-group-children="['children']"
+          :option-group-label="
+            userPreferencesStore.currentLanguage === 'en'
+              ? 'name.en'
+              : 'name.ru'
+          "
+          class="w-50"
+          placeholder="Select category"
+          @value-change="handleSelect"
+        ></CascadeSelect>
+      </div>
+      <div class="flex gap-y-2 flex-col">
+        <h2 class="text-base font-semibold text-(--p-primary-color)">
+          Price, €
+        </h2>
+        <div class="card flex flex-col justify-center gap-y-3">
+          <div class="flex w-50 gap-x-6">
+            <InputNumber
+              v-model="priceRange[0]"
+              :min="priceMin"
+              :max="priceMax"
+              fluid
+            />
+            <InputNumber
+              v-model="priceRange[1]"
+              :min="priceMin"
+              :max="priceMax"
+              fluid
+            />
+          </div>
+          <Slider
+            v-model="priceRange"
+            range
+            class="w-50"
+            :min="priceMin"
+            :max="priceMax"
+          />
+          <Button label="search" @click="search"></Button>
+        </div>
+      </div>
     </div>
   </Panel>
 </template>

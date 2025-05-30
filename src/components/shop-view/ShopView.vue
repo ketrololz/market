@@ -11,17 +11,19 @@ import {
   type PageState,
 } from 'primevue';
 import 'primeicons/primeicons.css';
-import productsService from '@/services/products/productsService';
+import productsService, { currency } from '@/services/products/productsService';
 import type { Category, ProductProjection } from '@commercetools/platform-sdk';
-import { useUserPreferencesStore } from '@/stores/userpPreferencesStore';
+import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 
-function handleSelect(category: Category) {
+function handleSelect(category: Category, min: number, max: number) {
   router.push({
     name: 'CatalogCategory',
     params: { category: normalizeRoute(category.name.en) },
   });
   categoryId.value = category.id;
   page.value = 0;
+  priceMin.value = min;
+  priceMax.value = max;
   getProductsByPage();
 }
 
@@ -61,18 +63,26 @@ const limit = 20;
 const page = ref(0);
 const totalProducts = ref(0);
 
+const priceMin = ref(0);
+const priceMax = ref(0);
+
 const userPreferencesStore = useUserPreferencesStore();
 
 async function getProductsByPage(text = '') {
   const offset = page.value * limit;
-  const result = await productsService.fetchProductsPageByCategory(
-    categoryId.value,
+
+  const lang = userPreferencesStore.currentLanguage;
+  const result = await productsService.fetchProductsPageByCategory({
     limit,
     offset,
-    selectedSortType.value.key,
-    userPreferencesStore.currentLanguage,
-    text,
-  );
+    categoryId: categoryId.value,
+    sort: selectedSortType.value.key,
+    language: userPreferencesStore.currentLanguage,
+    searchText: text,
+    priceMin: priceMin.value,
+    priceMax: priceMax.value,
+    currency: currency[lang],
+  });
 
   products.value = result.results;
   if (result.total) {
@@ -96,7 +106,11 @@ function onPageChange(event: PageState) {
       </template>
     </Breadcrumb>
     <div class="flex gap-4 flex-col md:flex-row min-h-150">
-      <Sidebar class="top-4" @select-category="handleSelect"></Sidebar>
+      <Sidebar
+        class="top-4"
+        @select-category="handleSelect"
+        @search-products="handleSelect"
+      ></Sidebar>
       <div class="flex flex-col w-full gap-y-10">
         <div class="flex justify-between">
           <Form class="flex gap-2" @submit.prevent>
