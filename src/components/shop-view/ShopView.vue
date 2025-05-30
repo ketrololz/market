@@ -133,6 +133,7 @@ function onPageChange(event: PageState) {
               v-model="searchValue"
               type="text"
               placeholder="Search..."
+              fluid
               @value-change="handleSearch"
             />
             <!-- <Button type="submit" severity="secondary" label="Search" /> -->
@@ -146,8 +147,22 @@ function onPageChange(event: PageState) {
             @value-change="handleSortSelect"
           ></Select>
         </div>
-        <ProductList :product-list="products" />
+        <ProductList v-if="products?.length" :product-list="products" />
+        <div
+          v-else
+          class="w-full h-auto md:h-full flex flex-col items-center justify-center"
+        >
+          <h1 class="text-7xl font-bold text-[var(--p-surface-400)] pb-4">
+            :(
+          </h1>
+          <p class="text-3xl font-bold text-[var(--p-surface-400)]">
+            Sorry, products not found
+          </p>
+          <img src="/images/no-products.png" class="w-80 mb-6 mt-4" />
+        </div>
+
         <Paginator
+          v-if="products?.length"
           :rows="limit"
           :total-records="totalProducts"
           template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
