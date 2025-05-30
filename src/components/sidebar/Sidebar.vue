@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import productsService from '@/services/products/productsService';
-import { CascadeSelect, Panel, Slider, InputNumber, Button } from 'primevue';
+import {
+  CascadeSelect,
+  Panel,
+  Slider,
+  InputNumber,
+  Button,
+  ToggleSwitch,
+  RadioButton,
+} from 'primevue';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import type { CategoryItem } from './types/category-item';
@@ -24,6 +32,8 @@ async function handleSelect() {
     selectedCategory.value,
     priceRange.value[0],
     priceRange.value[1],
+    discountStatus.value,
+    selectedPlayers.value,
   );
 }
 
@@ -33,6 +43,8 @@ function search() {
     selectedCategory.value,
     priceRange.value[0],
     priceRange.value[1],
+    discountStatus.value,
+    selectedPlayers.value,
   );
 }
 
@@ -125,17 +137,31 @@ const priceMin = ref(0);
 const priceMax = ref(0);
 const priceRange = ref([priceMin.value, priceMax.value]);
 
-onMounted(async () => {
-  await createCategoryTree();
-  handleLoad();
-});
-
 async function loadPrices(categoryId: string) {
   const prices = await productsService.fetchProductsPrice(categoryId);
   priceMin.value = Math.abs(prices.priceMin) === Infinity ? 0 : prices.priceMin;
   priceMax.value = Math.abs(prices.priceMax) === Infinity ? 0 : prices.priceMax;
   priceRange.value = [priceMin.value, priceMax.value];
 }
+
+const discountStatus = ref(false);
+
+const playersCountList = ref([
+  { label: 'Any', count: 0, key: 'p-0' },
+  { label: '1', count: 1, key: 'p-1' },
+  { label: '2', count: 2, key: 'p-2' },
+  { label: '3', count: 3, key: 'p-3' },
+  { label: '4', count: 4, key: 'p-4' },
+  { label: '5', count: 5, key: 'p-5' },
+  { label: 'More', count: 6, key: 'p-6' },
+]);
+
+const selectedPlayers = ref(0);
+
+onMounted(async () => {
+  await createCategoryTree();
+  handleLoad();
+});
 </script>
 
 <template>
@@ -190,9 +216,36 @@ async function loadPrices(categoryId: string) {
             :min="priceMin"
             :max="priceMax"
           />
-          <Button label="search" @click="search"></Button>
         </div>
       </div>
+      <div>
+        <h2 class="text-base font-semibold text-(--p-primary-color)">
+          Discount
+        </h2>
+        <div class="flex gap-x-2 w-full justify-between">
+          <p>Only with a discount</p>
+          <ToggleSwitch v-model="discountStatus" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-y-2">
+        <h2 class="text-base font-semibold text-(--p-primary-color)">
+          Players
+        </h2>
+        <div
+          v-for="playersCount in playersCountList"
+          :key="playersCount.key"
+          class="flex items-center gap-2"
+        >
+          <RadioButton
+            v-model="selectedPlayers"
+            :input-id="playersCount.key"
+            name="dynamic"
+            :value="playersCount.count"
+          />
+          <label :for="playersCount.key">{{ playersCount.label }}</label>
+        </div>
+      </div>
+      <Button label="Search" @click="search"></Button>
     </div>
   </Panel>
 </template>

@@ -14,6 +14,7 @@ export interface productProperties {
   priceMax: number;
   isDiscounted?: boolean;
   currency: currency;
+  playersCount: number;
 }
 
 export enum currency {
@@ -98,14 +99,19 @@ class productsService {
     appLogger.log('App.vue: Fetching products...');
     try {
       const filters = [
+        `variants.prices.value.currencyCode: "EUR"`,
         `variants.prices.value.centAmount:range(${product.priceMin * 100} to ${product.priceMax * 100})`,
-        `variants.prices.value.currencyCode:"${product.currency}"`,
       ];
       if (product.categoryId !== '0') {
         filters.push(`categories.id:"${product.categoryId}"`);
       }
       if (product.isDiscounted) {
-        filters.push(`variants.scopedPrice.discounted:*`);
+        filters.push('variants.prices.discounted.value.centAmount:exists');
+      }
+      if (product.playersCount > 0) {
+        filters.push(
+          `variants.attributes.players-min:range(0 to ${product.playersCount})`,
+        );
       }
       const args = {
         filter: filters,

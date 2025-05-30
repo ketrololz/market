@@ -15,7 +15,13 @@ import productsService, { currency } from '@/services/products/productsService';
 import type { Category, ProductProjection } from '@commercetools/platform-sdk';
 import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 
-function handleSelect(category: Category, min: number, max: number) {
+function handleSelect(
+  category: Category,
+  min: number,
+  max: number,
+  discountStatus: boolean,
+  players: number,
+) {
   router.push({
     name: 'CatalogCategory',
     params: { category: normalizeRoute(category.name.en) },
@@ -24,6 +30,8 @@ function handleSelect(category: Category, min: number, max: number) {
   page.value = 0;
   priceMin.value = min;
   priceMax.value = max;
+  isDiscounted.value = discountStatus;
+  playersCount.value = players;
   getProductsByPage();
 }
 
@@ -66,6 +74,10 @@ const totalProducts = ref(0);
 const priceMin = ref(0);
 const priceMax = ref(0);
 
+const isDiscounted = ref(false);
+
+const playersCount = ref(0);
+
 const userPreferencesStore = useUserPreferencesStore();
 
 async function getProductsByPage(text = '') {
@@ -82,6 +94,8 @@ async function getProductsByPage(text = '') {
     priceMin: priceMin.value,
     priceMax: priceMax.value,
     currency: currency[lang],
+    isDiscounted: isDiscounted.value,
+    playersCount: playersCount.value,
   });
 
   products.value = result.results;
