@@ -33,6 +33,7 @@ function handleSelect(
   isDiscounted.value = discountStatus;
   playersCount.value = players;
   getProductsByPage();
+  breadcrumbLink.value = [{ label: category.name.en }];
 }
 
 function handleSortSelect() {
@@ -63,7 +64,7 @@ const searchValue = ref('');
 
 const categoryId = ref<string>('');
 
-const items = ref([{ label: 'All games' }]);
+const breadcrumbLink = ref([{ label: 'All games' }]);
 
 const products = ref<ProductProjection[]>();
 
@@ -112,7 +113,7 @@ function onPageChange(event: PageState) {
 
 <template>
   <div class="px-4 relative">
-    <Breadcrumb :home="home" :model="items">
+    <Breadcrumb :home="home" :model="breadcrumbLink">
       <template #item="{ item }">
         <RouterLink :to="item.route">
           <span class="text-(--p-breadcrumb-item-color)">{{ item.label }}</span>
