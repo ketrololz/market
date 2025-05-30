@@ -8,6 +8,7 @@ import {
   Select,
   InputText,
   Paginator,
+  ProgressSpinner,
   type PageState,
 } from 'primevue';
 import 'primeicons/primeicons.css';
@@ -82,6 +83,7 @@ const playersCount = ref(0);
 const userPreferencesStore = useUserPreferencesStore();
 
 async function getProductsByPage(text = '') {
+  isLoading.value = true;
   const offset = page.value * limit;
 
   const lang = userPreferencesStore.currentLanguage;
@@ -103,7 +105,11 @@ async function getProductsByPage(text = '') {
   if (result.total) {
     totalProducts.value = result.total;
   }
+
+  isLoading.value = false;
 }
+
+const isLoading = ref(true);
 
 function onPageChange(event: PageState) {
   page.value = event.page;
@@ -122,7 +128,7 @@ function onPageChange(event: PageState) {
     </Breadcrumb>
     <div class="flex gap-4 flex-col md:flex-row min-h-150">
       <Sidebar
-        class="top-4"
+        class="mb-4"
         @select-category="handleSelect"
         @search-products="handleSelect"
       ></Sidebar>
@@ -147,7 +153,18 @@ function onPageChange(event: PageState) {
             @value-change="handleSortSelect"
           ></Select>
         </div>
-        <ProductList v-if="products?.length" :product-list="products" />
+        <div
+          v-if="isLoading"
+          class="w-full h-auto md:h-full flex flex-col items-center justify-center"
+        >
+          <ProgressSpinner
+            fill="transparent"
+            animation-duration="4s"
+            stroke-width="2.5"
+            pt:circle:class="!stroke-(--p-primary-300)"
+          />
+        </div>
+        <ProductList v-else-if="products?.length" :product-list="products" />
         <div
           v-else
           class="w-full h-auto md:h-full flex flex-col items-center justify-center"

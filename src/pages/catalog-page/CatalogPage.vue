@@ -1,7 +1,7 @@
 <!-- TODO:
       - search ✓
       - pagination ✓
-      - filters
+      - filters ✓
       - scroll animation
       - loading animation
       - load product by url ✓
