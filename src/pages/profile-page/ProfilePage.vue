@@ -36,6 +36,14 @@ const isDialogVisible = computed({
   },
 });
 
+function isShippingDeleteDisabled() {
+  return shippingAddresses.value.length <= 1;
+}
+
+function isBillingDeleteDisabled() {
+  return billingAddresses.value.length <= 1;
+}
+
 onMounted(async () => {
   try {
     const user = await AuthService.restoreSession();
@@ -229,6 +237,7 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
             :addresses="shippingAddresses"
             type="shipping"
             :default-shipping-address-id="customer.defaultShippingAddressId"
+            :is-delete-disabled="isShippingDeleteDisabled"
             @edit="onEditAddress"
             @delete="onDeleteAddress"
             @set-default="onSetDefault"
@@ -240,6 +249,7 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
             :addresses="billingAddresses"
             type="billing"
             :default-billing-address-id="customer.defaultBillingAddressId"
+            :is-delete-disabled="isBillingDeleteDisabled"
             @edit="onEditAddress"
             @delete="onDeleteAddress"
             @set-default="onSetDefault"

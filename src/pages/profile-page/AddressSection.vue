@@ -15,6 +15,7 @@ const props = defineProps<{
   type: 'shipping' | 'billing';
   defaultShippingAddressId?: string | undefined;
   defaultBillingAddressId?: string | undefined;
+  isDeleteDisabled?: (address: Address) => boolean;
 }>();
 
 function isDefaultAddress(address: Address): boolean {
@@ -80,7 +81,11 @@ const sortedAddresses = computed(() => {
           Edit
         </button>
         <button
-          class="cursor-pointer hover:underline"
+          :disabled="isDeleteDisabled?.(address)"
+          :class="{
+            'text-gray-400 cursor-not-allowed': isDeleteDisabled?.(address),
+            'text-blue-600': !isDeleteDisabled?.(address),
+          }"
           @click="$emit('delete', address)"
         >
           Delete
