@@ -19,6 +19,9 @@
     "projectSettings": {
       "fetchFailed": "Failed to load project settings. Please try again later.",
       "dataUnavailable": "Project configuration data is currently unavailable."
+    },
+    "product": {
+      "notFound": "Sorry, the product you are looking for could not be found."
     }
   },
   "success": {
@@ -30,6 +33,39 @@
     },
     "projectSettings": {
       "loaded": "Project settings loaded."
+    }
+  },
+  "breadcrumb": {
+    "home": "Home"
+  },
+  "productPage": {
+    "loading": "Loading product details...",
+    "notFound": "Sorry, the product you are looking for could not be found.",
+    "noIdentifier": "Product identifier (ID or Key) is missing.",
+    "noImages": "No images available.",
+    "descriptionTitle": "Description",
+    "priceTitle": "Price:",
+    "priceUnavailable": "Price unavailable.",
+    "detailsTitle": "Details:",
+    "addToCartButton": "Add to Cart",
+    "currencyLabel": "Currency:",
+    "saleTag": "SALE",
+    "unknownName": "Unknown Product",
+    "unknownDescription": "No description available for this product.",
+    "imageTitle": "Product Image",
+    "imageAlt": "Product Image",
+    "valueNotAvailable": "N/A",
+    "attributes": {
+      "players-min": "Min. Players",
+      "players-max": "Max. Players",
+      "playing-time-min": "Min. Playing Time",
+      "playing-time-max": "Max. Playing Time",
+      "age-recommended": "Recommended Age",
+      "publisher": "Publisher",
+      "language": "Language",
+      "mechanics": "Mechanics",
+      "country-of-origin": "Country Of Origin",
+      "weight": "Weight"
     }
   }
 }

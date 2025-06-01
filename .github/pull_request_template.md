@@ -1,10 +1,11 @@
 #### Description
 
-*what has been done*
+_what has been done_
 
 #### Media (optional)
 
 #### Checklist
+
 - [ ] 👀 I have performed a self-review of my code
 - [ ] 💭 I have commented my code in areas that are hard to understand
 - [ ] ⚠️ My changes do not result in any new warnings or errors

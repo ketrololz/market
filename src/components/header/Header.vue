@@ -6,6 +6,7 @@ import { computed, ref } from 'vue';
 import InlineSvg from 'vue-inline-svg';
 import type { HeaderProps } from './types/header-props';
 import { useAuthStore } from '../../stores/authStore';
+import LanguageSwitcher from '@components/common/LanguageSwitcher.vue';
 
 defineProps<HeaderProps>();
 
@@ -43,6 +44,7 @@ const toggle = (event: Event) => {
     </template>
     <template #end>
       <div class="flex items-center gap-x-2">
+        <LanguageSwitcher />
         <p class="truncate max-w-25 md:max-w-50">
           {{ authStore.userProfile?.firstName }}
         </p>
