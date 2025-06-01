@@ -493,7 +493,8 @@ const modalResponsiveOptions = ref([
               </span>
               <span
                 :class="{
-                  'text-red-600 font-bold': currentDisplayPrice.hasSale,
+                  'text-(--p-orange-500) font-bold':
+                    currentDisplayPrice.hasSale,
                   'text-gray-900 font-bold': !currentDisplayPrice.hasSale,
                 }"
               >
@@ -507,6 +508,11 @@ const modalResponsiveOptions = ref([
                 :value="t('productPage.saleTag')"
                 severity="danger"
                 class="ml-3 align-middle"
+                :pt="{
+                  root: {
+                    class: '!text-(--p-orange-600) !bg-(--p-orange-500)/20',
+                  },
+                }"
               ></Tag>
             </template>
             <span v-else class="text-gray-500">{{
