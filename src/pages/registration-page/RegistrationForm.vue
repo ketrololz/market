@@ -22,39 +22,25 @@ import TabList from 'primevue/tablist';
 import TabPanels from 'primevue/tabpanels';
 import Tab from 'primevue/tab';
 import TabPanel from 'primevue/tabpanel';
-import AddressForm from './../../components/form/AddressForm.vue';
+import AddressFields from '../../components/form/AddressFields.vue';
 
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
+import { useCountries } from '@/composables/useCountries';
 
 const authStore = useAuthStore();
 const projectSettingsStore = useProjectSettingsStore();
 import countriesLib from 'i18n-iso-countries';
 import countriesEn from 'i18n-iso-countries/langs/en.json';
 import countriesRu from 'i18n-iso-countries/langs/ru.json';
-import { useI18n } from 'vue-i18n';
 import { Message } from 'primevue';
 
-const { locale } = useI18n();
 countriesLib.registerLocale(countriesEn);
 countriesLib.registerLocale(countriesRu);
 
 const sameAddress = ref(true);
 
-const countries = computed(() => {
-  const projectCountryCodes = projectSettingsStore.getAvailableCountries;
-  const langForCountryNames = locale.value.startsWith('ru') ? 'ru' : 'en';
-
-  return projectCountryCodes
-    .map((code) => ({
-      code: code,
-      name:
-        countriesLib.getName(code, langForCountryNames, {
-          select: 'official',
-        }) || code,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-});
+const { countries } = useCountries();
 
 onMounted(async () => {
   if (projectSettingsStore.getAvailableCountries.length === 0) {
@@ -285,14 +271,14 @@ function syncAddresses() {
           </TabList>
           <TabPanels class="!px-0">
             <TabPanel value="shipping">
-              <AddressForm
+              <AddressFields
                 :path="'shippingAddress'"
                 :countries="countries"
                 :form="form"
               />
             </TabPanel>
             <TabPanel value="billing">
-              <AddressForm
+              <AddressFields
                 :path="'billingAddress'"
                 :countries="countries"
                 :readonly="sameAddress"

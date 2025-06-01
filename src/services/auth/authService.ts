@@ -16,6 +16,8 @@ import { AuthMessageKey } from '@/localization/i18nKeys';
 import { authUrl, clientId, clientSecret } from '@/api/ctpConfig';
 import AnonymousSessionService from './anonymousSessionService';
 import { validateData } from '@/utils/validationUtils';
+import type { CustomerAddressData } from './types/customerAddressData';
+import type { MyCustomerUpdateAction } from '@commercetools/platform-sdk';
 
 class AuthService {
   /**
@@ -380,6 +382,58 @@ class AuthService {
       appLogger.error(`AuthService: Failed to remove address:`, error);
       throw parseError(error);
     }
+  }
+
+  public async updateAddress(address: CustomerAddressData): Promise<Customer> {
+    appLogger.log('AuthService: Updating customer address...');
+    const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+    const current = await apiRoot.me().get().execute();
+
+    const actions: MyCustomerUpdateAction[] = [];
+
+    if (address.isNew) {
+      actions.push({
+        action: 'addAddress',
+        address,
+      });
+    } else if (address.id) {
+      actions.push({
+        action: 'changeAddress',
+        addressId: address.id,
+        address,
+      });
+    }
+
+    if (address.id && address.isDefaultShipping) {
+      actions.push({
+        action: 'setDefaultShippingAddress',
+        addressId: address.id,
+      });
+    }
+
+    if (address.id && address.isDefaultBilling) {
+      actions.push({
+        action: 'setDefaultBillingAddress',
+        addressId: address.id,
+      });
+    }
+
+    if (actions.length === 0) {
+      appLogger.log('AuthService: No address changes detected.');
+      return current.body;
+    }
+
+    const response = await apiRoot
+      .me()
+      .post({
+        body: {
+          version: current.body.version,
+          actions,
+        },
+      })
+      .execute();
+
+    return response.body;
   }
 }
 

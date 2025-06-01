@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import type { Address } from '@commercetools/platform-sdk';
 import { defineProps, computed } from 'vue';
+import { useCountries } from '@/composables/useCountries';
 
 defineEmits<{
-  (e: 'add'): void;
-  (e: 'edit', address: Address): void;
+  (
+    e: 'edit-or-add',
+    address: Address | null,
+    type: 'shipping' | 'billing',
+  ): void;
   (e: 'delete', address: Address): void;
   (e: 'set-default', address: Address, type: 'shipping' | 'billing'): void;
 }>();
@@ -17,6 +21,12 @@ const props = defineProps<{
   defaultBillingAddressId?: string | undefined;
   isDeleteDisabled?: (address: Address) => boolean;
 }>();
+
+const { countries } = useCountries();
+
+const getCountryName = (code: string): string => {
+  return countries.value.find((c) => c.code === code)?.name || code;
+};
 
 function isDefaultAddress(address: Address): boolean {
   const defaultId =
@@ -46,7 +56,7 @@ const sortedAddresses = computed(() => {
       <h2 class="text-base font-semibold">{{ title }}</h2>
       <button
         class="text-xs text-blue-600 hover:underline cursor-pointer"
-        @click="$emit('add')"
+        @click="$emit('edit-or-add', null, type)"
       >
         + Add {{ type === 'shipping' ? 'Shipping' : 'Billing' }} Address
       </button>
@@ -70,13 +80,14 @@ const sortedAddresses = computed(() => {
         <strong class="w-48">Postal Code:</strong> {{ address.postalCode }}
       </p>
       <p class="flex gap-2">
-        <strong class="w-48">Country:</strong> {{ address.country }}
+        <strong class="w-48">Country:</strong>
+        {{ getCountryName(address.country) }}
       </p>
 
       <div class="flex gap-3 mt-2 text-xs text-blue-600">
         <button
           class="cursor-pointer hover:underline"
-          @click="$emit('edit', address)"
+          @click="$emit('edit-or-add', address, type)"
         >
           Edit
         </button>

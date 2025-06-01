@@ -8,10 +8,12 @@ import EditableDialog from '@/components/editable-dialog/EditableDialog.vue';
 import { useDialogManager } from './../../composables/useDialogManager';
 import UserInfoForm from '@/components/form/UserInfoForm.vue';
 import PasswordForm from '@/components/form/PasswordForm.vue';
+import AddressForm from '@/components/form/AddressForm.vue';
 import type { PasswordFormData } from '@/components/form/PasswordForm.vue';
 import type { UserInfoFormData } from '@/components/form/UserInfoForm.vue';
 import { useAuthStore } from '@/stores/authStore';
 import type { UserInfoFormRef } from '@/components/form/types/UserFormRef';
+import type { CustomerAddressData } from '@/services/auth/types/customerAddressData';
 
 const {
   activeDialog,
@@ -19,16 +21,22 @@ const {
   closeDialog,
   isProfileDialogVisible,
   isPasswordDialogVisible,
+  isAddressDialogVisible,
 } = useDialogManager();
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
 const formRef = ref<UserInfoFormRef>();
+const editedAddress = ref<Address | null>(null);
+const addressType = ref<'shipping' | 'billing' | null>(null);
 
 const authStore = useAuthStore();
 
 const isDialogVisible = computed({
-  get: () => isProfileDialogVisible.value || isPasswordDialogVisible.value,
+  get: () =>
+    isProfileDialogVisible.value ||
+    isPasswordDialogVisible.value ||
+    isAddressDialogVisible.value,
   set: (value: boolean) => {
     if (!value) {
       closeDialog();
@@ -44,7 +52,7 @@ function isBillingDeleteDisabled() {
   return billingAddresses.value.length <= 1;
 }
 
-onMounted(async () => {
+async function loadCustomer() {
   try {
     const user = await AuthService.restoreSession();
     if (user) {
@@ -55,6 +63,10 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
+}
+
+onMounted(async () => {
+  await loadCustomer();
 });
 
 const shippingAddresses = computed(
@@ -87,7 +99,7 @@ const dialogTitle = computed(() => {
 });
 
 const currentInitialValues = computed<
-  UserInfoFormData | PasswordFormData | null
+  UserInfoFormData | PasswordFormData | CustomerAddressData | null
 >(() => {
   if (activeDialog.value === 'profile' && customer.value) {
     const { email, firstName, lastName, dateOfBirth } = customer.value;
@@ -102,6 +114,16 @@ const currentInitialValues = computed<
       currentPassword: '',
       newPassword: '',
     };
+  } else if (activeDialog.value === 'address') {
+    return (
+      editedAddress.value ?? {
+        streetName: '',
+        city: '',
+        postalCode: '',
+        country: '',
+        type: addressType.value,
+      }
+    );
   }
   return null;
 });
@@ -109,16 +131,18 @@ const currentInitialValues = computed<
 const currentFormComponent = computed(() => {
   if (activeDialog.value === 'profile') return UserInfoForm;
   if (activeDialog.value === 'password') return PasswordForm;
+  if (activeDialog.value === 'address') return AddressForm;
   return null;
 });
 
-function onAddNewAddress() {
-  console.log('Add new address');
-}
-
-function onEditAddress(address: Address) {
-  console.log('Edit address:', address);
-}
+const isEditMode = computed(() => {
+  if (activeDialog.value === 'profile' || activeDialog.value === 'password') {
+    return true;
+  } else if (activeDialog.value === 'address') {
+    return editedAddress.value !== null;
+  }
+  return false;
+});
 
 async function onDeleteAddress(address: Address) {
   if (!address.id) {
@@ -147,23 +171,33 @@ async function onSetDefault(address: Address, type: 'shipping' | 'billing') {
   }
 }
 
+function onEditAddress(address: Address | null, type: 'shipping' | 'billing') {
+  console.log('Editing address:', address, 'Type:', type);
+  editedAddress.value = address;
+  addressType.value = type;
+  openDialog('address', !!address);
+}
+
 function triggerSubmit() {
   formRef.value?.submit();
 }
 
-async function handleSave(data: UserInfoFormData | PasswordFormData) {
+async function handleSave(
+  data: UserInfoFormData | PasswordFormData | CustomerAddressData,
+) {
+  let success = false;
+
   if (activeDialog.value === 'profile') {
-    const success = await authStore.updateProfile(data as UserInfoFormData);
-    if (success) {
-      customer.value = authStore.userProfile;
-      closeDialog();
-    }
+    success = await authStore.updateProfile(data as UserInfoFormData);
   } else if (activeDialog.value === 'password') {
-    const success = await authStore.updatePassword(data as PasswordFormData);
-    if (success) {
-      customer.value = authStore.userProfile;
-      closeDialog();
-    }
+    success = await authStore.updatePassword(data as PasswordFormData);
+  } else if (activeDialog.value === 'address') {
+    success = await authStore.updateAddress(data as CustomerAddressData);
+  }
+
+  if (success) {
+    await loadCustomer();
+    closeDialog();
   }
 }
 </script>
@@ -238,10 +272,9 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
             type="shipping"
             :default-shipping-address-id="customer.defaultShippingAddressId"
             :is-delete-disabled="isShippingDeleteDisabled"
-            @edit="onEditAddress"
+            @edit-or-add="onEditAddress"
             @delete="onDeleteAddress"
             @set-default="onSetDefault"
-            @add="onAddNewAddress"
           />
 
           <AddressSection
@@ -250,10 +283,9 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
             type="billing"
             :default-billing-address-id="customer.defaultBillingAddressId"
             :is-delete-disabled="isBillingDeleteDisabled"
-            @edit="onEditAddress"
+            @edit-or-add="onEditAddress"
             @delete="onDeleteAddress"
             @set-default="onSetDefault"
-            @add="onAddNewAddress"
           />
         </div>
       </Panel>
@@ -263,7 +295,7 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
   <EditableDialog
     v-model="isDialogVisible"
     :title="dialogTitle"
-    :edit="true"
+    :edit="isEditMode"
     :initial-values="currentInitialValues"
     @submit="triggerSubmit"
   >
@@ -272,15 +304,24 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
         :is="currentFormComponent"
         ref="formRef"
         v-bind="
-          activeDialog === 'profile'
-            ? {
+          (() => {
+            if (activeDialog === 'profile') {
+              return {
                 initialValues: initialValues as UserInfoFormData,
                 onSubmit: handleSave,
-              }
-            : {
+              };
+            } else if (activeDialog === 'address') {
+              return {
+                initialValues: initialValues as CustomerAddressData,
+                onSubmit: handleSave,
+              };
+            } else {
+              return {
                 initialValues: initialValues as PasswordFormData,
                 onSubmit: handleSave,
-              }
+              };
+            }
+          })()
         "
       />
     </template>

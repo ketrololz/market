@@ -1,6 +1,7 @@
 {
   "errors": {
     "auth": {
+      "addressUpdateFailed": "Failed to update address. Please try again.",
       "addressRemoveFailed": "Failed to remove address. Please try again.",
       "defaultAddressUpdateFailed": "Failed to update default address. Please try again.",
       "profileUpdateFailed": "Failed to update profile. Please try again.",
@@ -27,6 +28,7 @@
   },
   "success": {
     "auth": {
+      "addressUpdate": "Address updated successfully.",
       "defaultAddressUpdate": "Default address updated successfully.",
       "profileUpdate": "Profile updated successfully.",
       "passwordUpdate": "Password updated successfully.",

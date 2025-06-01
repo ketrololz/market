@@ -30,7 +30,9 @@ export enum AuthMessageKey {
   PasswordUpdateSuccess = 'success.auth.passwordUpdate',
   DefaultAddressUpdateSuccess = 'success.auth.defaultAddressUpdate',
   AddressRemoveSuccess = 'success.auth.addressRemove',
+  AddressUpdateSuccess = 'success.auth.addressUpdate',
 
+  AddressUpdateFailed = 'errors.auth.addressUpdateFailed',
   AddressRemoveFailed = 'errors.auth.addressRemoveFailed',
   PasswordUpdateFailed = 'errors.auth.passwordUpdateFailed',
   ProfileUpdateFailed = 'errors.auth.profileUpdateFailed',

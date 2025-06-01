@@ -13,6 +13,7 @@ import { AuthMessageKey } from '@/localization/i18nKeys';
 import { AuthError, ClientValidationError } from '@/services/appErrors';
 import { router } from '@/router/router';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
+import type { CustomerAddressData } from '@/services/auth/types/customerAddressData';
 
 interface AuthStoreErrorDetails {
   i18nKey: AuthMessageKey | string;
@@ -414,6 +415,32 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Add or update customer's address (and optionally set as default).
+   * @param data - address form data + isNew flag
+   * @returns A promise that resolves to a boolean indicating success.
+   */
+  async function updateAddress(address: CustomerAddressData): Promise<boolean> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedUser = await AuthService.updateAddress(address);
+      setUserSession(updatedUser);
+      showSuccessToast(i18n.global.t(AuthMessageKey.AddressUpdateSuccess));
+      return true;
+    } catch (error) {
+      appLogger.error('Failed to update address in store:', error);
+      setError(
+        new AuthError(AuthMessageKey.AddressUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -424,6 +451,7 @@ export const useAuthStore = defineStore('auth', () => {
     authErrorDetails,
     authErrorMessage,
 
+    updateAddress,
     removeAddress,
     setDefaultAddress,
     updateProfile,
