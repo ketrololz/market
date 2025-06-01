@@ -18,6 +18,11 @@ export const ROUTES: RouteRecordRaw[] = [
     component: () => import('../pages/catalog-page/CatalogPage.vue'),
   },
   {
+    path: '/catalog/:category/',
+    name: 'CatalogCategory',
+    component: () => import('../components/shop-view/ShopView.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('../pages/NotFound.vue'),
