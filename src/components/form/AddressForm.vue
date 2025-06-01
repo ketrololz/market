@@ -1,10 +1,22 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed } from 'vue';
+import { defineProps, defineEmits, ref, computed, onMounted } from 'vue';
 import { Form, type FormInstance } from '@primevue/forms';
 import { yupResolver } from '@primevue/forms/resolvers/yup';
 
 import AddressFields from '@/components/form/AddressFields.vue';
 import { addressSchema } from '@/schemas/addressSchema';
+import { useCountries } from '@/composables/useCountries';
+import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
+
+const projectSettingsStore = useProjectSettingsStore();
+
+const { countries } = useCountries();
+
+onMounted(async () => {
+  if (projectSettingsStore.getAvailableCountries.length === 0) {
+    await projectSettingsStore.fetchProjectSettings();
+  }
+});
 
 export interface AddressFormData {
   streetName: string;
@@ -17,7 +29,6 @@ export interface AddressFormData {
 
 const props = defineProps<{
   initialValues: AddressFormData;
-  countries: { name: string; code: string }[];
   path?: string;
 }>();
 
@@ -27,7 +38,6 @@ const emit = defineEmits<{
 
 const formRef = ref<FormInstance>();
 const formData = ref<AddressFormData>({ ...props.initialValues });
-console.log('AddressForm initial values:', formData.value);
 
 const formPath = props.path ?? 'address';
 
@@ -52,10 +62,6 @@ defineExpose({ submit: submitForm, isValid });
     class="flex flex-col gap-2"
     @submit="submitForm"
   >
-    <AddressFields
-      :path="formPath"
-      :form="formRef"
-      :countries="props.countries"
-    />
+    <AddressFields :path="formPath" :form="formRef" :countries="countries" />
   </Form>
 </template>

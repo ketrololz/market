@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import type { Address } from '@commercetools/platform-sdk';
-import { defineProps, computed } from 'vue';
+import { defineProps, computed, onMounted } from 'vue';
 import { useCountries } from '@/composables/useCountries';
+import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
+
+const projectSettingsStore = useProjectSettingsStore();
+
+const { countries } = useCountries();
+
+onMounted(async () => {
+  if (projectSettingsStore.getAvailableCountries.length === 0) {
+    await projectSettingsStore.fetchProjectSettings();
+  }
+});
 
 defineEmits<{
   (
@@ -21,8 +32,6 @@ const props = defineProps<{
   defaultBillingAddressId?: string | undefined;
   isDeleteDisabled?: (address: Address) => boolean;
 }>();
-
-const { countries } = useCountries();
 
 const getCountryName = (code: string): string => {
   return countries.value.find((c) => c.code === code)?.name || code;

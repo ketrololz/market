@@ -332,8 +332,6 @@ export const useAuthStore = defineStore('auth', () => {
         .get()
         .execute();
 
-      console.log('Current user data:', data);
-
       const updatedUser = await AuthService.updatePassword({
         id: me.body.id,
         version: me.body.version,

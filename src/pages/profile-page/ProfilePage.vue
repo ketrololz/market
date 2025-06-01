@@ -172,7 +172,6 @@ async function onSetDefault(address: Address, type: 'shipping' | 'billing') {
 }
 
 function onEditAddress(address: Address | null, type: 'shipping' | 'billing') {
-  console.log('Editing address:', address, 'Type:', type);
   editedAddress.value = address;
   addressType.value = type;
   openDialog('address', !!address);

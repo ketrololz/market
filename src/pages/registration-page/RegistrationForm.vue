@@ -23,7 +23,7 @@ import TabPanels from 'primevue/tabpanels';
 import Tab from 'primevue/tab';
 import TabPanel from 'primevue/tabpanel';
 import AddressFields from '../../components/form/AddressFields.vue';
-
+import { Message } from 'primevue';
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
 import { useCountries } from '@/composables/useCountries';
@@ -33,7 +33,6 @@ const projectSettingsStore = useProjectSettingsStore();
 import countriesLib from 'i18n-iso-countries';
 import countriesEn from 'i18n-iso-countries/langs/en.json';
 import countriesRu from 'i18n-iso-countries/langs/ru.json';
-import { Message } from 'primevue';
 
 countriesLib.registerLocale(countriesEn);
 countriesLib.registerLocale(countriesRu);
