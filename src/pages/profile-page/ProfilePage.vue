@@ -114,16 +114,30 @@ const initialValues = computed<
       currentPassword: '',
       newPassword: '',
     };
-  } else if (activeDialog.value === 'address') {
-    return (
-      editedAddress.value ?? {
-        streetName: '',
-        city: '',
-        postalCode: '',
-        country: '',
-        type: addressType.value,
-      }
-    );
+  } else if (activeDialog.value === 'address' && customer.value) {
+    if (editedAddress.value) {
+      return {
+        id: editedAddress.value.id,
+        streetName: editedAddress.value.streetName ?? '',
+        city: editedAddress.value.city ?? '',
+        postalCode: editedAddress.value.postalCode ?? '',
+        country: editedAddress.value.country ?? '',
+        defaultShipping:
+          addressType.value === 'shipping' &&
+          customer.value.defaultShippingAddressId === editedAddress.value.id,
+        defaultBilling:
+          addressType.value === 'billing' &&
+          customer.value.defaultBillingAddressId === editedAddress.value.id,
+      };
+    }
+    return {
+      streetName: '',
+      city: '',
+      postalCode: '',
+      country: '',
+      defaultShipping: addressType.value === 'shipping' ? false : undefined,
+      defaultBilling: addressType.value === 'billing' ? false : undefined,
+    };
   }
   return null;
 });

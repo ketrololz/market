@@ -73,6 +73,14 @@ defineExpose({ submit: onFormSubmit, isValid });
     class="flex flex-col gap-2"
     @submit="onFormSubmit"
   >
-    <AddressFields :path="formPath" :form="formRef" :countries="countries" />
+    <AddressFields
+      :path="formPath"
+      :form="formRef"
+      :countries="countries"
+      :readonly="
+        props.type === 'billing' &&
+        formRef?.getFieldState('sameAsShipping')?.value
+      "
+    />
   </Form>
 </template>
