@@ -421,7 +421,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function updateAddress(address: CustomerAddressData): Promise<boolean> {
     setLoading(true);
     clearError();
-    console.log('authStore: Updating address:', address); // Debugging
+
     try {
       const updatedUser = await AuthService.updateAddress(address);
       setUserSession(updatedUser);

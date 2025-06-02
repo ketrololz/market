@@ -268,6 +268,7 @@ function syncAddresses() {
                 :path="'shippingAddress'"
                 :countries="countries"
                 :form="form"
+                :max-width-class="`max-w-[178px]`"
               />
             </TabPanel>
             <TabPanel value="billing">
@@ -276,6 +277,7 @@ function syncAddresses() {
                 :countries="countries"
                 :readonly="sameAddress"
                 :form="form"
+                :max-width-class="`max-w-[178px]`"
               />
             </TabPanel>
           </TabPanels>

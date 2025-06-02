@@ -132,7 +132,6 @@ const initialValues = computed<
           customer.value.defaultBillingAddressId === editedAddress.value.id
             ? true
             : undefined,
-        type: addressType.value,
       };
     }
     return {
@@ -142,7 +141,6 @@ const initialValues = computed<
       country: '',
       defaultShipping: addressType.value === 'shipping' ? false : undefined,
       defaultBilling: addressType.value === 'billing' ? false : undefined,
-      type: addressType.value,
     };
   }
   return null;
@@ -267,22 +265,45 @@ async function handleSave(
             </button>
           </div>
         </template>
-        <p class="flex gap-2">
-          <strong class="w-48">Email:</strong>
-          {{ customer.email }}
-        </p>
-        <p class="flex gap-2">
-          <strong class="w-48">First Name:</strong>
-          {{ customer.firstName }}
-        </p>
-        <p class="flex gap-2">
-          <strong class="w-48">Last Name:</strong>
-          {{ customer.lastName }}
-        </p>
-        <p class="flex gap-2">
-          <strong class="w-48">Date of Birth:</strong>
-          {{ customer.dateOfBirth }}
-        </p>
+        <div class="space-y-2">
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >Email:</strong
+            >
+            <span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.email }}</span
+            >
+          </p>
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >First Name:</strong
+            ><span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.firstName }}</span
+            >
+          </p>
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >Last Name:</strong
+            ><span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.lastName }}</span
+            >
+          </p>
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >Date of Birth:</strong
+            ><span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.dateOfBirth }}</span
+            >
+          </p>
+        </div>
       </Panel>
 
       <Panel
@@ -300,7 +321,10 @@ async function handleSave(
           </div>
         </template>
         <p class="flex gap-2">
-          <strong class="w-48">Password:</strong> *********
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Password:</strong
+          >
+          *********
         </p>
       </Panel>
 

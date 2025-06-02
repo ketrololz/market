@@ -40,7 +40,8 @@ const isFormValid = computed(() => {
     modal
     closable
     :header="dialogHeader"
-    :style="{ width: '50vw' }"
+    :style="{ width: '550px' }"
+    :breakpoints="{ '611px': '90vw' }"
   >
     <p class="text-sm text-gray-600 mb-4">
       {{

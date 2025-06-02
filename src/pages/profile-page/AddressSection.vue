@@ -79,20 +79,44 @@ const sortedAddresses = computed(() => {
         'border-blue-300 border': isDefaultAddress(address),
       }"
     >
-      <p class="flex gap-2">
-        <strong class="w-48">Street:</strong> {{ address.streetName }}
-      </p>
-      <p class="flex gap-2">
-        <strong class="w-48">City:</strong> {{ address.city }}
-      </p>
-      <p class="flex gap-2">
-        <strong class="w-48">Postal Code:</strong> {{ address.postalCode }}
-      </p>
-      <p class="flex gap-2">
-        <strong class="w-48">Country:</strong>
-        {{ getCountryName(address.country) }}
-      </p>
-
+      <div class="space-y-2">
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Street:</strong
+          >
+          <span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >{{ address.streetName }}</span
+          >
+        </p>
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >City:</strong
+          >
+          <span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >{{ address.city }}</span
+          >
+        </p>
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Postal Code:</strong
+          >
+          <span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >{{ address.postalCode }}</span
+          >
+        </p>
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Country:</strong
+          ><span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+          >
+            {{ getCountryName(address.country) }}</span
+          >
+        </p>
+      </div>
       <div class="flex gap-3 mt-2 text-xs text-blue-600">
         <button
           class="cursor-pointer hover:underline"

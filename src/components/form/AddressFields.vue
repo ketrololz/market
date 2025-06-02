@@ -10,6 +10,7 @@ const props = defineProps<{
   countries: { name: string; code: string }[];
   readonly?: boolean;
   form: FormInstance | undefined;
+  maxWidthClass?: string;
 }>();
 
 const getCountryNameByCode = (code: string | undefined | null) => {
@@ -35,7 +36,8 @@ function forceRevalidatePostalCode() {
       <FormField
         v-slot="slotProps"
         :name="`${props.path}.streetName`"
-        class="w-1/2 max-w-[178px]"
+        :class="props.maxWidthClass"
+        class="w-1/2"
       >
         <label :for="`${props.path}-streetName`" class="text-xs">Street</label>
         <BaseInput
@@ -49,7 +51,8 @@ function forceRevalidatePostalCode() {
       <FormField
         v-slot="slotProps"
         :name="`${props.path}.city`"
-        class="w-1/2 max-w-[178px]"
+        :class="props.maxWidthClass"
+        class="w-1/2"
       >
         <label :for="`${props.path}-city`" class="text-xs">City</label>
         <BaseInput
@@ -66,7 +69,8 @@ function forceRevalidatePostalCode() {
         v-slot="slotProps"
         :name="`${props.path}.postalCode`"
         :validate-on-value-update="true"
-        class="w-1/2 max-w-[178px]"
+        :class="props.maxWidthClass"
+        class="w-1/2"
       >
         <label :for="`${props.path}-postalCode`" class="text-xs"
           >Postal Code</label
@@ -82,7 +86,8 @@ function forceRevalidatePostalCode() {
       <FormField
         v-slot="slotProps"
         :name="`${props.path}.country`"
-        class="w-1/2 max-w-[178px]"
+        :class="props.maxWidthClass"
+        class="w-1/2"
       >
         <label :for="`${props.path}-country`" class="text-xs">Country</label>
         <Select
