@@ -5,7 +5,7 @@
     <div>
       <RouterLink to="/">
         <InlineSvg
-          src="logo-inversion.svg"
+          src="/logo-inversion.svg"
           height="22"
           aria-label="logo"
           class="mb-5"

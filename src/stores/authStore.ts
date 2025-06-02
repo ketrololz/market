@@ -12,6 +12,8 @@ import i18n from '@/plugins/i18n';
 import { AuthMessageKey } from '@/localization/i18nKeys';
 import { AuthError, ClientValidationError } from '@/services/appErrors';
 import { router } from '@/router/router';
+import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
+import type { CustomerAddressData } from '@/services/auth/types/customerAddressData';
 
 interface AuthStoreErrorDetails {
   i18nKey: AuthMessageKey | string;
@@ -281,6 +283,163 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Update personal profile information.
+   * @param data - Object containing updated personal fields.
+   * @returns A promise that resolves to a boolean indicating update success.
+   */
+  async function updateProfile(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+  }): Promise<boolean> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedUser = await AuthService.updatePersonalInfo(data);
+      setUserSession(updatedUser);
+      showSuccessToast(
+        i18n.global.t(AuthMessageKey.ProfileUpdateSuccess, {
+          name: updatedUser.firstName,
+        }),
+      );
+
+      return true;
+    } catch (error) {
+      appLogger.error('Failed to update profile in store:', error);
+
+      setError(
+        new AuthError(AuthMessageKey.ProfileUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function updatePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<boolean> {
+    setLoading(true);
+    clearError();
+    try {
+      const me = await CtpClientFactory.createApiRootWithUserSession()
+        .me()
+        .get()
+        .execute();
+
+      const updatedUser = await AuthService.updatePassword({
+        id: me.body.id,
+        version: me.body.version,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      setUserSession(updatedUser);
+      showSuccessToast(
+        i18n.global.t(AuthMessageKey.PasswordUpdateSuccess, {
+          name: updatedUser.firstName,
+        }),
+      );
+      return true;
+    } catch (error) {
+      appLogger.error('Failed to update password in store:', error);
+      setError(
+        new AuthError(AuthMessageKey.PasswordUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Update default shipping/billing address.
+   * @param data - object with addressId and flags
+   * @returns A promise that resolves to a boolean indicating success.
+   */
+  async function setDefaultAddress(
+    addressId: string,
+    type: 'shipping' | 'billing',
+  ): Promise<boolean> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedUser = await AuthService.setDefaultAddress(addressId, type);
+      setUserSession(updatedUser);
+
+      showSuccessToast(
+        i18n.global.t(AuthMessageKey.DefaultAddressUpdateSuccess),
+      );
+      return true;
+    } catch (error) {
+      appLogger.error(`Failed to set default ${type} address:`, error);
+      setError(
+        new AuthError(AuthMessageKey.DefaultAddressUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function removeAddress(addressId: string): Promise<Customer> {
+    setLoading(true);
+    clearError();
+    try {
+      const updatedUser = await AuthService.removeAddress(addressId);
+      setUserSession(updatedUser);
+
+      showSuccessToast(i18n.global.t(AuthMessageKey.AddressRemoveSuccess));
+
+      return updatedUser;
+    } catch (error) {
+      appLogger.error(`Failed to remove address:`, error);
+      setError(
+        new AuthError(AuthMessageKey.AddressRemoveFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Add or update customer's address (and optionally set as default).
+   * @param data - address form data +
+   * @returns A promise that resolves to a boolean indicating success.
+   */
+  async function updateAddress(address: CustomerAddressData): Promise<boolean> {
+    setLoading(true);
+    clearError();
+
+    try {
+      const updatedUser = await AuthService.updateAddress(address);
+      setUserSession(updatedUser);
+      showSuccessToast(i18n.global.t(AuthMessageKey.AddressUpdateSuccess));
+      return true;
+    } catch (error) {
+      appLogger.error('Failed to update/add address in store:', error);
+      setError(
+        new AuthError(AuthMessageKey.AddressUpdateFailed, {
+          details: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     user,
     isLoading,
@@ -291,6 +450,11 @@ export const useAuthStore = defineStore('auth', () => {
     authErrorDetails,
     authErrorMessage,
 
+    updateAddress,
+    removeAddress,
+    setDefaultAddress,
+    updateProfile,
+    updatePassword,
     login,
     register,
     logout,

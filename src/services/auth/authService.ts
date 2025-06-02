@@ -16,6 +16,8 @@ import { AuthMessageKey } from '@/localization/i18nKeys';
 import { authUrl, clientId, clientSecret } from '@/api/ctpConfig';
 import AnonymousSessionService from './anonymousSessionService';
 import { validateData } from '@/utils/validationUtils';
+import type { CustomerAddressData } from './types/customerAddressData';
+import type { MyCustomerUpdateAction } from '@commercetools/platform-sdk';
 
 class AuthService {
   /**
@@ -216,6 +218,281 @@ class AuthService {
       userTokenCache.clear();
       return null;
     }
+  }
+
+  public async updatePersonalInfo(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+  }): Promise<Customer> {
+    appLogger.log('AuthService: Updating personal information...');
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const current = await apiRoot.me().get().execute();
+
+      const actions: import('@commercetools/platform-sdk').MyCustomerUpdateAction[] =
+        [];
+
+      if (data.email !== current.body.email) {
+        actions.push({ action: 'changeEmail', email: data.email });
+      }
+      if (data.firstName !== current.body.firstName) {
+        actions.push({ action: 'setFirstName', firstName: data.firstName });
+      }
+      if (data.lastName !== current.body.lastName) {
+        actions.push({ action: 'setLastName', lastName: data.lastName });
+      }
+      if (data.dateOfBirth !== current.body.dateOfBirth) {
+        actions.push({
+          action: 'setDateOfBirth',
+          dateOfBirth: data.dateOfBirth,
+        });
+      }
+
+      if (actions.length === 0) {
+        appLogger.log('AuthService: No changes to update.');
+        return current.body;
+      }
+
+      const updated = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: current.body.version,
+            actions,
+          },
+        })
+        .execute();
+
+      appLogger.log('AuthService: Personal information updated.');
+      return updated.body;
+    } catch (error) {
+      appLogger.error('AuthService: Failed to update personal info:', error);
+      throw parseError(error);
+    }
+  }
+
+  public async updatePassword(data: {
+    id: string;
+    version: number;
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<Customer> {
+    appLogger.log('AuthService: Updating password...');
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const response = await apiRoot
+        .me()
+        .password()
+        .post({
+          body: {
+            version: data.version,
+            currentPassword: data.currentPassword,
+            newPassword: data.newPassword,
+          },
+        })
+        .execute();
+
+      appLogger.log('AuthService: Password updated, re-authenticating...');
+
+      const userApiRoot = CtpClientFactory.createPasswordFlowApiRoot({
+        email: response.body.email,
+        password: data.newPassword,
+      });
+
+      await userApiRoot.me().get().execute();
+
+      appLogger.log(
+        'AuthService: Re-authentication successful after password change.',
+      );
+      return response.body;
+    } catch (error) {
+      appLogger.error('AuthService: Failed to update password:', error);
+      throw parseError(error);
+    }
+  }
+
+  public async setDefaultAddress(
+    addressId: string,
+    type: 'shipping' | 'billing',
+  ): Promise<Customer> {
+    appLogger.log(
+      `AuthService: Setting default ${type} address to ID: ${addressId}`,
+    );
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const current = await apiRoot.me().get().execute();
+
+      const action: import('@commercetools/platform-sdk').MyCustomerUpdateAction =
+        type === 'shipping'
+          ? { action: 'setDefaultShippingAddress' as const, addressId }
+          : { action: 'setDefaultBillingAddress' as const, addressId };
+
+      const updated = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: current.body.version,
+            actions: [action],
+          },
+        })
+        .execute();
+
+      appLogger.log(`AuthService: Default ${type} address updated.`);
+      return updated.body;
+    } catch (error) {
+      appLogger.error(
+        `AuthService: Failed to set default ${type} address:`,
+        error,
+      );
+      throw parseError(error);
+    }
+  }
+
+  public async removeAddress(addressId: string): Promise<Customer> {
+    appLogger.log(`AuthService: Removing address with ID: ${addressId}`);
+
+    try {
+      const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+      const current = await apiRoot.me().get().execute();
+
+      const action: import('@commercetools/platform-sdk').MyCustomerUpdateAction =
+        {
+          action: 'removeAddress',
+          addressId,
+        };
+
+      const updated = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: current.body.version,
+            actions: [action],
+          },
+        })
+        .execute();
+
+      appLogger.log(`AuthService: Address removed.`);
+      return updated.body;
+    } catch (error) {
+      appLogger.error(`AuthService: Failed to remove address:`, error);
+      throw parseError(error);
+    }
+  }
+
+  public async updateAddress(address: CustomerAddressData): Promise<Customer> {
+    appLogger.log('AuthService: Updating customer address...', address);
+    const apiRoot = CtpClientFactory.createApiRootWithUserSession();
+    const current = await apiRoot.me().get().execute();
+
+    const actions: MyCustomerUpdateAction[] = [];
+    let newAddressId: string | undefined;
+
+    if (!address.id) {
+      actions.push({
+        action: 'addAddress',
+        address: {
+          streetName: address.streetName,
+          city: address.city,
+          postalCode: address.postalCode,
+          country: address.country,
+        },
+      });
+    } else {
+      actions.push({
+        action: 'changeAddress',
+        addressId: address.id,
+        address: {
+          streetName: address.streetName,
+          city: address.city,
+          postalCode: address.postalCode,
+          country: address.country,
+        },
+      });
+    }
+
+    if (actions.length === 0) {
+      appLogger.warn('AuthService: No address changes detected.');
+      throw new Error('No address changes to apply.');
+    }
+
+    let response = await apiRoot
+      .me()
+      .post({
+        body: {
+          version: current.body.version,
+          actions,
+        },
+      })
+      .execute();
+
+    if (!address.id) {
+      const addedAddress =
+        response.body.addresses[response.body.addresses.length - 1];
+      newAddressId = addedAddress.id;
+      if (!newAddressId) {
+        appLogger.error('AuthService: Failed to retrieve new address ID.');
+        throw new Error('Failed to retrieve new address ID.');
+      }
+    }
+
+    const followUpActions: MyCustomerUpdateAction[] = [];
+    const addressId = address.id || newAddressId;
+
+    if (!address.id && address.type) {
+      if (address.type === 'shipping') {
+        followUpActions.push({
+          action: 'addShippingAddressId',
+          addressId: newAddressId,
+        });
+      } else if (address.type === 'billing') {
+        followUpActions.push({
+          action: 'addBillingAddressId',
+          addressId: newAddressId,
+        });
+      }
+    }
+
+    if (addressId && address.defaultShipping) {
+      followUpActions.push({
+        action: 'setDefaultShippingAddress',
+        addressId,
+      });
+    }
+
+    if (addressId && address.defaultBilling) {
+      followUpActions.push({
+        action: 'setDefaultBillingAddress',
+        addressId,
+      });
+    }
+
+    if (followUpActions.length > 0) {
+      response = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: response.body.version,
+            actions: followUpActions,
+          },
+        })
+        .execute();
+    }
+
+    appLogger.log('AuthService: Updated customer:', response.body);
+    appLogger.log(
+      'AuthService: Shipping address IDs:',
+      response.body.shippingAddressIds,
+    );
+    appLogger.log(
+      'AuthService: Billing address IDs:',
+      response.body.billingAddressIds,
+    );
+    return response.body;
   }
 }
 
