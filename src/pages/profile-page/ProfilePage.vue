@@ -227,7 +227,11 @@ async function handleSave(
   } else if (activeDialog.value === 'password') {
     success = await authStore.updatePassword(data as PasswordFormData);
   } else if (activeDialog.value === 'address') {
-    success = await authStore.updateAddress(data as CustomerAddressData);
+    const addressData = {
+      ...(data as CustomerAddressData),
+      id: editedAddress.value?.id,
+    };
+    success = await authStore.updateAddress(addressData);
   }
 
   if (success) {

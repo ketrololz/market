@@ -427,7 +427,7 @@ export const useAuthStore = defineStore('auth', () => {
       showSuccessToast(i18n.global.t(AuthMessageKey.AddressUpdateSuccess));
       return true;
     } catch (error) {
-      appLogger.error('Failed to update address in store:', error);
+      appLogger.error('Failed to update/add address in store:', error);
       setError(
         new AuthError(AuthMessageKey.AddressUpdateFailed, {
           details: error instanceof Error ? error.message : String(error),

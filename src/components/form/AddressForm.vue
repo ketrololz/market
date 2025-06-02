@@ -52,7 +52,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
   }
 }
 
-defineExpose({ submit: onFormSubmit, isValid });
+defineExpose({ submit: () => formRef.value?.submit(), isValid });
 </script>
 
 <template>
