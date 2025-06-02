@@ -385,45 +385,42 @@ class AuthService {
   }
 
   public async updateAddress(address: CustomerAddressData): Promise<Customer> {
-    appLogger.log('AuthService: Updating customer address...');
+    appLogger.log('AuthService: Updating customer address...', address);
     const apiRoot = CtpClientFactory.createApiRootWithUserSession();
     const current = await apiRoot.me().get().execute();
 
     const actions: MyCustomerUpdateAction[] = [];
+    let newAddressId: string | undefined;
 
-    if (address.isNew) {
+    if (!address.id) {
       actions.push({
         action: 'addAddress',
-        address,
+        address: {
+          streetName: address.streetName,
+          city: address.city,
+          postalCode: address.postalCode,
+          country: address.country,
+        },
       });
-    } else if (address.id) {
+    } else {
       actions.push({
         action: 'changeAddress',
         addressId: address.id,
-        address,
-      });
-    }
-
-    if (address.id && address.isDefaultShipping) {
-      actions.push({
-        action: 'setDefaultShippingAddress',
-        addressId: address.id,
-      });
-    }
-
-    if (address.id && address.isDefaultBilling) {
-      actions.push({
-        action: 'setDefaultBillingAddress',
-        addressId: address.id,
+        address: {
+          streetName: address.streetName,
+          city: address.city,
+          postalCode: address.postalCode,
+          country: address.country,
+        },
       });
     }
 
     if (actions.length === 0) {
-      appLogger.log('AuthService: No address changes detected.');
-      return current.body;
+      appLogger.warn('AuthService: No address changes detected.');
+      throw new Error('No address changes to apply.');
     }
 
-    const response = await apiRoot
+    let response = await apiRoot
       .me()
       .post({
         body: {
@@ -433,6 +430,68 @@ class AuthService {
       })
       .execute();
 
+    if (!address.id) {
+      const addedAddress =
+        response.body.addresses[response.body.addresses.length - 1];
+      newAddressId = addedAddress.id;
+      if (!newAddressId) {
+        appLogger.error('AuthService: Failed to retrieve new address ID.');
+        throw new Error('Failed to retrieve new address ID.');
+      }
+    }
+
+    const followUpActions: MyCustomerUpdateAction[] = [];
+    const addressId = address.id || newAddressId;
+
+    if (!address.id && address.type) {
+      if (address.type === 'shipping') {
+        followUpActions.push({
+          action: 'addShippingAddressId',
+          addressId: newAddressId,
+        });
+      } else if (address.type === 'billing') {
+        followUpActions.push({
+          action: 'addBillingAddressId',
+          addressId: newAddressId,
+        });
+      }
+    }
+
+    if (addressId && address.defaultShipping) {
+      followUpActions.push({
+        action: 'setDefaultShippingAddress',
+        addressId,
+      });
+    }
+
+    if (addressId && address.defaultBilling) {
+      followUpActions.push({
+        action: 'setDefaultBillingAddress',
+        addressId,
+      });
+    }
+
+    if (followUpActions.length > 0) {
+      response = await apiRoot
+        .me()
+        .post({
+          body: {
+            version: response.body.version,
+            actions: followUpActions,
+          },
+        })
+        .execute();
+    }
+
+    appLogger.log('AuthService: Updated customer:', response.body);
+    appLogger.log(
+      'AuthService: Shipping address IDs:',
+      response.body.shippingAddressIds,
+    );
+    appLogger.log(
+      'AuthService: Billing address IDs:',
+      response.body.billingAddressIds,
+    );
     return response.body;
   }
 }

@@ -415,12 +415,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Add or update customer's address (and optionally set as default).
-   * @param data - address form data + isNew flag
+   * @param data - address form data +
    * @returns A promise that resolves to a boolean indicating success.
    */
   async function updateAddress(address: CustomerAddressData): Promise<boolean> {
     setLoading(true);
     clearError();
+    console.log('authStore: Updating address:', address); // Debugging
     try {
       const updatedUser = await AuthService.updateAddress(address);
       setUserSession(updatedUser);

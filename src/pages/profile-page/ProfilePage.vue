@@ -124,10 +124,15 @@ const initialValues = computed<
         country: editedAddress.value.country ?? '',
         defaultShipping:
           addressType.value === 'shipping' &&
-          customer.value.defaultShippingAddressId === editedAddress.value.id,
+          customer.value.defaultShippingAddressId === editedAddress.value.id
+            ? true
+            : undefined,
         defaultBilling:
           addressType.value === 'billing' &&
-          customer.value.defaultBillingAddressId === editedAddress.value.id,
+          customer.value.defaultBillingAddressId === editedAddress.value.id
+            ? true
+            : undefined,
+        type: addressType.value,
       };
     }
     return {
@@ -137,6 +142,7 @@ const initialValues = computed<
       country: '',
       defaultShipping: addressType.value === 'shipping' ? false : undefined,
       defaultBilling: addressType.value === 'billing' ? false : undefined,
+      type: addressType.value,
     };
   }
   return null;
@@ -230,6 +236,7 @@ async function handleSave(
     const addressData = {
       ...(data as CustomerAddressData),
       id: editedAddress.value?.id,
+      type: addressType.value ?? undefined,
     };
     success = await authStore.updateAddress(addressData);
   }
