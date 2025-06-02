@@ -4,9 +4,37 @@ import AuthService from '@/services/auth/authService';
 import type { Customer, Address } from '@commercetools/platform-sdk';
 import { Panel } from 'primevue';
 import AddressSection from './AddressSection.vue';
+import EditableDialog from '@/components/editable-dialog/EditableDialog.vue';
+import { useDialogManager } from './../../composables/useDialogManager';
+import UserInfoForm from '@/components/form/UserInfoForm.vue';
+import PasswordForm from '@/components/form/PasswordForm.vue';
+import type { PasswordFormData } from '@/components/form/PasswordForm.vue';
+import type { UserInfoFormData } from '@/components/form/UserInfoForm.vue';
+import { useAuthStore } from '@/stores/authStore';
+import type { UserInfoFormRef } from '@/components/form/types/UserFormRef';
+
+const {
+  activeDialog,
+  openDialog,
+  closeDialog,
+  isProfileDialogVisible,
+  isPasswordDialogVisible,
+} = useDialogManager();
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
+const formRef = ref<UserInfoFormRef>();
+
+const authStore = useAuthStore();
+
+const isDialogVisible = computed({
+  get: () => isProfileDialogVisible.value || isPasswordDialogVisible.value,
+  set: (value: boolean) => {
+    if (!value) {
+      closeDialog();
+    }
+  },
+});
 
 onMounted(async () => {
   try {
@@ -37,9 +65,44 @@ const billingAddresses = computed(
     ) ?? [],
 );
 
-function onEdit() {
-  console.log('Edit personal information', customer.value);
-}
+const dialogTitle = computed(() => {
+  switch (activeDialog.value) {
+    case 'profile':
+      return 'Edit Personal Info';
+    case 'address':
+      return 'Edit Address';
+    case 'password':
+      return 'Change Password';
+    default:
+      return '';
+  }
+});
+
+const currentInitialValues = computed<
+  UserInfoFormData | PasswordFormData | null
+>(() => {
+  if (activeDialog.value === 'profile' && customer.value) {
+    const { email, firstName, lastName, dateOfBirth } = customer.value;
+    return {
+      email: email ?? '',
+      firstName: firstName ?? '',
+      lastName: lastName ?? '',
+      dateOfBirth: dateOfBirth ?? '',
+    };
+  } else if (activeDialog.value === 'password') {
+    return {
+      currentPassword: '',
+      newPassword: '',
+    };
+  }
+  return null;
+});
+
+const currentFormComponent = computed(() => {
+  if (activeDialog.value === 'profile') return UserInfoForm;
+  if (activeDialog.value === 'password') return PasswordForm;
+  return null;
+});
 
 function onAddNewAddress() {
   console.log('Add new address');
@@ -56,6 +119,26 @@ function onDeleteAddress(address: Address) {
 function onSetDefault(address: Address, type: 'shipping' | 'billing') {
   console.log(`Set address ${address.id} as default ${type} address`);
 }
+
+function triggerSubmit() {
+  formRef.value?.submit();
+}
+
+async function handleSave(data: UserInfoFormData | PasswordFormData) {
+  if (activeDialog.value === 'profile') {
+    const success = await authStore.updateProfile(data as UserInfoFormData);
+    if (success) {
+      customer.value = authStore.userProfile;
+      closeDialog();
+    }
+  } else if (activeDialog.value === 'password') {
+    const success = await authStore.updatePassword(data as PasswordFormData);
+    if (success) {
+      customer.value = authStore.userProfile;
+      closeDialog();
+    }
+  }
+}
 </script>
 
 <template>
@@ -71,20 +154,23 @@ function onSetDefault(address: Address, type: 'shipping' | 'billing') {
             <span class="text-lg">Personal Information</span>
             <button
               class="text-xs text-blue-600 cursor-pointer text-blue-600 hover:underline"
-              @click="onEdit"
+              @click="openDialog('profile')"
             >
               Edit
             </button>
           </div>
         </template>
         <p class="flex gap-2">
-          <strong class="w-48">Email:</strong> {{ customer.email }}
+          <strong class="w-48">Email:</strong>
+          {{ customer.email }}
         </p>
         <p class="flex gap-2">
-          <strong class="w-48">First Name:</strong> {{ customer.firstName }}
+          <strong class="w-48">First Name:</strong>
+          {{ customer.firstName }}
         </p>
         <p class="flex gap-2">
-          <strong class="w-48">Last Name:</strong> {{ customer.lastName }}
+          <strong class="w-48">Last Name:</strong>
+          {{ customer.lastName }}
         </p>
         <p class="flex gap-2">
           <strong class="w-48">Date of Birth:</strong>
@@ -100,7 +186,7 @@ function onSetDefault(address: Address, type: 'shipping' | 'billing') {
             <span class="text-lg">Password</span>
             <button
               class="text-xs text-blue-600 cursor-pointer hover:underline"
-              @click="onEdit"
+              @click="openDialog('password')"
             >
               Edit
             </button>
@@ -144,4 +230,30 @@ function onSetDefault(address: Address, type: 'shipping' | 'billing') {
       </Panel>
     </div>
   </div>
+
+  <EditableDialog
+    v-model="isDialogVisible"
+    :title="dialogTitle"
+    :edit="true"
+    :initial-values="currentInitialValues"
+    @submit="triggerSubmit"
+  >
+    <template #default="{ initialValues }">
+      <component
+        :is="currentFormComponent"
+        ref="formRef"
+        v-bind="
+          activeDialog === 'profile'
+            ? {
+                initialValues: initialValues as UserInfoFormData,
+                onSubmit: handleSave,
+              }
+            : {
+                initialValues: initialValues as PasswordFormData,
+                onSubmit: handleSave,
+              }
+        "
+      />
+    </template>
+  </EditableDialog>
 </template>

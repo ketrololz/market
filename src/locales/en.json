@@ -1,6 +1,8 @@
 {
   "errors": {
     "auth": {
+      "profileUpdateFailed": "Failed to update profile. Please try again.",
+      "passwordUpdateFailed": "Failed to update password. Please try again.",
       "unknown": "An unexpected authentication error occurred.",
       "network": "Network error. Please check your connection.",
       "ctpApiGeneral": "An API error occurred: {details}",
@@ -23,6 +25,8 @@
   },
   "success": {
     "auth": {
+      "profileUpdate": "Profile updated successfully.",
+      "passwordUpdate": "Password updated successfully.",
       "login": "Login successful! Welcome back.",
       "register": "Registration successful! You are now logged in.",
       "logout": "You have been logged out successfully.",
