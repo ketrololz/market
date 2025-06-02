@@ -43,9 +43,22 @@ const toggle = (event: Event) => {
     </template>
     <template #end>
       <div class="flex items-center gap-x-2">
-        <p class="truncate max-w-25 md:max-w-50">
-          {{ authStore.userProfile?.firstName }}
-        </p>
+        <RouterLink to="/profile" class="flex items-center gap-2">
+          <Button
+            v-if="authStore.userProfile"
+            type="button"
+            class="ml-0 flex items-center gap-2 overflow-hidden"
+            aria-haspopup="true"
+            aria-controls="overlay_menu"
+            size="small"
+            variant="outlined"
+          >
+            <span class="pi pi-user"></span>
+            <span class="truncate max-w-25 md:max-w-50">
+              {{ authStore.userProfile.firstName }}
+            </span>
+          </Button>
+        </RouterLink>
         <Button
           type="button"
           class="ml-0"
