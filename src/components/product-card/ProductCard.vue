@@ -84,12 +84,12 @@ const cardInfo = convertCardInfo(props.productInfo);
         <img alt="product image" :src="cardInfo.image" class="p-5 w-full" />
       </template>
       <template #title>
-        <h2 class="text-lg font-semibold text-(--p-primary-color)">
+        <h2 class="text-lg font-semibold text-(--p-primary-color) line-clamp-2">
           {{ cardInfo.name }}
         </h2>
       </template>
       <template #subtitle>
-        <h4 class="truncate text-xs">
+        <h4 class="text-xs line-clamp-2">
           {{ cardInfo.description }}
         </h4>
       </template>
