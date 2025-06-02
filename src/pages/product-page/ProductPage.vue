@@ -14,6 +14,7 @@ import SelectButton from 'primevue/selectbutton';
 import appLogger from '@/utils/logger';
 import type {
   Attribute,
+  Category,
   Image as CtImage,
   LocalizedString,
 } from '@commercetools/platform-sdk';
@@ -191,40 +192,56 @@ const productAttributes = computed(() => {
 });
 
 import type { MenuItem } from 'primevue/menuitem';
+const sourceCategoryId = computed(
+  () => route.query.category as string | undefined,
+);
 
 const breadcrumbs = computed(() => {
-  const homeItem: MenuItem = { icon: 'pi pi-home', to: '/' };
+  const homeItem: MenuItem = {
+    label: t('breadcrumb.home'),
+    to: { name: 'Home' },
+  };
   const pathItems: MenuItem[] = [];
   const p = product.value;
   const currentLang = currentLocale.value;
 
   if (p?.categories?.length) {
-    const mainCategoryRef = p.categories[0];
-    const mainCategory = mainCategoryRef?.obj;
+    let displayCategoryData: Category | undefined;
 
-    if (mainCategory) {
-      if (mainCategory.parent?.obj) {
-        const parentCategory = mainCategory.parent.obj;
-        const parentSlug =
-          parentCategory.slug?.[currentLang] ||
-          parentCategory.slug?.en ||
-          parentCategory.id;
-        pathItems.push({
-          label:
-            parentCategory.name[currentLang] ||
-            parentCategory.name.en ||
-            'Parent Category',
-          to: `/catalog/category/${parentSlug}`,
-        });
+    if (sourceCategoryId.value) {
+      const foundCategory = p.categories.find(
+        (catRef) =>
+          catRef.obj?.slug?.[currentLang] === sourceCategoryId.value ||
+          catRef.obj?.slug?.en === sourceCategoryId.value ||
+          catRef.id === sourceCategoryId.value,
+      );
+      if (foundCategory?.obj) {
+        displayCategoryData = foundCategory.obj as Category;
       }
-      const categorySlug =
-        mainCategory.slug?.[currentLang] ||
-        mainCategory.slug?.en ||
-        mainCategory.id;
-      pathItems.push({
-        label:
-          mainCategory.name[currentLang] || mainCategory.name.en || 'Category',
-        to: `/catalog/category/${categorySlug}`,
+    }
+
+    if (!displayCategoryData && p.categories[0]?.obj) {
+      displayCategoryData = p.categories[0].obj as Category;
+    }
+
+    if (displayCategoryData) {
+      const categoryStack: Category[] = [];
+      let currentCatForPath: Category | undefined = displayCategoryData;
+
+      while (currentCatForPath) {
+        categoryStack.unshift(currentCatForPath);
+        currentCatForPath = currentCatForPath.parent?.obj as
+          | Category
+          | undefined;
+      }
+
+      categoryStack.forEach((catInPath) => {
+        const slug =
+          catInPath.slug?.[currentLang] || catInPath.slug?.en || catInPath.id;
+        pathItems.push({
+          label: catInPath.name[currentLang] || catInPath.name.en || 'Category',
+          to: { name: 'CatalogCategory', params: { category: slug } },
+        });
       });
     }
   }
