@@ -6,4 +6,9 @@ export const NAV_LINKS = ref([
     route: '/',
     icon: 'pi pi-home',
   },
+  {
+    label: 'Catalog',
+    route: '/catalog',
+    icon: 'pi pi-th-large',
+  },
 ]);
