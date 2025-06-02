@@ -28,8 +28,10 @@ const toggle = (event: Event) => {
 <template>
   <Menubar :model="navList">
     <template #start>
-      <InlineSvg src="/logo-main.svg" height="26" aria-label="logo">
-      </InlineSvg>
+      <RouterLink to="/">
+        <InlineSvg src="/logo-main.svg" height="26" aria-label="logo">
+        </InlineSvg>
+      </RouterLink>
     </template>
     <template #item="{ item, props, hasSubmenu }">
       <RouterLink v-if="item.route" :to="item.route" v-bind="props.action">
