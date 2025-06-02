@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import Card from 'primevue/card';
 import { Button } from 'primevue';
-import { router } from '@/router/router';
 import type { ProductProjection } from '@commercetools/platform-sdk';
 import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   productInfo: ProductProjection;
+  currentCategory?: string;
 }>();
 
+const router = useRouter();
 const userPreferencesStore = useUserPreferencesStore();
 
 function convertCardInfo(productInfo: ProductProjection) {
@@ -48,7 +50,7 @@ function convertCardInfo(productInfo: ProductProjection) {
     description: productInfo.description
       ? productInfo.description[userPreferencesStore.currentLanguage]
       : 'No description',
-    route: productInfo.slug.en,
+    identifier: productInfo.slug?.en || productInfo.key || productInfo.id,
     price: price,
     discountedPrice: newPrice ? newPrice : false,
   };
@@ -56,8 +58,12 @@ function convertCardInfo(productInfo: ProductProjection) {
   return cardInfo;
 }
 
-function navigate(route: string) {
-  router.push(route);
+function navigate(identifier: string) {
+  router.push({
+    name: 'Product',
+    params: { identifier },
+    query: { category: props.currentCategory },
+  });
 }
 
 const cardInfo = convertCardInfo(props.productInfo);
@@ -67,7 +73,7 @@ const cardInfo = convertCardInfo(props.productInfo);
   <div
     v-if="cardInfo"
     class="relative cursor-pointer hover:scale-102 transition duration-300 easy-in-out"
-    @click="navigate(cardInfo.route)"
+    @click="navigate(cardInfo.identifier)"
   >
     <!-- <p
       v-if="!productInfo"

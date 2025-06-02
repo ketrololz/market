@@ -1,11 +1,17 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 export const ROUTES: RouteRecordRaw[] = [
-  { path: '/', name: 'Home', component: () => import('../pages/HomePage.vue') },
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('../pages/HomePage.vue'),
+    meta: { requiresAuth: false, guestOnly: false },
+  },
   {
     path: '/login',
     name: 'Login',
     component: () => import('../pages/login-page/LoginPage.vue'),
+    meta: { guestOnly: true, requiresAuth: false },
   },
   {
     path: '/registration',
@@ -17,6 +23,13 @@ export const ROUTES: RouteRecordRaw[] = [
     path: '/catalog',
     name: 'Catalog',
     component: () => import('../pages/catalog-page/CatalogPage.vue'),
+  },
+  {
+    path: '/product/:identifier', // identifier can be id (6f233a30-edcd-4381-b696-4001efb2a4a6), key (0003), or slug (exploding-kittens || vzryvnye-kotyata")
+    name: 'Product',
+    component: () => import('../pages/product-page/ProductPage.vue'),
+    props: true,
+    meta: { requiresAuth: false, guestOnly: false },
   },
   {
     path: '/catalog/:category/',
@@ -33,5 +46,6 @@ export const ROUTES: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('../pages/NotFound.vue'),
+    meta: { requiresAuth: false, guestOnly: false },
   },
 ];

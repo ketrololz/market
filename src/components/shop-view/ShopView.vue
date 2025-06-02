@@ -3,6 +3,7 @@ import Sidebar from '../sidebar/Sidebar.vue';
 import ProductList from '../product-list/ProductList.vue';
 import { router } from '@/router/router';
 import { ref } from 'vue';
+import { Form } from '@primevue/forms';
 import {
   Breadcrumb,
   Select,
@@ -164,7 +165,11 @@ function onPageChange(event: PageState) {
             pt:circle:class="!stroke-(--p-primary-300)"
           />
         </div>
-        <ProductList v-else-if="products?.length" :product-list="products" />
+        <ProductList
+          v-else-if="products?.length"
+          :product-list="products"
+          :current-category="categoryId"
+        />
         <div
           v-else
           class="w-full h-auto md:h-full flex flex-col items-center justify-center"

@@ -38,10 +38,19 @@ router.beforeEach(
     const isAuthenticated = authStore.isUserLoggedIn;
 
     if (to.meta.requiresAuth && !isAuthenticated) {
+      appLogger.log(
+        `Navigation Guard: Route [${String(to.name)}] requires auth, user not authenticated. Redirecting to Login.`,
+      );
       next({ name: 'Login', query: { redirect: to.fullPath } });
     } else if (to.meta.guestOnly && isAuthenticated) {
+      appLogger.log(
+        `Navigation Guard: Route [${String(to.name)}] is guestOnly, user IS authenticated. Redirecting to Home.`,
+      );
       next({ name: 'Home' });
     } else {
+      appLogger.log(
+        `Navigation Guard: Allowing navigation to [${String(to.name)}]. Auth: ${isAuthenticated}`,
+      );
       next();
     }
   },
