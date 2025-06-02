@@ -16,3 +16,17 @@ export const passwordSchema = yup
     'No leading or trailing spaces allowed',
     (val) => val?.trim() === val,
   );
+
+export const passwordChangeSchema = yup.object({
+  currentPassword: passwordSchema.label('Current Password'),
+  newPassword: passwordSchema
+    .label('New Password')
+    .test(
+      'different-from-current',
+      'New password must be different from current password',
+      function (value) {
+        const { currentPassword } = this.parent;
+        return value !== currentPassword;
+      },
+    ),
+});

@@ -11,6 +11,7 @@ export const ROUTES: RouteRecordRaw[] = [
     path: '/registration',
     name: 'Registration',
     component: () => import('../pages/registration-page/RegistrationPage.vue'),
+    meta: { guestOnly: true, requiresAuth: false },
   },
   {
     path: '/catalog',
@@ -21,6 +22,12 @@ export const ROUTES: RouteRecordRaw[] = [
     path: '/catalog/:category/',
     name: 'CatalogCategory',
     component: () => import('../components/shop-view/ShopView.vue'),
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../pages/profile-page/ProfilePage.vue'),
+    meta: { requiresAuth: true, guestOnly: false },
   },
   {
     path: '/:pathMatch(.*)*',

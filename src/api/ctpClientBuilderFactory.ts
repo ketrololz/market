@@ -119,4 +119,18 @@ export class CtpClientFactory {
       .build();
     return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
   }
+
+  static createApiRootWithUserSession(): ByProjectKeyRequestBuilder {
+    const tokens = userTokenCache.get();
+    if (!tokens.token) {
+      throw new Error('No user token available for authenticated request.');
+    }
+
+    const client = new ClientBuilder()
+      .withExistingTokenFlow(`Bearer ${tokens.token}`, { force: true })
+      .withHttpMiddleware({ host: apiUrl, httpClient: fetch })
+      .build();
+
+    return createApiBuilderFromCtpClient(client).withProjectKey({ projectKey });
+  }
 }
