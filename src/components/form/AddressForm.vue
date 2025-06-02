@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed, onMounted } from 'vue';
-import { Form, type FormInstance } from '@primevue/forms';
+import { Form, type FormInstance, type FormSubmitEvent } from '@primevue/forms';
 import { yupResolver } from '@primevue/forms/resolvers/yup';
 
 import AddressFields from '@/components/form/AddressFields.vue';
 import { addressSchema } from '@/schemas/addressSchema';
 import { useCountries } from '@/composables/useCountries';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
+import * as yup from 'yup';
 
 const projectSettingsStore = useProjectSettingsStore();
 
@@ -38,30 +39,39 @@ const emit = defineEmits<{
 }>();
 
 const formRef = ref<FormInstance>();
-const formData = ref<AddressFormData>({ ...props.initialValues });
-
 const formPath = props.path ?? 'address';
 
 const isValid = computed(() => {
   return formRef.value?.valid ?? false;
 });
 
-function submitForm() {
-  if (formRef.value?.valid) {
-    emit('submit', formData.value);
+async function onFormSubmit({ values, valid }: FormSubmitEvent) {
+  if (valid) {
+    const formValues = props.path ? values[formPath] : values;
+    emit('submit', formValues as AddressFormData);
   }
 }
 
-defineExpose({ submit: submitForm, isValid });
+defineExpose({ submit: onFormSubmit, isValid });
 </script>
 
 <template>
   <Form
     ref="formRef"
-    :model-value="formData"
-    :resolver="yupResolver(addressSchema)"
+    :initial-values="
+      formPath === 'address'
+        ? props.initialValues
+        : { [formPath]: props.initialValues }
+    "
+    :resolver="
+      yupResolver(
+        formPath === 'address'
+          ? addressSchema
+          : yup.object({ [formPath]: addressSchema }),
+      )
+    "
     class="flex flex-col gap-2"
-    @submit="submitForm"
+    @submit="onFormSubmit"
   >
     <AddressFields :path="formPath" :form="formRef" :countries="countries" />
   </Form>
