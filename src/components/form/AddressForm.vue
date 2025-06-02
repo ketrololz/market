@@ -30,6 +30,7 @@ export interface AddressFormData {
 const props = defineProps<{
   initialValues: AddressFormData;
   path?: string;
+  type?: 'shipping' | 'billing';
 }>();
 
 const emit = defineEmits<{

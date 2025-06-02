@@ -30,12 +30,6 @@ import { useCountries } from '@/composables/useCountries';
 
 const authStore = useAuthStore();
 const projectSettingsStore = useProjectSettingsStore();
-import countriesLib from 'i18n-iso-countries';
-import countriesEn from 'i18n-iso-countries/langs/en.json';
-import countriesRu from 'i18n-iso-countries/langs/ru.json';
-
-countriesLib.registerLocale(countriesEn);
-countriesLib.registerLocale(countriesRu);
 
 const sameAddress = ref(true);
 

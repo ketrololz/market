@@ -98,7 +98,7 @@ const dialogTitle = computed(() => {
   }
 });
 
-const currentInitialValues = computed<
+const initialValues = computed<
   UserInfoFormData | PasswordFormData | CustomerAddressData | null
 >(() => {
   if (activeDialog.value === 'profile' && customer.value) {
@@ -126,6 +126,28 @@ const currentInitialValues = computed<
     );
   }
   return null;
+});
+
+const componentProps = computed(() => {
+  if (activeDialog.value === 'profile') {
+    return {
+      initialValues: initialValues.value as UserInfoFormData,
+      onSubmit: handleSave,
+    };
+  } else if (activeDialog.value === 'address') {
+    return {
+      initialValues: initialValues.value as CustomerAddressData,
+      onSubmit: handleSave,
+      type: addressType.value as 'shipping' | 'billing',
+      path:
+        addressType.value === 'shipping' ? 'shippingAddress' : 'billingAddress',
+    };
+  } else {
+    return {
+      initialValues: initialValues.value as PasswordFormData,
+      onSubmit: handleSave,
+    };
+  }
 });
 
 const currentFormComponent = computed(() => {
@@ -295,33 +317,14 @@ async function handleSave(
     v-model="isDialogVisible"
     :title="dialogTitle"
     :edit="isEditMode"
-    :initial-values="currentInitialValues"
+    :initial-values="initialValues"
     @submit="triggerSubmit"
   >
-    <template #default="{ initialValues }">
+    <template #default="{}">
       <component
         :is="currentFormComponent"
         ref="formRef"
-        v-bind="
-          (() => {
-            if (activeDialog === 'profile') {
-              return {
-                initialValues: initialValues as UserInfoFormData,
-                onSubmit: handleSave,
-              };
-            } else if (activeDialog === 'address') {
-              return {
-                initialValues: initialValues as CustomerAddressData,
-                onSubmit: handleSave,
-              };
-            } else {
-              return {
-                initialValues: initialValues as PasswordFormData,
-                onSubmit: handleSave,
-              };
-            }
-          })()
-        "
+        v-bind="componentProps"
       />
     </template>
   </EditableDialog>
