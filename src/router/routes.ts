@@ -46,9 +46,4 @@ export const ROUTES: RouteRecordRaw[] = [
     name: '404',
     component: () => import('../pages/NotFound.vue'),
   },
-  {
-    path: '/:pathMatch(.*)*',
-    name: '404',
-    component: NotFound,
-  },
 ];
