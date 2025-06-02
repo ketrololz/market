@@ -5,7 +5,6 @@ export const ROUTES: RouteRecordRaw[] = [
     path: '/',
     name: 'Home',
     component: () => import('../pages/HomePage.vue'),
-    meta: { requiresAuth: false, guestOnly: false },
   },
   {
     path: '/login',
@@ -46,6 +45,10 @@ export const ROUTES: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('../pages/NotFound.vue'),
-    meta: { requiresAuth: false, guestOnly: false },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: '404',
+    component: NotFound,
   },
 ];
