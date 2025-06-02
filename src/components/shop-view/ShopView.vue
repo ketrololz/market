@@ -122,9 +122,12 @@ function onPageChange(event: PageState) {
   <div class="px-4 relative">
     <Breadcrumb :home="home" :model="breadcrumbLink">
       <template #item="{ item }">
-        <RouterLink :to="item.route">
+        <RouterLink v-if="item.route" :to="item.route">
           <span class="text-(--p-breadcrumb-item-color)">{{ item.label }}</span>
         </RouterLink>
+        <span v-else class="text-(--p-breadcrumb-item-color)">{{
+          item.label
+        }}</span>
       </template>
     </Breadcrumb>
     <div class="flex gap-4 flex-col md:flex-row min-h-150">
