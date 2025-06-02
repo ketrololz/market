@@ -27,7 +27,6 @@ const formRef = ref<FormInstance>();
 const formData = ref<UserInfoFormData>({ ...props.initialValues });
 
 const isValid = computed(() => {
-  console.log('UserInfoForm isValid:', formRef.value?.valid ?? false);
   return formRef.value?.valid ?? false;
 });
 

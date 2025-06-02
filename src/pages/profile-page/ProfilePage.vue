@@ -8,10 +8,12 @@ import EditableDialog from '@/components/editable-dialog/EditableDialog.vue';
 import { useDialogManager } from './../../composables/useDialogManager';
 import UserInfoForm from '@/components/form/UserInfoForm.vue';
 import PasswordForm from '@/components/form/PasswordForm.vue';
+import AddressForm from '@/components/form/AddressForm.vue';
 import type { PasswordFormData } from '@/components/form/PasswordForm.vue';
 import type { UserInfoFormData } from '@/components/form/UserInfoForm.vue';
 import { useAuthStore } from '@/stores/authStore';
 import type { UserInfoFormRef } from '@/components/form/types/UserFormRef';
+import type { CustomerAddressData } from '@/services/auth/types/customerAddressData';
 
 const {
   activeDialog,
@@ -19,16 +21,22 @@ const {
   closeDialog,
   isProfileDialogVisible,
   isPasswordDialogVisible,
+  isAddressDialogVisible,
 } = useDialogManager();
 
 const customer = ref<Customer | null>(null);
 const isLoading = ref(true);
 const formRef = ref<UserInfoFormRef>();
+const editedAddress = ref<Address | null>(null);
+const addressType = ref<'shipping' | 'billing' | null>(null);
 
 const authStore = useAuthStore();
 
 const isDialogVisible = computed({
-  get: () => isProfileDialogVisible.value || isPasswordDialogVisible.value,
+  get: () =>
+    isProfileDialogVisible.value ||
+    isPasswordDialogVisible.value ||
+    isAddressDialogVisible.value,
   set: (value: boolean) => {
     if (!value) {
       closeDialog();
@@ -36,7 +44,15 @@ const isDialogVisible = computed({
   },
 });
 
-onMounted(async () => {
+function isShippingDeleteDisabled() {
+  return shippingAddresses.value.length <= 1;
+}
+
+function isBillingDeleteDisabled() {
+  return billingAddresses.value.length <= 1;
+}
+
+async function loadCustomer() {
   try {
     const user = await AuthService.restoreSession();
     if (user) {
@@ -47,6 +63,10 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
+}
+
+onMounted(async () => {
+  await loadCustomer();
 });
 
 const shippingAddresses = computed(
@@ -78,8 +98,8 @@ const dialogTitle = computed(() => {
   }
 });
 
-const currentInitialValues = computed<
-  UserInfoFormData | PasswordFormData | null
+const initialValues = computed<
+  UserInfoFormData | PasswordFormData | CustomerAddressData | null
 >(() => {
   if (activeDialog.value === 'profile' && customer.value) {
     const { email, firstName, lastName, dateOfBirth } = customer.value;
@@ -94,49 +114,134 @@ const currentInitialValues = computed<
       currentPassword: '',
       newPassword: '',
     };
+  } else if (activeDialog.value === 'address' && customer.value) {
+    if (editedAddress.value) {
+      return {
+        id: editedAddress.value.id,
+        streetName: editedAddress.value.streetName ?? '',
+        city: editedAddress.value.city ?? '',
+        postalCode: editedAddress.value.postalCode ?? '',
+        country: editedAddress.value.country ?? '',
+        defaultShipping:
+          addressType.value === 'shipping' &&
+          customer.value.defaultShippingAddressId === editedAddress.value.id
+            ? true
+            : undefined,
+        defaultBilling:
+          addressType.value === 'billing' &&
+          customer.value.defaultBillingAddressId === editedAddress.value.id
+            ? true
+            : undefined,
+      };
+    }
+    return {
+      streetName: '',
+      city: '',
+      postalCode: '',
+      country: '',
+      defaultShipping: addressType.value === 'shipping' ? false : undefined,
+      defaultBilling: addressType.value === 'billing' ? false : undefined,
+    };
   }
   return null;
+});
+
+const componentProps = computed(() => {
+  if (activeDialog.value === 'profile') {
+    return {
+      initialValues: initialValues.value as UserInfoFormData,
+      onSubmit: handleSave,
+    };
+  } else if (activeDialog.value === 'address') {
+    return {
+      initialValues: initialValues.value as CustomerAddressData,
+      onSubmit: handleSave,
+      type: addressType.value as 'shipping' | 'billing',
+      path:
+        addressType.value === 'shipping' ? 'shippingAddress' : 'billingAddress',
+    };
+  } else {
+    return {
+      initialValues: initialValues.value as PasswordFormData,
+      onSubmit: handleSave,
+    };
+  }
 });
 
 const currentFormComponent = computed(() => {
   if (activeDialog.value === 'profile') return UserInfoForm;
   if (activeDialog.value === 'password') return PasswordForm;
+  if (activeDialog.value === 'address') return AddressForm;
   return null;
 });
 
-function onAddNewAddress() {
-  console.log('Add new address');
+const isEditMode = computed(() => {
+  if (activeDialog.value === 'profile' || activeDialog.value === 'password') {
+    return true;
+  } else if (activeDialog.value === 'address') {
+    return editedAddress.value !== null;
+  }
+  return false;
+});
+
+async function onDeleteAddress(address: Address) {
+  if (!address.id) {
+    console.warn('Address id is undefined, cannot delete.');
+    return;
+  }
+  try {
+    await authStore.removeAddress(address.id);
+    customer.value = authStore.userProfile;
+  } catch (error) {
+    console.error('Failed to delete address:', error);
+  }
 }
 
-function onEditAddress(address: Address) {
-  console.log('Edit address:', address);
+async function onSetDefault(address: Address, type: 'shipping' | 'billing') {
+  if (!address.id) {
+    console.warn('Address id is undefined, cannot set as default.');
+    return;
+  }
+  try {
+    await authStore.setDefaultAddress(address.id, type);
+
+    customer.value = authStore.userProfile;
+  } catch (error) {
+    console.error(`Failed to set default ${type} address:`, error);
+  }
 }
 
-function onDeleteAddress(address: Address) {
-  console.log('Delete address:', address);
-}
-
-function onSetDefault(address: Address, type: 'shipping' | 'billing') {
-  console.log(`Set address ${address.id} as default ${type} address`);
+function onEditAddress(address: Address | null, type: 'shipping' | 'billing') {
+  editedAddress.value = address;
+  addressType.value = type;
+  openDialog('address', !!address);
 }
 
 function triggerSubmit() {
   formRef.value?.submit();
 }
 
-async function handleSave(data: UserInfoFormData | PasswordFormData) {
+async function handleSave(
+  data: UserInfoFormData | PasswordFormData | CustomerAddressData,
+) {
+  let success = false;
+
   if (activeDialog.value === 'profile') {
-    const success = await authStore.updateProfile(data as UserInfoFormData);
-    if (success) {
-      customer.value = authStore.userProfile;
-      closeDialog();
-    }
+    success = await authStore.updateProfile(data as UserInfoFormData);
   } else if (activeDialog.value === 'password') {
-    const success = await authStore.updatePassword(data as PasswordFormData);
-    if (success) {
-      customer.value = authStore.userProfile;
-      closeDialog();
-    }
+    success = await authStore.updatePassword(data as PasswordFormData);
+  } else if (activeDialog.value === 'address') {
+    const addressData = {
+      ...(data as CustomerAddressData),
+      id: editedAddress.value?.id,
+      type: addressType.value ?? undefined,
+    };
+    success = await authStore.updateAddress(addressData);
+  }
+
+  if (success) {
+    await loadCustomer();
+    closeDialog();
   }
 }
 </script>
@@ -160,22 +265,45 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
             </button>
           </div>
         </template>
-        <p class="flex gap-2">
-          <strong class="w-48">Email:</strong>
-          {{ customer.email }}
-        </p>
-        <p class="flex gap-2">
-          <strong class="w-48">First Name:</strong>
-          {{ customer.firstName }}
-        </p>
-        <p class="flex gap-2">
-          <strong class="w-48">Last Name:</strong>
-          {{ customer.lastName }}
-        </p>
-        <p class="flex gap-2">
-          <strong class="w-48">Date of Birth:</strong>
-          {{ customer.dateOfBirth }}
-        </p>
+        <div class="space-y-2">
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >Email:</strong
+            >
+            <span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.email }}</span
+            >
+          </p>
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >First Name:</strong
+            ><span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.firstName }}</span
+            >
+          </p>
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >Last Name:</strong
+            ><span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.lastName }}</span
+            >
+          </p>
+          <p class="flex gap-2 items-center">
+            <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+              >Date of Birth:</strong
+            ><span
+              class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >
+              {{ customer.dateOfBirth }}</span
+            >
+          </p>
+        </div>
       </Panel>
 
       <Panel
@@ -193,7 +321,10 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
           </div>
         </template>
         <p class="flex gap-2">
-          <strong class="w-48">Password:</strong> *********
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Password:</strong
+          >
+          *********
         </p>
       </Panel>
 
@@ -210,10 +341,10 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
             :addresses="shippingAddresses"
             type="shipping"
             :default-shipping-address-id="customer.defaultShippingAddressId"
-            @edit="onEditAddress"
+            :is-delete-disabled="isShippingDeleteDisabled"
+            @edit-or-add="onEditAddress"
             @delete="onDeleteAddress"
             @set-default="onSetDefault"
-            @add="onAddNewAddress"
           />
 
           <AddressSection
@@ -221,10 +352,10 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
             :addresses="billingAddresses"
             type="billing"
             :default-billing-address-id="customer.defaultBillingAddressId"
-            @edit="onEditAddress"
+            :is-delete-disabled="isBillingDeleteDisabled"
+            @edit-or-add="onEditAddress"
             @delete="onDeleteAddress"
             @set-default="onSetDefault"
-            @add="onAddNewAddress"
           />
         </div>
       </Panel>
@@ -234,25 +365,15 @@ async function handleSave(data: UserInfoFormData | PasswordFormData) {
   <EditableDialog
     v-model="isDialogVisible"
     :title="dialogTitle"
-    :edit="true"
-    :initial-values="currentInitialValues"
+    :edit="isEditMode"
+    :initial-values="initialValues"
     @submit="triggerSubmit"
   >
-    <template #default="{ initialValues }">
+    <template #default="{}">
       <component
         :is="currentFormComponent"
         ref="formRef"
-        v-bind="
-          activeDialog === 'profile'
-            ? {
-                initialValues: initialValues as UserInfoFormData,
-                onSubmit: handleSave,
-              }
-            : {
-                initialValues: initialValues as PasswordFormData,
-                onSubmit: handleSave,
-              }
-        "
+        v-bind="componentProps"
       />
     </template>
   </EditableDialog>

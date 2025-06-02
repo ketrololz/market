@@ -48,14 +48,14 @@ const toggle = (event: Event) => {
           <Button
             v-if="authStore.userProfile"
             type="button"
-            class="ml-0 flex items-center gap-2 overflow-hidden"
+            class="ml-0 flex items-center gap-2 overflow-hidden min-h-[35px]"
             aria-haspopup="true"
             aria-controls="overlay_menu"
             size="small"
             variant="outlined"
           >
             <span class="pi pi-user"></span>
-            <span class="truncate max-w-25 md:max-w-50">
+            <span class="truncate max-w-25 md:max-w-50 username">
               {{ authStore.userProfile.firstName }}
             </span>
           </Button>
@@ -91,3 +91,10 @@ const toggle = (event: Event) => {
     </template>
   </Menubar>
 </template>
+<style scoped>
+@media (max-width: 380px) {
+  .username {
+    display: none;
+  }
+}
+</style>

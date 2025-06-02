@@ -19,7 +19,6 @@ const emit = defineEmits<{
 const formRef = ref<FormInstance>();
 
 const isValid = computed(() => {
-  console.log('PasswordForm isValid:', formRef.value?.valid ?? false);
   return formRef.value?.valid ?? false;
 });
 

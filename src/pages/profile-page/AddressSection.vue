@@ -1,10 +1,25 @@
 <script setup lang="ts">
 import type { Address } from '@commercetools/platform-sdk';
-import { defineProps, computed } from 'vue';
+import { defineProps, computed, onMounted } from 'vue';
+import { useCountries } from '@/composables/useCountries';
+import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
+
+const projectSettingsStore = useProjectSettingsStore();
+
+const { countries } = useCountries();
+
+onMounted(async () => {
+  if (projectSettingsStore.getAvailableCountries.length === 0) {
+    await projectSettingsStore.fetchProjectSettings();
+  }
+});
 
 defineEmits<{
-  (e: 'add'): void;
-  (e: 'edit', address: Address): void;
+  (
+    e: 'edit-or-add',
+    address: Address | null,
+    type: 'shipping' | 'billing',
+  ): void;
   (e: 'delete', address: Address): void;
   (e: 'set-default', address: Address, type: 'shipping' | 'billing'): void;
 }>();
@@ -15,7 +30,12 @@ const props = defineProps<{
   type: 'shipping' | 'billing';
   defaultShippingAddressId?: string | undefined;
   defaultBillingAddressId?: string | undefined;
+  isDeleteDisabled?: (address: Address) => boolean;
 }>();
+
+const getCountryName = (code: string): string => {
+  return countries.value.find((c) => c.code === code)?.name || code;
+};
 
 function isDefaultAddress(address: Address): boolean {
   const defaultId =
@@ -45,7 +65,7 @@ const sortedAddresses = computed(() => {
       <h2 class="text-base font-semibold">{{ title }}</h2>
       <button
         class="text-xs text-blue-600 hover:underline cursor-pointer"
-        @click="$emit('add')"
+        @click="$emit('edit-or-add', null, type)"
       >
         + Add {{ type === 'shipping' ? 'Shipping' : 'Billing' }} Address
       </button>
@@ -59,28 +79,57 @@ const sortedAddresses = computed(() => {
         'border-blue-300 border': isDefaultAddress(address),
       }"
     >
-      <p class="flex gap-2">
-        <strong class="w-48">Street:</strong> {{ address.streetName }}
-      </p>
-      <p class="flex gap-2">
-        <strong class="w-48">City:</strong> {{ address.city }}
-      </p>
-      <p class="flex gap-2">
-        <strong class="w-48">Postal Code:</strong> {{ address.postalCode }}
-      </p>
-      <p class="flex gap-2">
-        <strong class="w-48">Country:</strong> {{ address.country }}
-      </p>
-
+      <div class="space-y-2">
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Street:</strong
+          >
+          <span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >{{ address.streetName }}</span
+          >
+        </p>
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >City:</strong
+          >
+          <span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >{{ address.city }}</span
+          >
+        </p>
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Postal Code:</strong
+          >
+          <span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+            >{{ address.postalCode }}</span
+          >
+        </p>
+        <p class="flex gap-2 items-center">
+          <strong class="max-w-48 w-48 shrink-0 min-w-25 max-sm:w-2/5"
+            >Country:</strong
+          ><span
+            class="scroll-container max-w-md overflow-x-auto whitespace-nowrap relative"
+          >
+            {{ getCountryName(address.country) }}</span
+          >
+        </p>
+      </div>
       <div class="flex gap-3 mt-2 text-xs text-blue-600">
         <button
           class="cursor-pointer hover:underline"
-          @click="$emit('edit', address)"
+          @click="$emit('edit-or-add', address, type)"
         >
           Edit
         </button>
         <button
-          class="cursor-pointer hover:underline"
+          :disabled="isDeleteDisabled?.(address)"
+          :class="{
+            'text-gray-400 cursor-not-allowed': isDeleteDisabled?.(address),
+            'text-blue-600': !isDeleteDisabled?.(address),
+          }"
           @click="$emit('delete', address)"
         >
           Delete

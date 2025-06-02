@@ -13,8 +13,11 @@ function createDialogVisibility(dialog: Exclude<DialogName, null>) {
   });
 }
 
-function openDialog(dialog: Exclude<DialogName, null>) {
+const isEditMode = ref(true);
+
+function openDialog(dialog: Exclude<DialogName, null>, edit = true) {
   activeDialog.value = dialog;
+  isEditMode.value = edit;
 }
 
 function closeDialog() {

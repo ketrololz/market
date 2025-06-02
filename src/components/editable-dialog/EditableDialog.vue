@@ -10,6 +10,10 @@ const visible = computed({
   set: (val: boolean) => emit('update:modelValue', val),
 });
 
+const dialogHeader = computed(() => {
+  return props.edit ? props.title : props.title.replace(/^Edit/, 'Add');
+});
+
 const props = defineProps<{
   title: string;
   edit?: boolean;
@@ -35,8 +39,9 @@ const isFormValid = computed(() => {
     v-model:visible="visible"
     modal
     closable
-    :header="props.title"
-    :style="{ width: '50vw' }"
+    :header="dialogHeader"
+    :style="{ width: '550px' }"
+    :breakpoints="{ '611px': '90vw' }"
   >
     <p class="text-sm text-gray-600 mb-4">
       {{

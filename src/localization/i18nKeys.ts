@@ -28,9 +28,15 @@ export enum AuthMessageKey {
   SessionRestored = 'success.auth.sessionRestored',
   ProfileUpdateSuccess = 'success.auth.profileUpdate',
   PasswordUpdateSuccess = 'success.auth.passwordUpdate',
+  DefaultAddressUpdateSuccess = 'success.auth.defaultAddressUpdate',
+  AddressRemoveSuccess = 'success.auth.addressRemove',
+  AddressUpdateSuccess = 'success.auth.addressUpdate',
 
+  AddressUpdateFailed = 'errors.auth.addressUpdateFailed',
+  AddressRemoveFailed = 'errors.auth.addressRemoveFailed',
   PasswordUpdateFailed = 'errors.auth.passwordUpdateFailed',
   ProfileUpdateFailed = 'errors.auth.profileUpdateFailed',
+  DefaultAddressUpdateFailed = 'errors.auth.defaultAddressUpdateFailed',
 }
 
 export enum ProjectSettingsMessageKey {
