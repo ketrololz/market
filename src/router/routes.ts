@@ -32,6 +32,17 @@ export const ROUTES: RouteRecordRaw[] = [
     meta: { requiresAuth: false, guestOnly: false },
   },
   {
+    path: '/catalog/:category/',
+    name: 'CatalogCategory',
+    component: () => import('../components/shop-view/ShopView.vue'),
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../pages/profile-page/ProfilePage.vue'),
+    meta: { requiresAuth: true, guestOnly: false },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('../pages/NotFound.vue'),

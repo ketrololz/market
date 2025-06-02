@@ -6,7 +6,6 @@ import { computed, ref } from 'vue';
 import InlineSvg from 'vue-inline-svg';
 import type { HeaderProps } from './types/header-props';
 import { useAuthStore } from '../../stores/authStore';
-import LanguageSwitcher from '@components/common/LanguageSwitcher.vue';
 
 defineProps<HeaderProps>();
 
@@ -29,7 +28,8 @@ const toggle = (event: Event) => {
 <template>
   <Menubar :model="navList">
     <template #start>
-      <InlineSvg src="logo-main.svg" height="26" aria-label="logo"> </InlineSvg>
+      <InlineSvg src="/logo-main.svg" height="26" aria-label="logo">
+      </InlineSvg>
     </template>
     <template #item="{ item, props, hasSubmenu }">
       <RouterLink v-if="item.route" :to="item.route" v-bind="props.action">
@@ -44,10 +44,22 @@ const toggle = (event: Event) => {
     </template>
     <template #end>
       <div class="flex items-center gap-x-2">
-        <LanguageSwitcher />
-        <p class="truncate max-w-25 md:max-w-50">
-          {{ authStore.userProfile?.firstName }}
-        </p>
+        <RouterLink to="/profile" class="flex items-center gap-2">
+          <Button
+            v-if="authStore.userProfile"
+            type="button"
+            class="ml-0 flex items-center gap-2 overflow-hidden min-h-[35px]"
+            aria-haspopup="true"
+            aria-controls="overlay_menu"
+            size="small"
+            variant="outlined"
+          >
+            <span class="pi pi-user"></span>
+            <span class="truncate max-w-25 md:max-w-50 username">
+              {{ authStore.userProfile.firstName }}
+            </span>
+          </Button>
+        </RouterLink>
         <Button
           type="button"
           class="ml-0"
@@ -79,3 +91,10 @@ const toggle = (event: Event) => {
     </template>
   </Menubar>
 </template>
+<style scoped>
+@media (max-width: 380px) {
+  .username {
+    display: none;
+  }
+}
+</style>
