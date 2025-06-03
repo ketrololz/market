@@ -48,6 +48,13 @@ function search() {
   );
 }
 
+function clear() {
+  selectedPlayers.value = 0;
+  discountStatus.value = false;
+  priceRange.value[0] = priceMin.value;
+  priceRange.value[1] = priceMax.value;
+}
+
 async function createCategoryTree() {
   const result = await productsService.fetchCategories();
 
@@ -245,7 +252,22 @@ onMounted(async () => {
           <label :for="playersCount.key">{{ playersCount.label }}</label>
         </div>
       </div>
-      <Button label="Search" @click="search"></Button>
+      <div class="flex gap-x-1">
+        <Button label="Search" fluid @click="search"></Button>
+        <Button
+          icon="pi pi-undo"
+          class="min-w-11"
+          severity="danger"
+          fluid
+          :disabled="
+            selectedPlayers === 0 &&
+            discountStatus === false &&
+            priceRange[0] === priceMin &&
+            priceRange[1] === priceMax
+          "
+          @click="clear"
+        ></Button>
+      </div>
     </div>
   </Panel>
 </template>
