@@ -137,7 +137,7 @@ function onPageChange(event: PageState) {
         @search-products="handleSelect"
       ></Sidebar>
       <div class="flex flex-col w-full gap-y-10">
-        <div class="flex justify-between">
+        <div class="flex justify-between gap-x-2">
           <Form class="flex gap-2" @submit.prevent>
             <InputText
               v-model="searchValue"
