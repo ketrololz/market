@@ -26,7 +26,7 @@ function convertCardInfo(productInfo: ProductProjection) {
   };
 
   if (userPreferencesStore.currentLanguage === 'en') {
-    currency.position = 2;
+    currency.position = 0;
     currency.sign = ' €';
   }
 
