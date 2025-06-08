@@ -13,6 +13,9 @@ importers:
       '@commercetools/ts-client':
         specifier: ^3.3.0
         version: 3.3.0
+      '@fortawesome/fontawesome-free':
+        specifier: ^6.7.2
+        version: 6.7.2
       '@primeuix/themes':
         specifier: ^1.0.3
         version: 1.0.3
@@ -649,6 +652,13 @@ packages:
         integrity: sha512-ZAoA40rNMPwSm+AeHpCq8STiNAwzWLJuP8Xv4CHIc9wv/PSuExjMrmjfYNj682vW0OOiZ1HKxzvjQr9XZIisQA==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+
+  '@fortawesome/fontawesome-free@6.7.2':
+    resolution:
+      {
+        integrity: sha512-JUOtgFW6k9u4Y+xeIaEiLr3+cjoUPiAuLXoyKOJSia6Duzb7pq+A76P9ZdPDoAoxHdHzq6gE9/jKBGXlZT8FbA==,
+      }
+    engines: { node: '>=6' }
 
   '@humanfs/core@0.19.1':
     resolution:
@@ -4339,6 +4349,8 @@ snapshots:
     dependencies:
       '@eslint/core': 0.13.0
       levn: 0.4.1
+
+  '@fortawesome/fontawesome-free@6.7.2': {}
 
   '@humanfs/core@0.19.1': {}
 
