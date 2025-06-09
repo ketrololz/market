@@ -42,6 +42,11 @@ export const ROUTES: RouteRecordRaw[] = [
     meta: { requiresAuth: true, guestOnly: false },
   },
   {
+    path: '/cart',
+    name: 'Cart',
+    component: () => import('../pages/cart-page/CartPage.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: '404',
     component: () => import('../pages/NotFound.vue'),
