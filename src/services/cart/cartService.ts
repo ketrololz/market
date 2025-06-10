@@ -7,9 +7,6 @@ import appLogger from '@/utils/logger';
 import { parseError } from '../appErrors';
 
 export class CartService {
-  /**
-   * Получает активную корзину (анонимного или залогиненного пользователя) через /me.
-   */
   public async getActiveCart(): Promise<Cart | null> {
     const session = await anonymousSessionService.ensureSession();
     if (!session) return null;
@@ -35,9 +32,6 @@ export class CartService {
     }
   }
 
-  /**
-   * Создает корзину через /me
-   */
   public async createCart(): Promise<Cart> {
     const session = await anonymousSessionService.ensureSession();
     if (!session) throw new Error('No active session');

@@ -28,7 +28,8 @@ export const useCartStore = defineStore('cart', () => {
     try {
       await cartService.deleteCart(cart.value);
     } catch {
-      // Ошибку можно игнорировать
+      error.value = new Error('Failed to clear cart');
+      throw error.value;
     } finally {
       cart.value = null;
     }
