@@ -4,6 +4,7 @@ import { Button } from 'primevue';
 import type { ProductProjection } from '@commercetools/platform-sdk';
 import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 import { useRouter } from 'vue-router';
+import { useCartStore } from '@/stores/ cartStore';
 
 const props = defineProps<{
   productInfo: ProductProjection;
@@ -12,6 +13,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const userPreferencesStore = useUserPreferencesStore();
+const cartStore = useCartStore();
 
 function convertCardInfo(productInfo: ProductProjection) {
   const prices = productInfo.masterVariant.prices;
@@ -67,6 +69,21 @@ function navigate(identifier: string) {
 }
 
 const cardInfo = convertCardInfo(props.productInfo);
+
+async function addToCart() {
+  try {
+    console.log('Adding to cart:', props.productInfo.id);
+    console.log('Product:', props.productInfo);
+    await cartStore.addLineItem(
+      props.productInfo.id,
+      props.productInfo.masterVariant.id,
+      1,
+    );
+  } catch (e) {
+    console.error('Failed to add to cart:', e);
+    // Handle error appropriately, e.g., show a notification
+  }
+}
 </script>
 
 <template>
@@ -119,7 +136,7 @@ const cardInfo = convertCardInfo(props.productInfo);
           severity="primary"
           outlined
           class="w-full"
-          @click.stop="console.log('Add to cart')"
+          @click.stop="addToCart"
         />
         <Button
           v-else

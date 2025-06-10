@@ -10,6 +10,60 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import { Form } from '@primevue/forms';
 import Divider from 'primevue/divider';
+import { onMounted, computed } from 'vue';
+import { useCartStore } from '@/stores/ cartStore';
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
+import { useProductCacheStore } from '@/stores/productCacheStore';
+
+const cartStore = useCartStore();
+const productCacheStore = useProductCacheStore();
+
+onMounted(async () => {
+  await cartStore.loadCart();
+
+  const productIds =
+    cartStore.cart?.lineItems.map((item) => item.productId) ?? [];
+
+  await Promise.all(
+    productIds.map((id) => productCacheStore.getProductById(id)),
+  );
+});
+
+const cartItems = computed(() => {
+  return (
+    cartStore.cart?.lineItems.map((item) => {
+      return {
+        id: item.id,
+        name: item.name.en,
+        players: `${
+          item.variant.attributes?.find((a) => a.name === 'players-min')?.value
+        } - ${
+          item.variant.attributes?.find((a) => a.name === 'players-max')?.value
+        }`,
+        age: `${
+          item.variant.attributes?.find((a) => a.name === 'age-recommended')
+            ?.value
+        }+`,
+        playTime: item.variant.attributes?.find(
+          (a) => a.name === 'playing-time-min',
+        )?.value,
+        publisher: item.variant.attributes?.find((a) => a.name === 'publisher')
+          ?.value?.ru,
+        quantity: item.quantity,
+        unitPrice: item.price.value.centAmount / 100,
+        price: item.totalPrice.centAmount / 100,
+        imageUrl: item.variant.images?.[0]?.url ?? '',
+        productId: item.productId,
+        description:
+          productCacheStore.getProductDescriptionSync?.(item.productId, 'en') ??
+          '',
+      };
+    }) ?? []
+  );
+});
 </script>
 
 <template>
@@ -32,52 +86,60 @@ import Divider from 'primevue/divider';
     <!-- <p>Your basket is empty. </p>
  <p>Add items for another 50 € and receive free shipping </p> -->
   </Panel>
-  <Panel>
-    <table class="w-full">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Description</th>
-          <th>Quantity</th>
-          <th>Unit price</th>
-          <th>Price</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="text-center">
-          <td><img src="" alt="" /></td>
-          <td class="flex flex-col">
-            <span class="text-sm text-(--p-primary-color)">Product Name</span>
-            <span class="text-xs text-gray-500"
-              ><strong>Number of players:</strong> 2-4
-            </span>
-            <span class="text-xs text-gray-500"><strong>Age:</strong> 8+ </span>
-            <span class="text-xs text-gray-500"
-              ><strong>Min. Playing Time:</strong> 60 min</span
-            >
-            <span class="text-xs text-gray-500"
-              ><strong>Publisher:</strong> Hobby World
-            </span>
-          </td>
-          <td>1</td>
-          <td>$10.00</td>
-          <td>$10.00</td>
-          <td></td>
-        </tr>
-      </tbody>
-    </table>
-  </Panel>
+
   <Panel pt:header:class="pb-0!">
-    <DataTable
-      :value="[]"
-      class="w-full"
-      pt:root:class="!border-0 !shadow-none"
-      pt:header:class="!border-0 !shadow-none"
-      pt:body:class="!border-0 !shadow-none"
-    >
-      <Column field="name" header="Name" />
-      <Column field="description" header="Description" />
+    <DataTable :value="cartItems" class="w-full">
+      <Column field="item" header="Item">
+        <template #body="slotProps">
+          <a
+            :href="`/product/${slotProps.data.productId}`"
+            target="_blank"
+            class="block w-20 h-20"
+          >
+            <img
+              :src="slotProps.data.imageUrl"
+              alt="Product Image"
+              class="object-contain w-full h-full"
+            />
+          </a>
+        </template>
+      </Column>
+      <Column field="description" header="Description">
+        <template #body="slotProps">
+          <div class="flex flex-col">
+            <span
+              class="text-sm text-primary font-medium text-(--p-primary-color)"
+            >
+              {{ slotProps.data.name }}
+            </span>
+            <span class="text-xs text-gray-500">
+              <strong>Number of players:</strong> {{ slotProps.data.players }}
+            </span>
+            <span class="text-xs text-gray-500">
+              <strong>Age:</strong> {{ slotProps.data.age }}
+            </span>
+            <span class="text-xs text-gray-500">
+              <strong>Min. Playing Time:</strong> {{ slotProps.data.playTime }}
+            </span>
+            <span class="text-xs text-gray-500">
+              <strong>Publisher:</strong> {{ slotProps.data.publisher }}
+            </span>
+
+            <Accordion value="0" unstyled="true">
+              <AccordionPanel value="1">
+                <AccordionHeader>
+                  <strong class="text-xs text-gray-500">Details</strong>
+                </AccordionHeader>
+                <AccordionContent>
+                  <p class="text-xs text-gray-500">
+                    {{ slotProps.data.description }}
+                  </p>
+                </AccordionContent>
+              </AccordionPanel>
+            </Accordion>
+          </div>
+        </template>
+      </Column>
       <Column field="quantity" header="Quantity">
         <template #body="slotProps">
           <InputNumber
@@ -93,15 +155,6 @@ import Divider from 'primevue/divider';
       </Column>
       <Column field="unitPrice" header="Unit Price" />
       <Column field="price" header="Price" />
-      <Column field="delete" header="">
-        <template #body="slotProps">
-          <Button
-            icon="pi pi-trash"
-            class="p-button-danger p-button-rounded p-button-sm"
-            @click="onDelete(slotProps.data.id)"
-          />
-        </template>
-      </Column>
     </DataTable>
     <Form class="flex gap-2"
       ><InputText
@@ -126,3 +179,10 @@ import Divider from 'primevue/divider';
     </div>
   </Panel>
 </template>
+
+<style scoped>
+.p-accordionheader {
+  display: flex;
+  gap: 0.5rem;
+}
+</style>
