@@ -70,6 +70,47 @@ const cartItems = computed(() => {
     }) ?? []
   );
 });
+
+const onQuantityChange = async (item) => {
+  try {
+    await cartStore.updateCart([
+      {
+        action: 'changeLineItemQuantity',
+        lineItemId: item.id,
+        quantity: item.quantity,
+      },
+    ]);
+
+    // optionally: reload cart and product info
+    await cartStore.loadCart();
+    const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
+    await Promise.all(
+      productIds.map((id) => productCacheStore.getProductById(id)),
+    );
+  } catch (err) {
+    console.error('Failed to update quantity', err);
+  }
+};
+
+const onDelete = async (lineItemId) => {
+  try {
+    await cartStore.updateCart([
+      {
+        action: 'removeLineItem',
+        lineItemId: lineItemId,
+      },
+    ]);
+
+    // optionally: reload cart and product info
+    await cartStore.loadCart();
+    const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
+    await Promise.all(
+      productIds.map((id) => productCacheStore.getProductById(id)),
+    );
+  } catch (err) {
+    console.error('Failed to delete item', err);
+  }
+};
 </script>
 
 <template>
@@ -155,12 +196,27 @@ const cartItems = computed(() => {
             :step="1"
             :min="1"
             :max="100"
-            class="w-20"
+            size="small"
+            allow-empty="false"
+            input-class="w-10 text-center !px-0"
+            increment-button-class="!px-1 !w-6"
+            decrement-button-class="!px-1 !w-6"
+            @update:model-value="onQuantityChange(slotProps.data)"
           />
         </template>
       </Column>
       <Column field="unitPrice" header="Unit Price" />
       <Column field="price" header="Price" />
+      <Column field="delete" header="">
+        <template #body="slotProps">
+          <Button
+            icon="pi pi-trash"
+            class="p-button-rounded"
+            size="small"
+            @click="onDelete(slotProps.data.id)"
+          />
+        </template>
+      </Column>
     </DataTable>
     <Form class="flex gap-2"
       ><InputText
