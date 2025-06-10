@@ -141,12 +141,23 @@ const onDelete = async (lineItemId) => {
       </Stepper>
     </Panel>
     <Panel pt:header:class="pb-0!">
-      <p>Your order ships free of charge</p>
-      <!-- <p>Your basket is empty. </p>
- <p>Add items for another 50 € and receive free shipping </p> -->
+      <p v-if="!cartItems.length">
+        our cart is currently empty. Check out our
+        <RouterLink
+          to="/catalog"
+          class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
+          >catalog</RouterLink
+        >
+        to get started!
+      </p>
+      <p v-else-if="totalPrice < 100">
+        Add items for another {{ (100 - totalPrice).toFixed(2) }} € and receive
+        free shipping
+      </p>
+      <p v-else>Your order ships free of charge</p>
     </Panel>
 
-    <Panel pt:header:class="pb-0!">
+    <Panel v-if="cartItems.length > 0" pt:header:class="pb-0!">
       <DataTable :value="cartItems" class="w-full">
         <Column field="item" header="Item">
           <template #body="slotProps">
@@ -231,7 +242,7 @@ const onDelete = async (lineItemId) => {
           </template>
         </Column>
       </DataTable>
-      <Form class="flex gap-2"
+      <Form class="flex gap-2 my-4" @submit.prevent="() => {}"
         ><InputText
           v-model="couponCode"
           placeholder="Enter Promo Code"
@@ -251,7 +262,7 @@ const onDelete = async (lineItemId) => {
       <Divider />
       <div class="flex justify-between">
         <span>Total</span>
-        <span> {{ totalPrice.toFixed(2) }}</span>
+        <span> {{ totalPrice.toFixed(2) }} €</span>
       </div>
     </Panel>
   </div>
