@@ -17,9 +17,15 @@ import AccordionPanel from 'primevue/accordionpanel';
 import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import { useProductCacheStore } from '@/stores/productCacheStore';
+import { useRouter } from 'vue-router';
 
 const cartStore = useCartStore();
 const productCacheStore = useProductCacheStore();
+const router = useRouter();
+
+const navigate = (path) => {
+  router.push(path);
+};
 
 onMounted(async () => {
   await cartStore.loadCart();
@@ -91,24 +97,24 @@ const cartItems = computed(() => {
     <DataTable :value="cartItems" class="w-full">
       <Column field="item" header="Item">
         <template #body="slotProps">
-          <a
-            :href="`/product/${slotProps.data.productId}`"
-            target="_blank"
-            class="block w-20 h-20"
+          <div
+            class="block w-20 h-20 cursor-pointer hover:scale-105 transition duration-300 ease-in-out"
+            @click="navigate(`/product/${slotProps.data.productId}`)"
           >
             <img
               :src="slotProps.data.imageUrl"
               alt="Product Image"
               class="object-contain w-full h-full"
             />
-          </a>
+          </div>
         </template>
       </Column>
       <Column field="description" header="Description">
         <template #body="slotProps">
           <div class="flex flex-col">
             <span
-              class="text-sm text-primary font-medium text-(--p-primary-color)"
+              class="text-sm text-primary font-medium text-(--p-primary-color) cursor-pointer hover:underline"
+              @click="navigate(`/product/${slotProps.data.productId}`)"
             >
               {{ slotProps.data.name }}
             </span>

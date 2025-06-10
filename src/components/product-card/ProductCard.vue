@@ -72,8 +72,6 @@ const cardInfo = convertCardInfo(props.productInfo);
 
 async function addToCart() {
   try {
-    console.log('Adding to cart:', props.productInfo.id);
-    console.log('Product:', props.productInfo);
     await cartStore.addLineItem(
       props.productInfo.id,
       props.productInfo.masterVariant.id,
