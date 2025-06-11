@@ -4,7 +4,7 @@ import { Button } from 'primevue';
 import type { ProductProjection } from '@commercetools/platform-sdk';
 import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 import { useRouter } from 'vue-router';
-import { useCartStore } from '@/stores/ cartStore';
+import { useCartStore } from '@/stores/cartStore';
 
 const props = defineProps<{
   productInfo: ProductProjection;

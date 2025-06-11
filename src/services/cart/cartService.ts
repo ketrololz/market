@@ -7,14 +7,29 @@ import appLogger from '@/utils/logger';
 import { parseError } from '../appErrors';
 import { userTokenCache } from '@/api/localStorageTokenCache';
 import { CtpClientFactory } from '@/api/ctpClientBuilderFactory';
+import { isNotFoundError } from '@/utils/isNotFoundError';
+
+const cartDraft = {
+  currency: 'EUR',
+};
 
 export class CartService {
-  public async getActiveCart(): Promise<Cart | null> {
+  private async getSession() {
     const storedUserToken = userTokenCache.get();
     const session = storedUserToken.token
       ? CtpClientFactory.createApiRootWithUserSession()
       : (await anonymousSessionService.ensureSession())?.apiRoot;
-    if (!session) return null;
+
+    if (!session) {
+      throw new Error('No active session');
+    }
+
+    return session;
+  }
+
+  public async getActiveCart(): Promise<Cart | null> {
+    const session = await this.getSession();
+
     try {
       const response = await session.me().activeCart().get().execute();
 
@@ -24,33 +39,21 @@ export class CartService {
       );
       return response.body;
     } catch (error) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'statusCode' in error &&
-        error.statusCode === 404
-      )
-        return null;
+      if (isNotFoundError(error)) return null;
       appLogger.error('CartService: Failed to get cart via /me', error);
       throw parseError(error);
     }
   }
 
   public async createCart(): Promise<Cart> {
-    const storedUserToken = userTokenCache.get();
-    const session = storedUserToken.token
-      ? CtpClientFactory.createApiRootWithUserSession()
-      : (await anonymousSessionService.ensureSession())?.apiRoot;
-    if (!session) throw new Error('No active session');
+    const session = await this.getSession();
 
     try {
       const response = await session
         .me()
         .carts()
         .post({
-          body: {
-            currency: 'EUR',
-          },
+          body: cartDraft,
         })
         .execute();
 
@@ -63,11 +66,7 @@ export class CartService {
   }
 
   public async deleteCart(cart: Cart): Promise<void> {
-    const storedUserToken = userTokenCache.get();
-    const session = storedUserToken.token
-      ? CtpClientFactory.createApiRootWithUserSession()
-      : (await anonymousSessionService.ensureSession())?.apiRoot;
-    if (!session) throw new Error('No active session');
+    const session = await this.getSession();
 
     try {
       await session
@@ -89,11 +88,7 @@ export class CartService {
     version: number,
     actions: MyCartUpdateAction[],
   ): Promise<Cart> {
-    const storedUserToken = userTokenCache.get();
-    const session = storedUserToken.token
-      ? CtpClientFactory.createApiRootWithUserSession()
-      : (await anonymousSessionService.ensureSession())?.apiRoot;
-    if (!session) throw new Error('No active session');
+    const session = await this.getSession();
 
     try {
       const response = await session

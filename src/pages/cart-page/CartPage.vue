@@ -11,7 +11,7 @@ import InputText from 'primevue/inputtext';
 import { Form } from '@primevue/forms';
 import Divider from 'primevue/divider';
 import { onMounted, computed } from 'vue';
-import { useCartStore } from '@/stores/ cartStore';
+import { useCartStore } from '@/stores/cartStore';
 import Accordion from 'primevue/accordion';
 import AccordionPanel from 'primevue/accordionpanel';
 import AccordionHeader from 'primevue/accordionheader';
@@ -22,10 +22,6 @@ import { useRouter } from 'vue-router';
 const cartStore = useCartStore();
 const productCacheStore = useProductCacheStore();
 const router = useRouter();
-
-const navigate = (path) => {
-  router.push(path);
-};
 
 const totalQuantity = computed(() => {
   return cartStore.cart?.lineItems.reduce(
@@ -92,12 +88,7 @@ const onQuantityChange = async (item) => {
       },
     ]);
 
-    // optionally: reload cart and product info
-    await cartStore.loadCart();
-    const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
-    await Promise.all(
-      productIds.map((id) => productCacheStore.getProductById(id)),
-    );
+    await reloadCartAndProducts();
   } catch (err) {
     console.error('Failed to update quantity', err);
   }
@@ -112,15 +103,18 @@ const onDelete = async (lineItemId) => {
       },
     ]);
 
-    // optionally: reload cart and product info
-    await cartStore.loadCart();
-    const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
-    await Promise.all(
-      productIds.map((id) => productCacheStore.getProductById(id)),
-    );
+    await reloadCartAndProducts();
   } catch (err) {
     console.error('Failed to delete item', err);
   }
+};
+
+const reloadCartAndProducts = async () => {
+  await cartStore.loadCart();
+  const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
+  await Promise.all(
+    productIds.map((id) => productCacheStore.getProductById(id)),
+  );
 };
 </script>
 
@@ -142,7 +136,7 @@ const onDelete = async (lineItemId) => {
     </Panel>
     <Panel pt:header:class="pb-0!">
       <p v-if="!cartItems.length">
-        our cart is currently empty. Check out our
+        Your cart is currently empty. Check out our
         <RouterLink
           to="/catalog"
           class="underline text-(--p-primary-color) hover:text-indigo-700 active:text-indigo-800"
@@ -163,7 +157,7 @@ const onDelete = async (lineItemId) => {
           <template #body="slotProps">
             <div
               class="block w-20 h-20 cursor-pointer hover:scale-105 transition duration-300 ease-in-out"
-              @click="navigate(`/product/${slotProps.data.productId}`)"
+              @click="() => router.push(`/product/${slotProps.data.productId}`)"
             >
               <img
                 :src="slotProps.data.imageUrl"
