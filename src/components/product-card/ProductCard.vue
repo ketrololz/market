@@ -6,6 +6,8 @@ import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 
+import { computed } from 'vue';
+
 const props = defineProps<{
   productInfo: ProductProjection;
   currentCategory?: string;
@@ -14,6 +16,14 @@ const props = defineProps<{
 const router = useRouter();
 const userPreferencesStore = useUserPreferencesStore();
 const cartStore = useCartStore();
+
+const isInCart = computed(() =>
+  cartStore.cart?.lineItems.some(
+    (item) =>
+      item.productId === props.productInfo.id &&
+      item.variant.id === props.productInfo.masterVariant.id,
+  ),
+);
 
 function convertCardInfo(productInfo: ProductProjection) {
   const prices = productInfo.masterVariant.prices;
@@ -79,7 +89,6 @@ async function addToCart() {
     );
   } catch (e) {
     console.error('Failed to add to cart:', e);
-    // Handle error appropriately, e.g., show a notification
   }
 }
 </script>
@@ -130,10 +139,11 @@ async function addToCart() {
       <template #footer>
         <Button
           v-if="cardInfo"
-          label="Add to cart"
+          :label="isInCart ? 'In cart' : 'Add to cart'"
           severity="primary"
           outlined
           class="w-full"
+          :disabled="isInCart"
           @click.stop="addToCart"
         />
         <Button
