@@ -18,10 +18,13 @@ import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import { useProductCacheStore } from '@/stores/productCacheStore';
 import { useRouter } from 'vue-router';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from 'primevue/useconfirm';
 
 const cartStore = useCartStore();
 const productCacheStore = useProductCacheStore();
 const router = useRouter();
+const confirm = useConfirm();
 
 const totalQuantity = computed(() => {
   return cartStore.cart?.lineItems.reduce(
@@ -115,6 +118,28 @@ const reloadCartAndProducts = async () => {
   await Promise.all(
     productIds.map((id) => productCacheStore.getProductById(id)),
   );
+};
+
+const showClearCartDialog = () => {
+  confirm.require({
+    message: 'Are you sure you want to clear the cart?',
+    header: 'Clear Cart',
+    icon: 'pi pi-trash',
+    acceptClass: 'p-button-sm',
+    rejectClass: 'p-button-sm',
+    rejectLabel: 'Cancel',
+    acceptLabel: 'Clear Cart',
+    rejectIcon: 'pi pi-times',
+    acceptIcon: 'pi pi-check',
+    accept: async () => {
+      try {
+        await cartStore.clearCart();
+        await reloadCartAndProducts();
+      } catch (err) {
+        console.error('Failed to clear cart', err);
+      }
+    },
+  });
 };
 </script>
 
@@ -225,7 +250,7 @@ const reloadCartAndProducts = async () => {
         </Column>
         <Column field="unitPrice" header="Unit Price" />
         <Column field="price" header="Price" />
-        <Column field="delete" header="">
+        <Column header="">
           <template #body="slotProps">
             <Button
               icon="pi pi-trash"
@@ -258,6 +283,24 @@ const reloadCartAndProducts = async () => {
         <span>Total</span>
         <span> {{ totalPrice.toFixed(2) }} €</span>
       </div>
+      <Divider />
+      <div class="flex justify-between mt-4">
+        <ConfirmDialog></ConfirmDialog>
+        <Button
+          label="Clear Cart"
+          icon="pi pi-trash"
+          class="p-button-outlined"
+          size="small"
+          @click="showClearCartDialog()"
+        />
+        <Button
+          label="Continue to Address"
+          icon="pi pi-arrow-right"
+          class="p-button"
+          size="small"
+          @click="(event) => eventPreventDefault()"
+        />
+      </div>
     </Panel>
   </div>
 </template>
@@ -266,5 +309,9 @@ const reloadCartAndProducts = async () => {
 .p-accordionheader {
   display: flex;
   gap: 0.5rem;
+}
+
+.p-datatable-column-header-content {
+  justify-content: center;
 }
 </style>
