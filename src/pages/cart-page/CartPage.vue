@@ -69,7 +69,12 @@ const cartItems = computed(() => {
         publisher: item.variant.attributes?.find((a) => a.name === 'publisher')
           ?.value?.ru,
         quantity: item.quantity,
-        unitPrice: item.price.value.centAmount / 100,
+        originalUnitPrice: item.price.value.centAmount / 100,
+        unitPrice:
+          (item.price.discounted?.value.centAmount ??
+            item.price.value.centAmount) / 100,
+        discountedPrice: item.price.discounted?.value.centAmount !== undefined,
+        hasDiscount: item.price.discounted?.value?.centAmount !== undefined,
         price: item.totalPrice.centAmount / 100,
         imageUrl: item.variant.images?.[0]?.url ?? '',
         productId: item.productId,
@@ -248,7 +253,19 @@ const showClearCartDialog = () => {
             />
           </template>
         </Column>
-        <Column field="unitPrice" header="Unit Price" />
+        <Column header="Unit Price">
+          <template #body="slotProps">
+            <div class="flex flex-col items-start">
+              <span
+                v-if="slotProps.data.hasDiscount"
+                class="line-through text-sm text-gray-500"
+              >
+                {{ slotProps.data.originalUnitPrice.toFixed(2) }} €
+              </span>
+              <span> {{ slotProps.data.unitPrice.toFixed(2) }} € </span>
+            </div>
+          </template>
+        </Column>
         <Column field="price" header="Price" />
         <Column header="">
           <template #body="slotProps">

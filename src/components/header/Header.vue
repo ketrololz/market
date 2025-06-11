@@ -8,11 +8,18 @@ import type { HeaderProps } from './types/header-props';
 import { useAuthStore } from '../../stores/authStore';
 import OverlayBadge from 'primevue/overlaybadge';
 import { useCartStore } from '@/stores/cartStore';
+import { onMounted } from 'vue';
 
 defineProps<HeaderProps>();
 
 const authStore = useAuthStore();
 const cartStore = useCartStore();
+
+onMounted(() => {
+  if (!cartStore.cart) {
+    cartStore.loadCart();
+  }
+});
 
 const userIcon = computed(() => {
   if (authStore.isUserLoggedIn) {
@@ -55,9 +62,12 @@ const cartItemCount = computed(() => {
       </a>
     </template>
     <template #end>
-      <div class="flex items-center">
+      <div class="flex items-center gap-2">
         <RouterLink to="/cart">
-          <OverlayBadge v-if="cartItemCount > 0" :value="cartItemCount">
+          <OverlayBadge
+            v-if="cartStore.cart && cartItemCount > 0"
+            :value="cartItemCount"
+          >
             <Button
               icon="pi pi-shopping-cart"
               size="small"
@@ -85,7 +95,7 @@ const cartItemCount = computed(() => {
             variant="outlined"
           >
             <span class="pi pi-user"></span>
-            <span class="truncate max-w-25 md:max-w-50 username">
+            <span class="truncate max-w-10 sm:max-w-25 md:max-w-50 username">
               {{ authStore.userProfile.firstName }}
             </span>
           </Button>
