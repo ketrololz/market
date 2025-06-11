@@ -145,7 +145,7 @@ const onDelete = async (lineItemId) => {
         our cart is currently empty. Check out our
         <RouterLink
           to="/catalog"
-          class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
+          class="underline text-(--p-primary-color) hover:text-indigo-700 active:text-indigo-800"
           >catalog</RouterLink
         >
         to get started!
