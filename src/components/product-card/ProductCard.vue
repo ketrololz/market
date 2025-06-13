@@ -7,6 +7,10 @@ import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 
 import { computed } from 'vue';
+import appLogger from '@/utils/logger';
+import { showSuccessToast, showErrorToast } from '@/utils/toaster';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const props = defineProps<{
   productInfo: ProductProjection;
@@ -87,8 +91,10 @@ async function addToCart() {
       props.productInfo.masterVariant.id,
       1,
     );
+    showSuccessToast(t('productPage.addSuccess'));
   } catch (e) {
-    console.error('Failed to add to cart:', e);
+    appLogger.error('Failed to add to cart:', e);
+    showErrorToast(t('productPage.addError'));
   }
 }
 </script>

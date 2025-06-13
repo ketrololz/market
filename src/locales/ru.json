@@ -58,6 +58,7 @@
     "priceUnavailable": "Цена недоступна.",
     "detailsTitle": "Характеристики:",
     "addToCartButton": "Добавить в корзину",
+    "removeFromCartButton": "Удалить из корзины",
     "currencyLabel": "Валюта:",
     "saleTag": "СКИДКА",
     "unknownName": "Неизвестный товар",
@@ -65,6 +66,8 @@
     "imageTitle": "Изображение товара",
     "imageAlt": "Изображение товара",
     "valueNotAvailable": "Нет данных",
+    "addSuccess": "Товар успешно добавлен в корзину.",
+    "addError": "Не удалось добавить товар в корзину.",
     "attributes": {
       "players-min": "Мин. игроков",
       "players-max": "Макс. игроков",

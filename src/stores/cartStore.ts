@@ -69,6 +69,22 @@ export const useCartStore = defineStore('cart', () => {
     cart.value = updatedCart;
   }
 
+  async function removeLineItem(lineItemId: string) {
+    if (!cart.value) throw new Error('Cart not loaded');
+
+    await withLoading(async () => {
+      const actions: MyCartUpdateAction[] = [
+        { action: 'removeLineItem', lineItemId },
+      ];
+      const updatedCart = await cartService.updateCart(
+        cart.value!.id,
+        cart.value!.version,
+        actions,
+      );
+      cart.value = updatedCart;
+    }, 'Failed to remove item from cart');
+  }
+
   return {
     cart,
     isLoading,
@@ -77,5 +93,6 @@ export const useCartStore = defineStore('cart', () => {
     clearCart,
     updateCart,
     addLineItem,
+    removeLineItem,
   };
 });
