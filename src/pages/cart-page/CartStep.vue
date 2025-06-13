@@ -375,7 +375,7 @@ const showClearCartDialog = () => {
         <span> {{ totalPrice.toFixed(2) }} €</span>
       </div>
       <Divider />
-      <div class="flex justify-between mt-4">
+      <div class="flex justify-start mt-4">
         <ConfirmDialog></ConfirmDialog>
         <Button
           label="Clear Cart"
@@ -383,13 +383,6 @@ const showClearCartDialog = () => {
           class="p-button-outlined"
           size="small"
           @click="showClearCartDialog()"
-        />
-        <Button
-          label="Continue to Address"
-          icon="pi pi-arrow-right"
-          class="p-button"
-          size="small"
-          @click="(event) => eventPreventDefault()"
         />
       </div>
     </Panel>
