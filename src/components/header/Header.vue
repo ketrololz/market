@@ -67,6 +67,7 @@ const cartItemCount = computed(() => {
           <OverlayBadge
             v-if="cartStore.cart && cartItemCount > 0"
             :value="cartItemCount"
+            class="text-nowrap max-w-[50px]"
           >
             <Button
               icon="pi pi-shopping-cart"

@@ -1,334 +1,80 @@
 <script setup>
-import Panel from 'primevue/panel';
 import Stepper from 'primevue/stepper';
 import StepList from 'primevue/steplist';
+import StepPanels from 'primevue/steppanels';
 import Step from 'primevue/step';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Button from 'primevue/button';
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-import { Form } from '@primevue/forms';
-import Divider from 'primevue/divider';
-import { onMounted, computed } from 'vue';
-import { useCartStore } from '@/stores/cartStore';
-import Accordion from 'primevue/accordion';
-import AccordionPanel from 'primevue/accordionpanel';
-import AccordionHeader from 'primevue/accordionheader';
-import AccordionContent from 'primevue/accordioncontent';
-import { useProductCacheStore } from '@/stores/productCacheStore';
-import { useRouter } from 'vue-router';
-import ConfirmDialog from 'primevue/confirmdialog';
-import { useConfirm } from 'primevue/useconfirm';
-
-const cartStore = useCartStore();
-const productCacheStore = useProductCacheStore();
-const router = useRouter();
-const confirm = useConfirm();
-
-const totalQuantity = computed(() => {
-  return cartStore.cart?.lineItems.reduce(
-    (sum, item) => sum + item.quantity,
-    0,
-  );
-});
-
-const totalPrice = computed(() => {
-  return cartStore.cart?.totalPrice.centAmount / 100;
-});
-
-onMounted(async () => {
-  await cartStore.loadCart();
-
-  const productIds =
-    cartStore.cart?.lineItems.map((item) => item.productId) ?? [];
-
-  await Promise.all(
-    productIds.map((id) => productCacheStore.getProductById(id)),
-  );
-});
-
-const cartItems = computed(() => {
-  return (
-    cartStore.cart?.lineItems.map((item) => {
-      return {
-        id: item.id,
-        name: item.name.en,
-        players: `${
-          item.variant.attributes?.find((a) => a.name === 'players-min')?.value
-        } - ${
-          item.variant.attributes?.find((a) => a.name === 'players-max')?.value
-        }`,
-        age: `${
-          item.variant.attributes?.find((a) => a.name === 'age-recommended')
-            ?.value
-        }+`,
-        playTime: item.variant.attributes?.find(
-          (a) => a.name === 'playing-time-min',
-        )?.value,
-        publisher: item.variant.attributes?.find((a) => a.name === 'publisher')
-          ?.value?.ru,
-        quantity: item.quantity,
-        originalUnitPrice: item.price.value.centAmount / 100,
-        unitPrice:
-          (item.price.discounted?.value.centAmount ??
-            item.price.value.centAmount) / 100,
-        discountedPrice: item.price.discounted?.value.centAmount !== undefined,
-        hasDiscount: item.price.discounted?.value?.centAmount !== undefined,
-        price: item.totalPrice.centAmount / 100,
-        imageUrl: item.variant.images?.[0]?.url ?? '',
-        productId: item.productId,
-        description:
-          productCacheStore.getProductDescriptionSync?.(item.productId, 'en') ??
-          '',
-      };
-    }) ?? []
-  );
-});
-
-const onQuantityChange = async (item) => {
-  try {
-    await cartStore.updateCart([
-      {
-        action: 'changeLineItemQuantity',
-        lineItemId: item.id,
-        quantity: item.quantity,
-      },
-    ]);
-
-    await reloadCartAndProducts();
-  } catch (err) {
-    console.error('Failed to update quantity', err);
-  }
-};
-
-const onDelete = async (lineItemId) => {
-  try {
-    await cartStore.updateCart([
-      {
-        action: 'removeLineItem',
-        lineItemId: lineItemId,
-      },
-    ]);
-
-    await reloadCartAndProducts();
-  } catch (err) {
-    console.error('Failed to delete item', err);
-  }
-};
-
-const reloadCartAndProducts = async () => {
-  await cartStore.loadCart();
-  const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
-  await Promise.all(
-    productIds.map((id) => productCacheStore.getProductById(id)),
-  );
-};
-
-const showClearCartDialog = () => {
-  confirm.require({
-    message: 'Are you sure you want to clear the cart?',
-    header: 'Clear Cart',
-    icon: 'pi pi-trash',
-    acceptClass: 'p-button-sm',
-    rejectClass: 'p-button-sm',
-    rejectLabel: 'Cancel',
-    acceptLabel: 'Clear Cart',
-    rejectIcon: 'pi pi-times',
-    acceptIcon: 'pi pi-check',
-    accept: async () => {
-      try {
-        await cartStore.clearCart();
-        await reloadCartAndProducts();
-      } catch (err) {
-        console.error('Failed to clear cart', err);
-      }
-    },
-  });
-};
+import StepPanel from 'primevue/steppanel';
+import CartStep from './CartStep.vue';
+import { Button } from 'primevue';
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-4">
-    <Panel
-      header="My Order"
-      pt:header:class="justify-self-center text-xl pb-0!"
-      pt:root:class="pb-3 text-center"
-    >
-      <Stepper value="1" class="basis-[50rem]">
-        <StepList>
-          <Step value="1">Cart</Step>
-          <Step value="2">Billing and Shipping Address</Step>
-          <Step value="3">Shipping and Payment Method</Step>
-          <Step value="4">Summary</Step>
-        </StepList>
-      </Stepper>
-    </Panel>
-    <Panel pt:header:class="pb-0!">
-      <p v-if="!cartItems.length">
-        Your cart is currently empty. Check out our
-        <RouterLink
-          to="/catalog"
-          class="underline text-(--p-primary-color) hover:text-indigo-700 active:text-indigo-800"
-          >catalog</RouterLink
-        >
-        to get started!
-      </p>
-      <p v-else-if="totalPrice < 100">
-        Add items for another {{ (100 - totalPrice).toFixed(2) }} € and receive
-        free shipping
-      </p>
-      <p v-else>Your order ships free of charge</p>
-    </Panel>
-
-    <Panel v-if="cartItems.length > 0" pt:header:class="pb-0!">
-      <DataTable :value="cartItems" class="w-full">
-        <Column field="item" header="Item">
-          <template #body="slotProps">
-            <div
-              class="block w-20 h-20 cursor-pointer hover:scale-105 transition duration-300 ease-in-out"
-              @click="() => router.push(`/product/${slotProps.data.productId}`)"
-            >
-              <img
-                :src="slotProps.data.imageUrl"
-                alt="Product Image"
-                class="object-contain w-full h-full"
-              />
-            </div>
-          </template>
-        </Column>
-        <Column field="description" header="Description">
-          <template #body="slotProps">
-            <div class="flex flex-col">
-              <span
-                class="text-sm text-primary font-medium text-(--p-primary-color) cursor-pointer hover:underline"
-                @click="navigate(`/product/${slotProps.data.productId}`)"
-              >
-                {{ slotProps.data.name }}
-              </span>
-              <span class="text-xs text-gray-500">
-                <strong>Number of players:</strong> {{ slotProps.data.players }}
-              </span>
-              <span class="text-xs text-gray-500">
-                <strong>Age:</strong> {{ slotProps.data.age }}
-              </span>
-              <span class="text-xs text-gray-500">
-                <strong>Min. Playing Time:</strong>
-                {{ slotProps.data.playTime }}
-              </span>
-              <span class="text-xs text-gray-500">
-                <strong>Publisher:</strong> {{ slotProps.data.publisher }}
-              </span>
-
-              <Accordion value="0" unstyled="true">
-                <AccordionPanel value="1">
-                  <AccordionHeader>
-                    <strong class="text-xs text-gray-500">Details</strong>
-                  </AccordionHeader>
-                  <AccordionContent>
-                    <p class="text-xs text-gray-500">
-                      {{ slotProps.data.description }}
-                    </p>
-                  </AccordionContent>
-                </AccordionPanel>
-              </Accordion>
-            </div>
-          </template>
-        </Column>
-        <Column field="quantity" header="Quantity">
-          <template #body="slotProps">
-            <InputNumber
-              v-model="slotProps.data.quantity"
-              show-buttons
-              button-layout="horizontal"
-              :step="1"
-              :min="1"
-              :max="100"
-              size="small"
-              allow-empty="false"
-              input-class="w-10 text-center !px-0"
-              increment-button-class="!px-1 !w-6"
-              decrement-button-class="!px-1 !w-6"
-              @update:model-value="onQuantityChange(slotProps.data)"
-            />
-          </template>
-        </Column>
-        <Column header="Unit Price">
-          <template #body="slotProps">
-            <div class="flex flex-col items-start">
-              <span
-                v-if="slotProps.data.hasDiscount"
-                class="line-through text-sm text-gray-500"
-              >
-                {{ slotProps.data.originalUnitPrice.toFixed(2) }} €
-              </span>
-              <span> {{ slotProps.data.unitPrice.toFixed(2) }} € </span>
-            </div>
-          </template>
-        </Column>
-        <Column field="price" header="Price" />
-        <Column header="">
-          <template #body="slotProps">
+  <div
+    class="flex flex-col justify-start gap-4 p-4 max-w-[1536px] mx-auto w-full max-sm:px-0"
+  >
+    <Stepper value="1" class="basis-[50rem]">
+      <StepList>
+        <Step value="1">Cart</Step>
+        <Step value="2">Billing and Shipping Address</Step>
+        <Step value="3">Shipping and Payment Method</Step>
+        <Step value="4">Summary</Step>
+      </StepList>
+      <StepPanels>
+        <StepPanel v-slot="{ activateCallback }" value="1">
+          <CartStep />
+          <div class="flex pt-6 justify-end">
             <Button
-              icon="pi pi-trash"
-              class="p-button-rounded"
+              label="Continue to Address"
+              icon="pi pi-arrow-right"
+              class="p-button"
               size="small"
-              @click="onDelete(slotProps.data.id)"
+              @click="activateCallback('2')"
             />
-          </template>
-        </Column>
-      </DataTable>
-      <Form class="flex gap-2 my-4" @submit.prevent="() => {}"
-        ><InputText
-          v-model="couponCode"
-          placeholder="Enter Promo Code"
-          class="w-1/2 max-w-[15rem]"
-          size="small" />
-        <Button label="Apply" class="w-1/2 max-w-[10rem]" size="small"
-      /></Form>
-
-      <div class="flex justify-between">
-        <span>Shopping Cart ( {{ totalQuantity }} Item )</span>
-        <span>{{ totalPrice.toFixed(2) }} €</span>
-      </div>
-      <div class="flex justify-between">
-        <span>Discount with Promocode</span>
-        <span> 0 €</span>
-      </div>
-      <Divider />
-      <div class="flex justify-between">
-        <span>Total</span>
-        <span> {{ totalPrice.toFixed(2) }} €</span>
-      </div>
-      <Divider />
-      <div class="flex justify-between mt-4">
-        <ConfirmDialog></ConfirmDialog>
-        <Button
-          label="Clear Cart"
-          icon="pi pi-trash"
-          class="p-button-outlined"
-          size="small"
-          @click="showClearCartDialog()"
-        />
-        <Button
-          label="Continue to Address"
-          icon="pi pi-arrow-right"
-          class="p-button"
-          size="small"
-          @click="(event) => eventPreventDefault()"
-        />
-      </div>
-    </Panel>
+          </div>
+        </StepPanel>
+        <StepPanel v-slot="{ activateCallback }" value="2">
+          <div class="flex flex-col h-48">
+            <div
+              class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium"
+            >
+              Content II
+            </div>
+          </div>
+          <div class="flex pt-6 justify-between">
+            <Button
+              label="Back to Cart"
+              icon="pi pi-arrow-left"
+              class="p-button"
+              size="small"
+              @click="activateCallback('1')"
+            />
+            <Button
+              label="Continue to Payment"
+              icon="pi pi-arrow-right"
+              class="p-button"
+              size="small"
+              @click="activateCallback('3')"
+            />
+          </div>
+        </StepPanel>
+        <StepPanel v-slot="{ activateCallback }" value="3">
+          <div class="flex flex-col h-48">
+            <div
+              class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium"
+            >
+              Content III
+            </div>
+          </div>
+          <div class="pt-6">
+            <Button
+              label="Back to Address"
+              severity="secondary"
+              icon="pi pi-arrow-left"
+              @click="activateCallback('2')"
+            />
+          </div>
+        </StepPanel>
+      </StepPanels>
+    </Stepper>
   </div>
 </template>
-
-<style scoped>
-.p-accordionheader {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.p-datatable-column-header-content {
-  justify-content: center;
-}
-</style>
