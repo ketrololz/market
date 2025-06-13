@@ -14,7 +14,7 @@ import InlineSvg from 'vue-inline-svg';
       Three heroes, each with their own destiny, unite for a great goal - to
       create a store worthy of legends. Their path lies through forests of bugs,
       fields of mockups, and mountains of shuffles. Anna is the keeper of order
-      and validation, Daniel is a young mage of precise code, Bogdan is a
+      and validation, Daniil is a young mage of precise code, Bogdan is a
       commander and architect of digital lands. Together they are not just a
       team, but a synergy of skills, dedication, and the pursuit of excellence.
       Their front is impregnable, their code is clean, and their interface is
