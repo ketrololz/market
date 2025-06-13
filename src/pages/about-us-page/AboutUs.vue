@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Panel, Tag, Tabs, Tab, TabList, TabPanel, TabPanels } from 'primevue';
+import InlineSvg from 'vue-inline-svg';
 </script>
 
 <template>
@@ -243,6 +244,15 @@ import { Panel, Tag, Tabs, Tab, TabList, TabPanel, TabPanels } from 'primevue';
         </Tabs>
       </Panel>
     </div>
+    <a href="https://rs.school/" target="_blank">
+      <InlineSvg
+        src="/rs_school_logo.svg"
+        height="30"
+        aria-label="logo"
+        fill="var(--p-primary-color)"
+        class="opacity-50 hover:opacity-100 transition-opacity duration-100 ease-in-out"
+      ></InlineSvg>
+    </a>
   </div>
 </template>
 
