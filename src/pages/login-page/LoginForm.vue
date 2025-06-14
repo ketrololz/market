@@ -43,7 +43,7 @@ async function onFormSubmit({ values, valid }: FormSubmitEvent) {
       >Don't have a Senet account yet?
       <RouterLink
         to="/registration"
-        class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
+        class="underline text-(--p-primary-color) hover:text-indigo-700 active:text-indigo-800"
         >Sign up!</RouterLink
       ></span
     >
