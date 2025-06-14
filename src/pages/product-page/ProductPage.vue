@@ -351,7 +351,7 @@ const modalResponsiveOptions = ref([
 </script>
 
 <template>
-  <div class="product-detail-page container mx-auto p-4 pt-8 flex flex-col">
+  <div class="product-detail-page container mx-auto px-4 mb-15 flex flex-col">
     <ProgressSpinner v-if="isLoading" aria-label="Loading product" />
 
     <Message
@@ -374,7 +374,7 @@ const modalResponsiveOptions = ref([
       <Breadcrumb
         :home="breadcrumbs.home"
         :model="breadcrumbs.items"
-        class="mb-6 text-sm overflow-hidden"
+        class="text-md overflow-hidden text-(--p-breadcrumb-item-color)"
         :pt="{
           list: {
             style: {
@@ -469,7 +469,7 @@ const modalResponsiveOptions = ref([
               <img
                 :src="slotProps.item.itemImageSrc"
                 :alt="slotProps.item.alt"
-                class="w-full h-auto aspect-square object-contain block cursor-pointer"
+                class="w-full max-w-140 h-auto aspect-square object-contain block cursor-pointer"
                 @click="
                   openModalGallery(
                     galleryImages.findIndex(
@@ -496,11 +496,13 @@ const modalResponsiveOptions = ref([
         </div>
 
         <div class="product-info">
-          <h1 class="text-3xl lg:text-4xl font-bold mb-3 text-gray-800">
+          <h1
+            class="text-3xl lg:text-4xl font-bold mb-3 text-(--p-primary-color)"
+          >
             {{ productName }}
           </h1>
 
-          <div class="product-price my-5 text-3xl">
+          <div class="product-price my-4 text-3xl">
             <template v-if="currentDisplayPrice">
               <span
                 v-if="currentDisplayPrice.hasSale"
