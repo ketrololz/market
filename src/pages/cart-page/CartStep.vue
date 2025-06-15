@@ -30,13 +30,6 @@ const totalPrice = computed(() => {
 
 onMounted(async () => {
   await cartStore.loadCart();
-
-  const productIds =
-    cartStore.cart?.lineItems.map((item) => item.productId) ?? [];
-
-  await Promise.all(
-    productIds.map((id) => productCacheStore.getProductById(id)),
-  );
 });
 
 function getPlayersText(item) {
@@ -116,10 +109,6 @@ const onDelete = async (lineItemId) => {
 
 const reloadCartAndProducts = async () => {
   await cartStore.loadCart();
-  const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
-  await Promise.all(
-    productIds.map((id) => productCacheStore.getProductById(id)),
-  );
 };
 
 const showClearCartDialog = () => {
