@@ -1,5 +1,6 @@
 import {
   type Cart,
+  type DiscountCodeReference,
   type MyCartUpdateAction,
 } from '@commercetools/platform-sdk';
 import anonymousSessionService from '../auth/anonymousSessionService';
@@ -31,7 +32,15 @@ export class CartService {
     const session = await this.getSession();
 
     try {
-      const response = await session.me().activeCart().get().execute();
+      const response = await session
+        .me()
+        .activeCart()
+        .get({
+          queryArgs: {
+            expand: 'discountCodes[*].discountCode',
+          },
+        })
+        .execute();
 
       appLogger.log(
         'CartService: Active cart retrieved via /me',
@@ -54,6 +63,9 @@ export class CartService {
         .carts()
         .post({
           body: cartDraft,
+          queryArgs: {
+            expand: 'discountCodes[*].discountCode',
+          },
         })
         .execute();
 
@@ -95,7 +107,12 @@ export class CartService {
         .me()
         .carts()
         .withId({ ID: cartId })
-        .post({ body: { version, actions } })
+        .post({
+          body: { version, actions },
+          queryArgs: {
+            expand: 'discountCodes[*].discountCode',
+          },
+        })
         .execute();
 
       appLogger.log(
@@ -129,6 +146,32 @@ export class CartService {
     ];
 
     return this.updateCart(cart.id, cart.version, actions);
+  }
+
+  public async applyDiscountCode(
+    cartId: string,
+    cartVersion: number,
+    code: string,
+  ): Promise<Cart> {
+    appLogger.log('CartService: Applying discount code:', { cartId, code });
+    const action: MyCartUpdateAction = { action: 'addDiscountCode', code };
+    return this.updateCart(cartId, cartVersion, [action]);
+  }
+
+  public async removeDiscountCode(
+    cartId: string,
+    cartVersion: number,
+    discountCode: DiscountCodeReference,
+  ): Promise<Cart> {
+    appLogger.log('CartService: Removing discount code:', {
+      cartId,
+      discountCodeId: discountCode.id,
+    });
+    const action: MyCartUpdateAction = {
+      action: 'removeDiscountCode',
+      discountCode,
+    };
+    return this.updateCart(cartId, cartVersion, [action]);
   }
 }
 

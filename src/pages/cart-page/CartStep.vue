@@ -7,37 +7,70 @@ import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import { Form } from '@primevue/forms';
 import Divider from 'primevue/divider';
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'vue-router';
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from 'primevue/useconfirm';
+import Tag from 'primevue/tag';
+import { showErrorToast } from '@/utils/toaster';
+import appLogger from '@/utils/logger';
 
 const cartStore = useCartStore();
 const router = useRouter();
 const confirm = useConfirm();
+const couponCode = ref('');
 
-const totalQuantity = computed(() => {
-  return cartStore.cart?.lineItems.reduce(
-    (sum, item) => sum + item.quantity,
-    0,
+const totalPrice = computed(
+  () => (cartStore.cart?.totalPrice.centAmount ?? 0) / 100,
+);
+
+const subtotal = computed(() => {
+  if (!cartStore.cart) return 0;
+  return (
+    cartStore.cart.lineItems.reduce(
+      (acc, item) => acc + item.totalPrice.centAmount,
+      0,
+    ) / 100
   );
 });
 
-const totalPrice = computed(() => {
-  return cartStore.cart?.totalPrice.centAmount / 100;
+const totalDiscount = computed(() => {
+  if (!cartStore.cart || cartStore.cart.discountCodes.length === 0) return 0;
+  const discount = subtotal.value - totalPrice.value;
+  return discount > 0 ? discount : 0;
+});
+
+const totalQuantity = computed(() => {
+  return (
+    cartStore.cart?.lineItems.reduce((sum, item) => sum + item.quantity, 0) ?? 0
+  );
 });
 
 onMounted(async () => {
   await cartStore.loadCart();
-
-  const productIds =
-    cartStore.cart?.lineItems.map((item) => item.productId) ?? [];
-
-  await Promise.all(
-    productIds.map((id) => productCacheStore.getProductById(id)),
-  );
 });
+
+const applyCoupon = async () => {
+  if (couponCode.value.trim()) {
+    try {
+      await cartStore.applyDiscountCode(couponCode.value.trim());
+      couponCode.value = '';
+    } catch (err) {
+      appLogger.error('Failed to apply promo code', err);
+      showErrorToast('Failed to apply promo code');
+    }
+  }
+};
+
+const removeCoupon = async (discountCode) => {
+  try {
+    await cartStore.removeDiscountCode(discountCode);
+  } catch (err) {
+    appLogger.error('Failed to remove promo code', err);
+    showErrorToast('Failed to remove promo code');
+  }
+};
 
 function getPlayersText(item) {
   const min = item.variant.attributes?.find(
@@ -57,6 +90,8 @@ function getPlayersText(item) {
 const cartItems = computed(() => {
   return (
     cartStore.cart?.lineItems.map((item) => {
+      const isDiscountedByPromo = item.discountedPricePerQuantity.length > 0;
+
       return {
         id: item.id,
         name: item.name.en,
@@ -73,8 +108,9 @@ const cartItems = computed(() => {
         unitPrice:
           (item.price.discounted?.value.centAmount ??
             item.price.value.centAmount) / 100,
-        discountedPrice: item.price.discounted?.value.centAmount !== undefined,
-        hasDiscount: item.price.discounted?.value?.centAmount !== undefined,
+        hasProductDiscount:
+          item.price.discounted?.value?.centAmount !== undefined,
+        hasPromoDiscount: isDiscountedByPromo,
         price: item.totalPrice.centAmount / 100,
         imageUrl: item.variant.images?.[0]?.url ?? '',
         productId: item.productId,
@@ -95,7 +131,7 @@ const onQuantityChange = async (item) => {
 
     await reloadCartAndProducts();
   } catch (err) {
-    console.error('Failed to update quantity', err);
+    appLogger.error('Failed to update quantity', err);
   }
 };
 
@@ -110,16 +146,12 @@ const onDelete = async (lineItemId) => {
 
     await reloadCartAndProducts();
   } catch (err) {
-    console.error('Failed to delete item', err);
+    appLogger.error('Failed to delete item', err);
   }
 };
 
 const reloadCartAndProducts = async () => {
   await cartStore.loadCart();
-  const productIds = cartStore.cart?.lineItems.map((i) => i.productId) ?? [];
-  await Promise.all(
-    productIds.map((id) => productCacheStore.getProductById(id)),
-  );
 };
 
 const showClearCartDialog = () => {
@@ -138,7 +170,7 @@ const showClearCartDialog = () => {
         await cartStore.clearCart();
         await reloadCartAndProducts();
       } catch (err) {
-        console.error('Failed to clear cart', err);
+        appLogger.error('Failed to clear cart', err);
       }
     },
   });
@@ -248,7 +280,7 @@ const showClearCartDialog = () => {
               :min="1"
               :max="100"
               size="small"
-              allow-empty="false"
+              :allow-empty="false"
               input-class="w-10 text-center !px-0 max-md:!text-xs"
               increment-button-class="!px-1 !w-6 max-md:!hidden"
               decrement-button-class="!px-1 !w-6 max-md:!hidden"
@@ -263,8 +295,12 @@ const showClearCartDialog = () => {
         >
           <template #body="slotProps">
             <div class="flex flex-col items-center text-sm max-md:text-xs">
+              <!-- Отображаем старую цену, если есть ЛЮБАЯ скидка -->
               <span
-                v-if="slotProps.data.hasDiscount"
+                v-if="
+                  slotProps.data.hasProductDiscount ||
+                  slotProps.data.hasPromoDiscount
+                "
                 class="line-through text-xs text-gray-500 max-md:text-[10px]"
               >
                 {{ slotProps.data.originalUnitPrice.toFixed(2) }} €
@@ -299,7 +335,7 @@ const showClearCartDialog = () => {
                   :min="1"
                   :max="100"
                   size="small"
-                  allow-empty="false"
+                  :allow-empty="false"
                   input-class="w-9 text-center !px-1 !py-0 !text-xs"
                   increment-button-class="!hidden"
                   decrement-button-class="!hidden"
@@ -309,7 +345,10 @@ const showClearCartDialog = () => {
               <div>
                 <span class="flex flex-col justify-center items-center">
                   <span
-                    v-if="slotProps.data.hasDiscount"
+                    v-if="
+                      slotProps.data.hasProductDiscount ||
+                      slotProps.data.hasPromoDiscount
+                    "
                     class="line-through text-gray-500 text-[10px] mr-1"
                     >{{ slotProps.data.originalUnitPrice.toFixed(2) }} €</span
                   >
@@ -352,29 +391,63 @@ const showClearCartDialog = () => {
           </template>
         </Column>
       </DataTable>
-      <Form class="flex gap-2 my-4" @submit.prevent="() => {}"
-        ><InputText
+      <Form class="flex gap-2 my-4" @submit="applyCoupon">
+        <InputText
           v-model="couponCode"
           placeholder="Enter Promo Code"
           class="w-1/2 max-w-[15rem]"
-          size="small" />
-        <Button label="Apply" class="w-1/2 max-w-[10rem]" size="small"
-      /></Form>
+          size="small"
+        />
+        <Button
+          label="Apply"
+          type="submit"
+          class="w-1/2 max-w-[10rem]"
+          size="small"
+        />
+      </Form>
+
+      <div
+        v-if="cartStore.cart && cartStore.cart.discountCodes.length > 0"
+        class="my-4 flex flex-col gap-2"
+      >
+        <p class="font-medium">Applied promo codes:</p>
+        <div class="flex gap-2 flex-wrap">
+          <Tag
+            v-for="codeInfo in cartStore.cart.discountCodes"
+            :key="codeInfo.discountCode.id"
+            class="p-tag-info"
+          >
+            {{ codeInfo.discountCode.obj?.code }}
+            <Button
+              icon="pi pi-times"
+              class="p-button-rounded p-button-text p-button-sm ml-2"
+              @click="removeCoupon(codeInfo.discountCode)"
+            />
+          </Tag>
+        </div>
+      </div>
 
       <div class="flex justify-between max-sm:text-sm">
         <span>Shopping Cart ( {{ totalQuantity }} Item )</span>
-        <span>{{ totalPrice.toFixed(2) }} €</span>
+        <span :class="{ 'line-through text-gray-500': totalDiscount > 0 }">
+          {{ subtotal.toFixed(2) }} €
+        </span>
       </div>
-      <div class="flex justify-between max-sm:text-sm">
+
+      <div
+        v-if="totalDiscount > 0"
+        class="flex justify-between max-sm:text-sm text-green-600"
+      >
         <span>Discount with Promocode</span>
-        <span> 0 €</span>
+        <span>-{{ totalDiscount.toFixed(2) }} €</span>
       </div>
       <Divider />
       <div class="flex justify-between font-bold">
         <span>Total</span>
-        <span> {{ totalPrice.toFixed(2) }} €</span>
+        <span>{{ totalPrice.toFixed(2) }} €</span>
       </div>
       <Divider />
+
       <div class="flex justify-start mt-4">
         <ConfirmDialog></ConfirmDialog>
         <Button
