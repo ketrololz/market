@@ -114,7 +114,6 @@ export const useCartStore = defineStore('cart', () => {
       'Failed to remove discount code',
     );
   }
-
   return {
     cart,
     isLoading,

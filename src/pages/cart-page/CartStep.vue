@@ -91,7 +91,6 @@ const cartItems = computed(() => {
   return (
     cartStore.cart?.lineItems.map((item) => {
       const isDiscountedByPromo = item.discountedPricePerQuantity.length > 0;
-
       return {
         id: item.id,
         name: item.name.en,
@@ -295,7 +294,6 @@ const showClearCartDialog = () => {
         >
           <template #body="slotProps">
             <div class="flex flex-col items-center text-sm max-md:text-xs">
-              <!-- Отображаем старую цену, если есть ЛЮБАЯ скидка -->
               <span
                 v-if="
                   slotProps.data.hasProductDiscount ||
@@ -447,7 +445,6 @@ const showClearCartDialog = () => {
         <span>{{ totalPrice.toFixed(2) }} €</span>
       </div>
       <Divider />
-
       <div class="flex justify-start mt-4">
         <ConfirmDialog></ConfirmDialog>
         <Button
