@@ -27,6 +27,7 @@ function closeDialog() {
 export function useDialogManager() {
   return {
     activeDialog,
+    isEditMode,
     openDialog,
     closeDialog,
     isProfileDialogVisible: createDialogVisibility('profile'),
