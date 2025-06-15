@@ -17,6 +17,7 @@ export interface ProductIdentifier {
 }
 
 import { categoriesLanguages } from '@/stores/userPreferencesStore';
+import { isNotFoundError } from '@/utils/isNotFoundError';
 
 export interface productProperties {
   limit: number;
@@ -109,12 +110,7 @@ class ProductsService {
       );
       return response.body;
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === 'object' &&
-        'statusCode' in error &&
-        (error as { statusCode: number }).statusCode === 404
-      ) {
+      if (isNotFoundError(error)) {
         appLogger.warn(
           `ProductsService: Product with identifier ${identifier.value} not found.`,
         );
