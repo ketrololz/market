@@ -11,4 +11,9 @@ export const NAV_LINKS = ref([
     route: '/catalog',
     icon: 'pi pi-th-large',
   },
+  {
+    label: 'About us',
+    route: '/about',
+    icon: 'pi pi-users',
+  },
 ]);

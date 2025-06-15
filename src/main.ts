@@ -10,6 +10,7 @@ import { MAIN_THEME } from './theme/main-theme';
 import { toastOptions } from './plugins/toastification';
 import toast from 'vue-toastification';
 import i18n from './plugins/i18n';
+import '@fortawesome/fontawesome-free/css/all.css';
 import ConfirmationService from 'primevue/confirmationservice';
 
 const pinia = createPinia();
