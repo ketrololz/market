@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
+import { useCartStore } from '@/stores/cartStore';
 import { useProductDetailStore } from '@/stores/productsStore';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
 import { ref, onMounted, computed, watch } from 'vue';
@@ -16,6 +17,7 @@ import type {
   Attribute,
   Category,
   Image as CtImage,
+  LineItem,
   LocalizedString,
 } from '@commercetools/platform-sdk';
 
@@ -26,6 +28,7 @@ const props = defineProps<{
 const route = useRoute();
 const productStore = useProductDetailStore();
 const projectSettingsStore = useProjectSettingsStore();
+const cartStore = useCartStore();
 const { t, locale } = useI18n();
 
 const displayModalGallery = ref(false);
@@ -36,7 +39,9 @@ const selectedCurrency = ref<string>(
 );
 
 const product = computed(() => productStore.getProduct);
-const isLoading = computed(() => productStore.getIsLoading);
+const isLoading = computed(
+  () => productStore.getIsLoading || cartStore.isLoading,
+);
 const errorMessage = computed(() => productStore.getError);
 const currentLocale = computed(() => locale.value);
 
@@ -58,6 +63,15 @@ const productDescription = computed(() => {
       'productPage.unknownDescription',
       'No description available for this product.',
     )
+  );
+});
+
+const productLineItem = computed<LineItem | undefined>(() => {
+  if (!product.value || !cartStore.cart?.lineItems) {
+    return undefined;
+  }
+  return cartStore.cart.lineItems.find(
+    (item) => item.productId === product.value?.id,
   );
 });
 
@@ -192,6 +206,7 @@ const productAttributes = computed(() => {
 });
 
 import type { MenuItem } from 'primevue/menuitem';
+import { showErrorToast, showSuccessToast } from '@/utils/toaster';
 const sourceCategoryId = computed(
   () => route.query.category as string | undefined,
 );
@@ -281,12 +296,32 @@ function openModalGallery(index: number) {
   displayModalGallery.value = true;
 }
 
-function addToCart() {
-  appLogger.log('Add to cart clicked for product:', product.value?.id);
+// NEW: (Requirement 4_07 & 4_08) Управляем кнопкой "Add to Cart"
+async function handleAddToCart() {
+  if (!product.value) return;
+  const { id: productId, masterVariant } = product.value;
+
+  try {
+    await cartStore.addLineItem(productId, masterVariant.id, 1);
+    showSuccessToast(t('productPage.addSuccess'));
+  } catch (err) {
+    appLogger.error('Failed to add item to cart', err);
+    showErrorToast(t('productPage.addError'));
+  }
 }
 
-const isAddToCartDisabled = computed(() => {
-  return false;
+async function handleRemoveFromCart() {
+  if (!productLineItem.value) return;
+
+  try {
+    await cartStore.removeLineItem(productLineItem.value.id);
+  } catch (err) {
+    appLogger.error('Failed to remove item from cart', err);
+  }
+}
+
+const isActionDisabled = computed(() => {
+  return productStore.getIsLoading || cartStore.isLoading;
 });
 
 async function loadProductData() {
@@ -599,13 +634,27 @@ const modalResponsiveOptions = ref([
             </dl>
           </div>
 
-          <Button
-            :label="t('productPage.addToCartButton')"
-            icon="pi pi-shopping-cart"
-            class="w-full md:w-auto mt-2 p-button-lg p-button-raised"
-            :disabled="isAddToCartDisabled"
-            @click="addToCart"
-          />
+          <div class="mt-6">
+            <Button
+              v-if="!productLineItem"
+              :label="t('productPage.addToCartButton')"
+              icon="pi pi-shopping-cart"
+              class="w-full md:w-auto p-button-lg p-button-raised"
+              :loading="cartStore.isLoading"
+              :disabled="isActionDisabled"
+              @click="handleAddToCart"
+            />
+
+            <Button
+              v-else
+              :label="t('productPage.removeFromCartButton')"
+              icon="pi pi-trash"
+              class="w-full md:w-auto p-button-lg p-button-raised p-button-danger"
+              :loading="cartStore.isLoading"
+              :disabled="isActionDisabled"
+              @click="handleRemoveFromCart"
+            />
+          </div>
         </div>
       </div>
     </div>

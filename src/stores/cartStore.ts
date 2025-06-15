@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { cartService } from '@/services/cart/cartService';
-import type { Cart, MyCartUpdateAction } from '@commercetools/platform-sdk';
+import type {
+  Cart,
+  DiscountCodeReference,
+  MyCartUpdateAction,
+} from '@commercetools/platform-sdk';
 
 export const useCartStore = defineStore('cart', () => {
   const cart = ref<Cart | null>(null);
@@ -69,6 +73,47 @@ export const useCartStore = defineStore('cart', () => {
     cart.value = updatedCart;
   }
 
+  async function removeLineItem(lineItemId: string) {
+    if (!cart.value) throw new Error('Cart not loaded');
+
+    await withLoading(async () => {
+      const actions: MyCartUpdateAction[] = [
+        { action: 'removeLineItem', lineItemId },
+      ];
+      const updatedCart = await cartService.updateCart(
+        cart.value!.id,
+        cart.value!.version,
+        actions,
+      );
+      cart.value = updatedCart;
+    }, 'Failed to remove item from cart');
+  }
+
+  async function applyDiscountCode(code: string) {
+    if (!cart.value) throw new Error('Cart not loaded');
+    cart.value = await withLoading(
+      () =>
+        cartService.applyDiscountCode(
+          cart.value!.id,
+          cart.value!.version,
+          code,
+        ),
+      `Failed to apply discount code "${code}"`,
+    );
+  }
+
+  async function removeDiscountCode(discountCode: DiscountCodeReference) {
+    if (!cart.value) throw new Error('Cart not loaded');
+    cart.value = await withLoading(
+      () =>
+        cartService.removeDiscountCode(
+          cart.value!.id,
+          cart.value!.version,
+          discountCode,
+        ),
+      'Failed to remove discount code',
+    );
+  }
   return {
     cart,
     isLoading,
@@ -77,5 +122,8 @@ export const useCartStore = defineStore('cart', () => {
     clearCart,
     updateCart,
     addLineItem,
+    removeLineItem,
+    applyDiscountCode,
+    removeDiscountCode,
   };
 });
