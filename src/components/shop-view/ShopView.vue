@@ -66,7 +66,7 @@ const searchValue = ref('');
 
 const categoryId = ref<string>('');
 
-const breadcrumbLink = ref([{ label: 'All games' }]);
+const breadcrumbLink = ref([{ label: 'All Categories' }]);
 
 const products = ref<ProductProjection[]>();
 
