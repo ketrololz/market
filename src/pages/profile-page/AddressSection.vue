@@ -62,9 +62,9 @@ const sortedAddresses = computed(() => {
 <template>
   <div>
     <div class="flex justify-between items-center mb-1">
-      <h2 class="text-base font-semibold">{{ title }}</h2>
+      <h2 class="text-sm font-semibold">{{ title }}</h2>
       <button
-        class="text-xs text-blue-600 hover:underline cursor-pointer"
+        class="text-xs text-(--p-primary-color) hover:underline cursor-pointer"
         @click="$emit('edit-or-add', null, type)"
       >
         + Add {{ type === 'shipping' ? 'Shipping' : 'Billing' }} Address
@@ -76,7 +76,7 @@ const sortedAddresses = computed(() => {
       :key="address.id"
       class="address-section p-4 bg-white rounded-lg shadow mb-4"
       :class="{
-        'border-blue-300 border': isDefaultAddress(address),
+        'border-indigo-300 border': isDefaultAddress(address),
       }"
     >
       <div class="space-y-2">
@@ -117,7 +117,7 @@ const sortedAddresses = computed(() => {
           >
         </p>
       </div>
-      <div class="flex gap-3 mt-2 text-xs text-blue-600">
+      <div class="flex gap-3 mt-2 text-xs text-(--p-primary-color)">
         <button
           class="cursor-pointer hover:underline"
           @click="$emit('edit-or-add', address, type)"
@@ -128,7 +128,7 @@ const sortedAddresses = computed(() => {
           :disabled="isDeleteDisabled?.(address)"
           :class="{
             'text-gray-400 cursor-not-allowed': isDeleteDisabled?.(address),
-            'text-blue-600': !isDeleteDisabled?.(address),
+            'text-(--p-primary-color)': !isDeleteDisabled?.(address),
           }"
           @click="$emit('delete', address)"
         >

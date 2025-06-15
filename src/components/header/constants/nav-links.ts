@@ -8,7 +8,7 @@ export const NAV_LINKS = ref([
   },
   {
     label: 'Catalog',
-    route: '/catalog',
+    route: '/catalog/all-categories',
     icon: 'pi pi-th-large',
   },
   {

@@ -163,7 +163,7 @@ function syncAddresses() {
       >If you have an account,
       <RouterLink
         to="/login"
-        class="underline text-blue-600 hover:text-indigo-700 active:text-indigo-800"
+        class="underline text-(--p-primary-color) hover:text-indigo-700 active:text-indigo-800"
         >sign in</RouterLink
       >
       with your email address.
