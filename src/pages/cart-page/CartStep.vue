@@ -182,7 +182,7 @@ const showClearCartDialog = () => {
       <p v-if="!cartItems.length">
         Your cart is currently empty. Check out our
         <RouterLink
-          to="/catalog"
+          to="/catalog/all-categories"
           class="underline text-(--p-primary-color) hover:text-indigo-700 active:text-indigo-800"
           >catalog</RouterLink
         >

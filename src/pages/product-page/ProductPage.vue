@@ -249,7 +249,6 @@ const breadcrumbs = computed(() => {
       }
 
       categoryStack.forEach((catInPath, index) => {
-        console.log(catInPath.name.en);
         if (index === 0) {
           pathItems.push({
             label: 'All Categories',
