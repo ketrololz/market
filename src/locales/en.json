@@ -1,0 +1,86 @@
+{
+  "errors": {
+    "auth": {
+      "addressUpdateFailed": "Failed to update address. Please try again.",
+      "addressRemoveFailed": "Failed to remove address. Please try again.",
+      "defaultAddressUpdateFailed": "Failed to update default address. Please try again.",
+      "profileUpdateFailed": "Failed to update profile. Please try again.",
+      "passwordUpdateFailed": "Failed to update password. Please try again.",
+      "unknown": "An unexpected authentication error occurred.",
+      "network": "Network error. Please check your connection.",
+      "ctpApiGeneral": "An API error occurred: {details}",
+      "login": {
+        "invalidCredentials": "Invalid email or password.",
+        "failedGeneral": "Login failed. Please try again."
+      },
+      "register": {
+        "emailInUse": "This email address is already in use.",
+        "failedGeneral": "Registration failed. Please try again."
+      },
+      "sessionRestoreFailed": "Failed to restore session. Please log in again.",
+      "logoutFailed": "An error occurred during logout.",
+      "clientValidationFailed": "Well, well, well, trying to break the system, are we? 😉 Not this time! Please fix the errors."
+    },
+    "projectSettings": {
+      "fetchFailed": "Failed to load project settings. Please try again later.",
+      "dataUnavailable": "Project configuration data is currently unavailable."
+    },
+    "product": {
+      "notFound": "Sorry, the product you are looking for could not be found."
+    }
+  },
+  "success": {
+    "auth": {
+      "addressUpdate": "Address updated successfully.",
+      "defaultAddressUpdate": "Default address updated successfully.",
+      "profileUpdate": "Profile updated successfully.",
+      "passwordUpdate": "Password updated successfully.",
+      "login": "Login successful! Welcome back.",
+      "register": "Registration successful! You are now logged in.",
+      "logout": "You have been logged out successfully.",
+      "sessionRestored": "Session restored successfully.",
+      "addressRemove": "Address removed successfully."
+    },
+    "projectSettings": {
+      "loaded": "Project settings loaded."
+    }
+  },
+  "breadcrumb": {
+    "home": "Home"
+  },
+  "productPage": {
+    "loading": "Loading product details...",
+    "notFound": "Sorry, the product you are looking for could not be found.",
+    "noIdentifier": "Product identifier (ID or Key) is missing.",
+    "noImages": "No images available.",
+    "descriptionTitle": "Description",
+    "priceTitle": "Price:",
+    "priceUnavailable": "Price unavailable.",
+    "detailsTitle": "Details:",
+    "addToCartButton": "Add to cart",
+    "removeFromCartButton": "Remove from cart",
+    "currencyLabel": "Currency:",
+    "saleTag": "SALE",
+    "unknownName": "Unknown Product",
+    "unknownDescription": "No description available for this product.",
+    "imageTitle": "Product Image",
+    "imageAlt": "Product Image",
+    "valueNotAvailable": "N/A",
+    "addSuccess": "Product added to cart successfully.",
+    "addError": "Failed to add product to cart.",
+    "removeSuccess": "Product removed from cart successfully.",
+    "removeError": "Failed to remove product from cart.",
+    "attributes": {
+      "players-min": "Min. Players",
+      "players-max": "Max. Players",
+      "playing-time-min": "Min. Playing Time",
+      "playing-time-max": "Max. Playing Time",
+      "age-recommended": "Recommended Age",
+      "publisher": "Publisher",
+      "language": "Language",
+      "mechanics": "Mechanics",
+      "country-of-origin": "Country Of Origin",
+      "weight": "Weight"
+    }
+  }
+}
