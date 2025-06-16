@@ -105,12 +105,6 @@ async function addToCart() {
     class="relative cursor-pointer hover:scale-102 transition duration-300 easy-in-out"
     @click="navigate(cardInfo.identifier)"
   >
-    <!-- <p
-      v-if="!productInfo"
-      class="px-5 py-2 bg-(--p-rose-400) text-white font-medium absolute top-5 left-5 rounded-md"
-    >
-      Out of stock
-    </p> -->
     <Card
       class="w-80"
       pt:title:class="min-h-14 flex items-end"
