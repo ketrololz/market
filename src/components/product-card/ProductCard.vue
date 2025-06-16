@@ -4,6 +4,13 @@ import { Button } from 'primevue';
 import type { ProductProjection } from '@commercetools/platform-sdk';
 import { useUserPreferencesStore } from '@/stores/userPreferencesStore';
 import { useRouter } from 'vue-router';
+import { useCartStore } from '@/stores/cartStore';
+
+import { computed } from 'vue';
+import appLogger from '@/utils/logger';
+import { showSuccessToast, showErrorToast } from '@/utils/toaster';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const props = defineProps<{
   productInfo: ProductProjection;
@@ -12,6 +19,15 @@ const props = defineProps<{
 
 const router = useRouter();
 const userPreferencesStore = useUserPreferencesStore();
+const cartStore = useCartStore();
+
+const isInCart = computed(() =>
+  cartStore.cart?.lineItems.some(
+    (item) =>
+      item.productId === props.productInfo.id &&
+      item.variant.id === props.productInfo.masterVariant.id,
+  ),
+);
 
 function convertCardInfo(productInfo: ProductProjection) {
   const prices = productInfo.masterVariant.prices;
@@ -67,6 +83,20 @@ function navigate(identifier: string) {
 }
 
 const cardInfo = convertCardInfo(props.productInfo);
+
+async function addToCart() {
+  try {
+    await cartStore.addLineItem(
+      props.productInfo.id,
+      props.productInfo.masterVariant.id,
+      1,
+    );
+    showSuccessToast(t('productPage.addSuccess'));
+  } catch (e) {
+    appLogger.error('Failed to add to cart:', e);
+    showErrorToast(t('productPage.addError'));
+  }
+}
 </script>
 
 <template>
@@ -115,11 +145,12 @@ const cardInfo = convertCardInfo(props.productInfo);
       <template #footer>
         <Button
           v-if="cardInfo"
-          label="Add to cart"
+          :label="isInCart ? 'In cart' : 'Add to cart'"
           severity="primary"
           outlined
           class="w-full"
-          @click.stop="console.log('Add to cart')"
+          :disabled="isInCart"
+          @click.stop="addToCart"
         />
         <Button
           v-else

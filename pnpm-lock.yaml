@@ -13,6 +13,9 @@ importers:
       '@commercetools/ts-client':
         specifier: ^3.3.0
         version: 3.3.0
+      '@fortawesome/fontawesome-free':
+        specifier: ^6.7.2
+        version: 6.7.2
       '@primeuix/themes':
         specifier: ^1.0.3
         version: 1.0.3
@@ -68,6 +71,9 @@ importers:
       '@eslint/js':
         specifier: ^9.25.1
         version: 9.25.1
+      '@pinia/testing':
+        specifier: ^1.0.2
+        version: 1.0.2(pinia@3.0.2(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3)))
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
@@ -650,6 +656,13 @@ packages:
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
 
+  '@fortawesome/fontawesome-free@6.7.2':
+    resolution:
+      {
+        integrity: sha512-JUOtgFW6k9u4Y+xeIaEiLr3+cjoUPiAuLXoyKOJSia6Duzb7pq+A76P9ZdPDoAoxHdHzq6gE9/jKBGXlZT8FbA==,
+      }
+    engines: { node: '>=6' }
+
   '@humanfs/core@0.19.1':
     resolution:
       {
@@ -779,6 +792,14 @@ packages:
       {
         integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==,
       }
+
+  '@pinia/testing@1.0.2':
+    resolution:
+      {
+        integrity: sha512-yZVXJTKh677J0AT8kOPxGk5s1v7hMQIDT3tmeriwtR5LDu41DvXTEBQf0ql9SsHW1mCSDG38QDFzSSl5ucJqnQ==,
+      }
+    peerDependencies:
+      pinia: '>=3.0.3'
 
   '@pkgjs/parseargs@0.11.0':
     resolution:
@@ -4340,6 +4361,8 @@ snapshots:
       '@eslint/core': 0.13.0
       levn: 0.4.1
 
+  '@fortawesome/fontawesome-free@6.7.2': {}
+
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -4406,6 +4429,10 @@ snapshots:
       fastq: 1.19.1
 
   '@one-ini/wasm@0.1.1': {}
+
+  '@pinia/testing@1.0.2(pinia@3.0.2(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3)))':
+    dependencies:
+      pinia: 3.0.2(typescript@5.7.3)(vue@3.5.13(typescript@5.7.3))
 
   '@pkgjs/parseargs@0.11.0':
     optional: true

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
+import { useCartStore } from '@/stores/cartStore';
 import { useProductDetailStore } from '@/stores/productsStore';
 import { useProjectSettingsStore } from '@/stores/projectSettingsStore';
 import { ref, onMounted, computed, watch } from 'vue';
@@ -16,6 +17,7 @@ import type {
   Attribute,
   Category,
   Image as CtImage,
+  LineItem,
   LocalizedString,
 } from '@commercetools/platform-sdk';
 
@@ -26,6 +28,7 @@ const props = defineProps<{
 const route = useRoute();
 const productStore = useProductDetailStore();
 const projectSettingsStore = useProjectSettingsStore();
+const cartStore = useCartStore();
 const { t, locale } = useI18n();
 
 const displayModalGallery = ref(false);
@@ -58,6 +61,15 @@ const productDescription = computed(() => {
       'productPage.unknownDescription',
       'No description available for this product.',
     )
+  );
+});
+
+const productLineItem = computed<LineItem | undefined>(() => {
+  if (!product.value || !cartStore.cart?.lineItems) {
+    return undefined;
+  }
+  return cartStore.cart.lineItems.find(
+    (item) => item.productId === product.value?.id,
   );
 });
 
@@ -192,6 +204,7 @@ const productAttributes = computed(() => {
 });
 
 import type { MenuItem } from 'primevue/menuitem';
+import { showErrorToast, showSuccessToast } from '@/utils/toaster';
 const sourceCategoryId = computed(
   () => route.query.category as string | undefined,
 );
@@ -235,7 +248,18 @@ const breadcrumbs = computed(() => {
           | undefined;
       }
 
-      categoryStack.forEach((catInPath) => {
+      categoryStack.forEach((catInPath, index) => {
+        console.log(catInPath.name.en);
+        if (index === 0) {
+          pathItems.push({
+            label: 'All Categories',
+            to: {
+              name: 'CatalogCategory',
+              params: { category: 'all-categories' },
+            },
+          });
+          return;
+        }
         const slug =
           catInPath.slug?.[currentLang] || catInPath.slug?.en || catInPath.id;
         pathItems.push({
@@ -281,12 +305,33 @@ function openModalGallery(index: number) {
   displayModalGallery.value = true;
 }
 
-function addToCart() {
-  appLogger.log('Add to cart clicked for product:', product.value?.id);
+async function handleAddToCart() {
+  if (!product.value) return;
+  const { id: productId, masterVariant } = product.value;
+
+  try {
+    await cartStore.addLineItem(productId, masterVariant.id, 1);
+    showSuccessToast(t('productPage.addSuccess'));
+  } catch (err) {
+    appLogger.error('Failed to add item to cart', err);
+    showErrorToast(t('productPage.addError'));
+  }
 }
 
-const isAddToCartDisabled = computed(() => {
-  return false;
+async function handleRemoveFromCart() {
+  if (!productLineItem.value) return;
+
+  try {
+    await cartStore.removeLineItem(productLineItem.value.id);
+    showSuccessToast(t('productPage.removeSuccess'));
+  } catch (err) {
+    appLogger.error('Failed to remove item from cart', err);
+    showErrorToast(t('productPage.removeError'));
+  }
+}
+
+const isActionDisabled = computed(() => {
+  return productStore.getIsLoading || cartStore.isLoading;
 });
 
 async function loadProductData() {
@@ -351,7 +396,7 @@ const modalResponsiveOptions = ref([
 </script>
 
 <template>
-  <div class="product-detail-page container mx-auto p-4 pt-8 flex flex-col">
+  <div class="product-detail-page container mx-auto px-4 mb-15 flex flex-col">
     <ProgressSpinner v-if="isLoading" aria-label="Loading product" />
 
     <Message
@@ -374,7 +419,7 @@ const modalResponsiveOptions = ref([
       <Breadcrumb
         :home="breadcrumbs.home"
         :model="breadcrumbs.items"
-        class="mb-6 text-sm overflow-hidden"
+        class="text-md overflow-hidden text-(--p-breadcrumb-item-color)"
         :pt="{
           list: {
             style: {
@@ -469,7 +514,7 @@ const modalResponsiveOptions = ref([
               <img
                 :src="slotProps.item.itemImageSrc"
                 :alt="slotProps.item.alt"
-                class="w-full h-auto aspect-square object-contain block cursor-pointer"
+                class="w-full max-w-140 h-auto aspect-square object-contain block cursor-pointer"
                 @click="
                   openModalGallery(
                     galleryImages.findIndex(
@@ -496,11 +541,13 @@ const modalResponsiveOptions = ref([
         </div>
 
         <div class="product-info">
-          <h1 class="text-3xl lg:text-4xl font-bold mb-3 text-gray-800">
+          <h1
+            class="text-3xl lg:text-4xl font-bold mb-3 text-(--p-primary-color)"
+          >
             {{ productName }}
           </h1>
 
-          <div class="product-price my-5 text-3xl">
+          <div class="product-price my-4 text-3xl">
             <template v-if="currentDisplayPrice">
               <span
                 v-if="currentDisplayPrice.hasSale"
@@ -597,13 +644,27 @@ const modalResponsiveOptions = ref([
             </dl>
           </div>
 
-          <Button
-            :label="t('productPage.addToCartButton')"
-            icon="pi pi-shopping-cart"
-            class="w-full md:w-auto mt-2 p-button-lg p-button-raised"
-            :disabled="isAddToCartDisabled"
-            @click="addToCart"
-          />
+          <div class="mt-6">
+            <Button
+              v-if="!productLineItem"
+              :label="t('productPage.addToCartButton')"
+              icon="pi pi-shopping-cart"
+              class="w-full md:w-auto p-button-lg p-button-raised"
+              :loading="cartStore.isLoading"
+              :disabled="isActionDisabled"
+              @click="handleAddToCart"
+            />
+
+            <Button
+              v-else
+              :label="t('productPage.removeFromCartButton')"
+              icon="pi pi-trash"
+              class="w-full md:w-auto p-button-lg p-button-raised p-button-danger"
+              :loading="cartStore.isLoading"
+              :disabled="isActionDisabled"
+              @click="handleRemoveFromCart"
+            />
+          </div>
         </div>
       </div>
     </div>

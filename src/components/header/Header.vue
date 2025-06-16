@@ -6,10 +6,20 @@ import { computed, ref } from 'vue';
 import InlineSvg from 'vue-inline-svg';
 import type { HeaderProps } from './types/header-props';
 import { useAuthStore } from '../../stores/authStore';
+import OverlayBadge from 'primevue/overlaybadge';
+import { useCartStore } from '@/stores/cartStore';
+import { onMounted } from 'vue';
 
 defineProps<HeaderProps>();
 
 const authStore = useAuthStore();
+const cartStore = useCartStore();
+
+onMounted(() => {
+  if (!cartStore.cart) {
+    cartStore.loadCart();
+  }
+});
 
 const userIcon = computed(() => {
   if (authStore.isUserLoggedIn) {
@@ -23,6 +33,13 @@ const menu = ref();
 const toggle = (event: Event) => {
   menu.value.toggle(event);
 };
+
+const cartItemCount = computed(() => {
+  return (
+    cartStore.cart?.lineItems?.reduce((sum, item) => sum + item.quantity, 0) ??
+    0
+  );
+});
 </script>
 
 <template>
@@ -45,7 +62,29 @@ const toggle = (event: Event) => {
       </a>
     </template>
     <template #end>
-      <div class="flex items-center gap-x-2">
+      <div class="flex items-center gap-2">
+        <RouterLink to="/cart">
+          <OverlayBadge
+            v-if="cartStore.cart && cartItemCount > 0"
+            :value="cartItemCount"
+            class="text-nowrap max-w-[50px]"
+          >
+            <Button
+              icon="pi pi-shopping-cart"
+              size="small"
+              aria-label="Shopping Cart"
+              class="p-button-rounded p-0 !bg-transparent !border-none shadow-none hover:!bg-[#f4f4f5]"
+              severity="secondary"
+            />
+          </OverlayBadge>
+          <Button
+            v-else
+            icon="pi pi-shopping-cart"
+            size="small"
+            aria-label="Shopping Cart"
+            severity="secondary"
+            class="p-button-rounded p-0 !bg-transparent !border-none shadow-none hover:!bg-[#f4f4f5]"
+        /></RouterLink>
         <RouterLink to="/profile" class="flex items-center gap-2">
           <Button
             v-if="authStore.userProfile"
@@ -57,7 +96,7 @@ const toggle = (event: Event) => {
             variant="outlined"
           >
             <span class="pi pi-user"></span>
-            <span class="truncate max-w-25 md:max-w-50 username">
+            <span class="truncate max-w-10 sm:max-w-25 md:max-w-50 username">
               {{ authStore.userProfile.firstName }}
             </span>
           </Button>
@@ -98,5 +137,13 @@ const toggle = (event: Event) => {
   .username {
     display: none;
   }
+}
+::v-deep(.p-badge) {
+  position: relative !important;
+  background: transparent !important;
+
+  color: #4f46e5 !important;
+  transform: translate(-15px, -9px) !important;
+  outline-style: none !important;
 }
 </style>

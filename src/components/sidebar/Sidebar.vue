@@ -96,7 +96,7 @@ async function createCategoryTree() {
   categoryList.value.splice(0, 0, {
     name: {
       ru: 'Все категории',
-      en: 'All categories',
+      en: 'All Categories',
     },
     id: '0',
     slug: 'all-categories',

@@ -247,18 +247,24 @@ async function handleSave(
 </script>
 
 <template>
-  <div class="text-sm mx-2">
+  <div class="text-sm mx-2 flex-1 w-full">
     <div v-if="isLoading">Loading...</div>
-    <div v-else-if="customer">
-      <h1 class="text-center text-xl font-semibold mt-4">User Profile</h1>
+    <div v-else-if="customer" class="mb-10">
+      <h1
+        class="text-center text-xl font-semibold mt-4 text-(--p-panel-header-color)"
+      >
+        User Profile
+      </h1>
       <Panel
         pt:root:class="p-2  bg-white rounded-lg shadow-md m-4 max-w-3xl mx-auto"
       >
         <template #header>
           <div class="flex justify-between items-center w-full">
-            <span class="text-lg">Personal Information</span>
+            <span class="text-base text-gray-700 font-medium"
+              >Personal Information</span
+            >
             <button
-              class="text-xs text-blue-600 cursor-pointer text-blue-600 hover:underline"
+              class="text-xs text-(--p-primary-color) cursor-pointer hover:underline"
               @click="openDialog('profile')"
             >
               Edit
@@ -311,9 +317,9 @@ async function handleSave(
       >
         <template #header>
           <div class="flex justify-between items-center w-full">
-            <span class="text-lg">Password</span>
+            <span class="text-base text-gray-700 font-medium">Password</span>
             <button
-              class="text-xs text-blue-600 cursor-pointer hover:underline"
+              class="text-xs text-(--p-primary-color) cursor-pointer hover:underline"
               @click="openDialog('password')"
             >
               Edit
@@ -332,7 +338,7 @@ async function handleSave(
         pt:root:class="p-2 bg-white rounded-lg shadow-md m-4  max-w-3xl mx-auto"
       >
         <template #header>
-          <div class="text-lg">Addresses</div>
+          <div class="text-base text-gray-700 font-medium">Addresses</div>
         </template>
 
         <div>

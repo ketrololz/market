@@ -16,7 +16,7 @@
           class="font-regular w-full max-w-140 text-center md:text-left text-2xl md:text-xl"
         >
           Get a discount on your first purchase with promo code:
-          <span class="font-medium text-(--p-primary-color)">rpgheroes</span>
+          <span class="font-medium text-(--p-primary-color)">FIRST15</span>
         </h2>
       </div>
     </div>
