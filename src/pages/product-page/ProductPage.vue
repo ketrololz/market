@@ -39,9 +39,7 @@ const selectedCurrency = ref<string>(
 );
 
 const product = computed(() => productStore.getProduct);
-const isLoading = computed(
-  () => productStore.getIsLoading || cartStore.isLoading,
-);
+const isLoading = computed(() => productStore.getIsLoading);
 const errorMessage = computed(() => productStore.getError);
 const currentLocale = computed(() => locale.value);
 
@@ -307,7 +305,6 @@ function openModalGallery(index: number) {
   displayModalGallery.value = true;
 }
 
-// NEW: (Requirement 4_07 & 4_08) Управляем кнопкой "Add to Cart"
 async function handleAddToCart() {
   if (!product.value) return;
   const { id: productId, masterVariant } = product.value;
@@ -326,8 +323,10 @@ async function handleRemoveFromCart() {
 
   try {
     await cartStore.removeLineItem(productLineItem.value.id);
+    showSuccessToast(t('productPage.removeSuccess'));
   } catch (err) {
     appLogger.error('Failed to remove item from cart', err);
+    showErrorToast(t('productPage.removeError'));
   }
 }
 
