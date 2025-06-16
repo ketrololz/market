@@ -69,7 +69,7 @@
     "addSuccess": "Product added to cart successfully.",
     "addError": "Failed to add product to cart.",
     "removeSuccess": "Product removed from cart successfully.",
-    "removeError": "Failed to remove product from cart",
+    "removeError": "Failed to remove product from cart.",
     "attributes": {
       "players-min": "Min. Players",
       "players-max": "Max. Players",
