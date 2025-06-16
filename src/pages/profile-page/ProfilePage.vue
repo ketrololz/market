@@ -247,7 +247,7 @@ async function handleSave(
 </script>
 
 <template>
-  <div class="text-sm mx-2">
+  <div class="text-sm mx-2 w-full">
     <div v-if="isLoading">Loading...</div>
     <div v-else-if="customer" class="mb-10">
       <h1
