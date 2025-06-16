@@ -250,7 +250,18 @@ const breadcrumbs = computed(() => {
           | undefined;
       }
 
-      categoryStack.forEach((catInPath) => {
+      categoryStack.forEach((catInPath, index) => {
+        console.log(catInPath.name.en);
+        if (index === 0) {
+          pathItems.push({
+            label: 'All Categories',
+            to: {
+              name: 'CatalogCategory',
+              params: { category: 'all-categories' },
+            },
+          });
+          return;
+        }
         const slug =
           catInPath.slug?.[currentLang] || catInPath.slug?.en || catInPath.id;
         pathItems.push({
